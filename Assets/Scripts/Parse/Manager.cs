@@ -11,16 +11,15 @@ public class Manager : MonoBehaviour
     public Canvas dataCanvas, visulaizationCanvas;
     public CameraBahaviour cameraBehaviour;
 
-    private SortedDictionary<int, SortedDictionary<int, Tree>> outputData;
+    private List<SortedDictionary<int, Tree>> outputData;
     private int current_year;
     private bool isVisualizationActive = false;
-    int[] years;
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            if (current_year < years.Length - 1)
+            if (current_year < outputData.Count - 1)
             {
                 current_year++;
                 if (!isVisualizationActive)
@@ -29,8 +28,8 @@ public class Manager : MonoBehaviour
                 }
                 else
                 {
-                    visualizer.receiveTreeData(outputData[years[current_year]]);
-                    visualizer.displayTrees(years[current_year]);
+                    visualizer.receiveTreeData(outputData[current_year]);
+                    visualizer.displayTrees(outputData[current_year].Values.First().Year);
                 }
             }
 
@@ -47,8 +46,8 @@ public class Manager : MonoBehaviour
                 }
                 else
                 {
-                    visualizer.receiveTreeData(outputData[years[current_year]]);
-                    visualizer.displayTrees(years[current_year]);
+                    visualizer.receiveTreeData(outputData[current_year]);
+                    visualizer.displayTrees(outputData[current_year].Values.First().Year);
                 }
             }
 
@@ -59,7 +58,7 @@ public class Manager : MonoBehaviour
             cameraBehaviour.EnableRotation();
             dataCanvas.gameObject.SetActive(false);
             visulaizationCanvas.gameObject.SetActive(true);
-            visualizer.displayTrees(years[current_year]);
+            visualizer.displayTrees(outputData[current_year].Values.First().Year);
         }
         else if (Input.GetKeyDown(KeyCode.Space) && isVisualizationActive)
         {
@@ -67,22 +66,21 @@ public class Manager : MonoBehaviour
             cameraBehaviour.DisableRotation();
             dataCanvas.gameObject.SetActive(true);
             visulaizationCanvas.gameObject.SetActive(false);
-            showInfo(current_year);
+            showInfo(outputData[current_year].Values.First().Year);
         }
     }
 
-    public void receiveData(SortedDictionary<int, SortedDictionary<int, Tree>> data)
+    public void receiveData(List<SortedDictionary<int, Tree>> data)
     {
         outputData = data;
-        years = outputData.Keys.ToArray();
         current_year = 0;
         showInfo(current_year);
     }
 
     void showInfo(int currentyear)
     {
-        string msg = $"{years[currentyear]}\n";
-        SortedDictionary<int, Tree> trees = outputData[years[currentyear]];
+        string msg = $"{outputData[current_year].Values.First().Year}\n";
+        SortedDictionary<int, Tree> trees = outputData[current_year];
         foreach (KeyValuePair<int, Tree> kvp in trees)
         {
             Tree t = kvp.Value;

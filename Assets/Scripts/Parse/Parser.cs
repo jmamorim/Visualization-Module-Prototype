@@ -65,20 +65,27 @@ public class Parser : MonoBehaviour
             return;
         }
 
-        SortedDictionary<int, SortedDictionary<int, Tree>> treesInfoPerYear = new SortedDictionary<int, SortedDictionary<int, Tree>>();
+        List<SortedDictionary<int, Tree>> treesInfoPerYear = new List<SortedDictionary<int, Tree>>();
+        int index = 0;
+        int treeCount = 0;
 
         if (interval == 0)
         {
             for (int i = 1; i < lines.Length; i++)
             {
                 string[] treeInfo = lines[i].Trim().Split(',');
-
+                if (int.Parse(treeInfo[6].Trim()) <= treeCount)
+                {
+                    index++;
+                    treeCount = 0;
+                }
+                Debug.Log($"index: {index} treecount: {treeCount}");
                 try
                 {
-                    int year = int.Parse(treeInfo[3]);
-                    if (!treesInfoPerYear.ContainsKey(year))
-                        treesInfoPerYear[year] = new SortedDictionary<int, Tree>();
-
+                    if (index >= treesInfoPerYear.Count)
+                    {
+                        treesInfoPerYear.Add(new SortedDictionary<int, Tree>());
+                    }
                     Tree tree = new Tree(
                         int.Parse(treeInfo[1].Trim()),  //id_presc
                         int.Parse(treeInfo[2].Trim()),  //ciclo
@@ -91,10 +98,11 @@ public class Parser : MonoBehaviour
                         float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture), //h
                         float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), //cw
                         int.Parse(treeInfo[24].Trim()), //estado
-                        treesInfoPerYear.ContainsKey(year - 1) ? treesInfoPerYear[year - 1][int.Parse(treeInfo[6].Trim())].rotation : UnityEngine.Random.Range(0f, 360f)    //rotation
+                        index != 0 ? treesInfoPerYear[0][int.Parse(treeInfo[6].Trim())].rotation : UnityEngine.Random.Range(0f, 360f)    //rotation
                     );
 
-                    treesInfoPerYear[year][tree.id_arv] = tree;
+                    treesInfoPerYear[index][tree.id_arv] = tree;
+                    treeCount++;
                 }
                 catch (Exception ex)
                 {
@@ -107,40 +115,42 @@ public class Parser : MonoBehaviour
         else
         {
             int year = starting_year;
-            int treeCount = 0;
             for (int i = 1; i < lines.Length; i++)
             {
                 string[] treeInfo = lines[i].Trim().Split(',');
+                if (int.Parse(treeInfo[6].Trim()) < treeCount)
+                {
+                    index++;
+                    year += interval;
+                    treeCount = 0;
+                    if (year > ending_year)
+                        year = ending_year;
+                }
                 try
                 {
+                    if (index >= treesInfoPerYear.Count)
+                    {
+                        treesInfoPerYear.Add(new SortedDictionary<int, Tree>());
+                    }
                     if (int.Parse(treeInfo[3].Trim()) == year)
                     {
-                        if (!treesInfoPerYear.ContainsKey(year))
-                            treesInfoPerYear[year] = new SortedDictionary<int, Tree>();
-
                         Tree tree = new Tree(
-                            int.Parse(treeInfo[1].Trim()),  //id_presc
-                            int.Parse(treeInfo[2].Trim()),  //ciclo
-                            int.Parse(treeInfo[3].Trim()),  //Year
-                            float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture), //t
-                            int.Parse(treeInfo[6].Trim()),  //id_arv
-                            float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),  //Xarv
-                            float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),  //Yarv
-                            float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),  //d
-                            float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture), //h
-                            float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), //cw
-                            int.Parse(treeInfo[24].Trim()), //estado
-                            treesInfoPerYear.ContainsKey(year - interval) ? treesInfoPerYear[year - interval][int.Parse(treeInfo[6].Trim())].rotation : UnityEngine.Random.Range(0f, 360f)  //rotation
-                        );
-                        treesInfoPerYear[year][tree.id_arv] = tree;
+                        int.Parse(treeInfo[1].Trim()),  // id_presc
+                        int.Parse(treeInfo[2].Trim()),  // ciclo
+                        int.Parse(treeInfo[3].Trim()),  // Year
+                        float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture), // t
+                        int.Parse(treeInfo[6].Trim()),  // id_arv
+                        float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),  // Xarv
+                        float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),  // Yarv
+                        float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),  // d
+                        float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture), // h
+                        float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), // cw
+                        int.Parse(treeInfo[24].Trim()), // estado
+                        index != 0 ? treesInfoPerYear[0][int.Parse(treeInfo[6].Trim())].rotation : UnityEngine.Random.Range(0f, 360f) // rotation
+                    );
+
+                        treesInfoPerYear[index][tree.id_arv] = tree;
                         treeCount++;
-                    }
-                    if (treeCount >= numberOfTrees)
-                    {
-                        year += interval;
-                        treeCount = 0;
-                        if (year > ending_year)
-                            year = ending_year;
                     }
                 }
                 catch (Exception ex)
