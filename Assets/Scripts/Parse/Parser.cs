@@ -1,12 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Parser : MonoBehaviour
 {
@@ -82,17 +80,18 @@ public class Parser : MonoBehaviour
                         treesInfoPerYear[year] = new SortedDictionary<int, Tree>();
 
                     Tree tree = new Tree(
-                        int.Parse(treeInfo[1].Trim()),
-                        int.Parse(treeInfo[2].Trim()),
-                        int.Parse(treeInfo[3].Trim()),
-                        float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture),
-                        int.Parse(treeInfo[6].Trim()),
-                        float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture),
-                        int.Parse(treeInfo[24].Trim())
+                        int.Parse(treeInfo[1].Trim()),  //id_presc
+                        int.Parse(treeInfo[2].Trim()),  //ciclo
+                        int.Parse(treeInfo[3].Trim()),  //Year
+                        float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture), //t
+                        int.Parse(treeInfo[6].Trim()),  //id_arv
+                        float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),  //Xarv
+                        float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),  //Yarv
+                        float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),  //d
+                        float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture), //h
+                        float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), //cw
+                        int.Parse(treeInfo[24].Trim()), //estado
+                        treesInfoPerYear.ContainsKey(year - 1) ? treesInfoPerYear[year - 1][int.Parse(treeInfo[6].Trim())].rotation : UnityEngine.Random.Range(0f, 360f)    //rotation
                     );
 
                     treesInfoPerYear[year][tree.id_arv] = tree;
@@ -120,17 +119,18 @@ public class Parser : MonoBehaviour
                             treesInfoPerYear[year] = new SortedDictionary<int, Tree>();
 
                         Tree tree = new Tree(
-                            int.Parse(treeInfo[1].Trim()),
-                            int.Parse(treeInfo[2].Trim()),
-                            int.Parse(treeInfo[3].Trim()),
-                            float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture),
-                            int.Parse(treeInfo[6].Trim()),
-                            float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),
-                            float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),
-                            float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),
-                            float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture),
-                            float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture),
-                            int.Parse(treeInfo[24].Trim())
+                            int.Parse(treeInfo[1].Trim()),  //id_presc
+                            int.Parse(treeInfo[2].Trim()),  //ciclo
+                            int.Parse(treeInfo[3].Trim()),  //Year
+                            float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture), //t
+                            int.Parse(treeInfo[6].Trim()),  //id_arv
+                            float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),  //Xarv
+                            float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),  //Yarv
+                            float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),  //d
+                            float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture), //h
+                            float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), //cw
+                            int.Parse(treeInfo[24].Trim()), //estado
+                            treesInfoPerYear.ContainsKey(year - interval) ? treesInfoPerYear[year - interval][int.Parse(treeInfo[6].Trim())].rotation : UnityEngine.Random.Range(0f, 360f)  //rotation
                         );
                         treesInfoPerYear[year][tree.id_arv] = tree;
                         treeCount++;
@@ -179,25 +179,4 @@ public class Parser : MonoBehaviour
         this.path = path;
     }
 
-}
-
-public class Tree
-{
-    public int id_presc, ciclo, Year, id_arv, estado;
-    public float t, Xarv, Yarv, d, h, cw;
-
-    public Tree(int id_presc, int ciclo, int Year, float t, int id_arv, float Xarv, float Yarv, float d, float h, float cw, int estado)
-    {
-        this.id_presc = id_presc;
-        this.ciclo = ciclo;
-        this.Year = Year;
-        this.t = t;
-        this.id_arv = id_arv;
-        this.Xarv = Xarv;
-        this.Yarv = Yarv;
-        this.d = d;
-        this.h = h;
-        this.cw = cw;
-        this.estado = estado;
-    }
 }
