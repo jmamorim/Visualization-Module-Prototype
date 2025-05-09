@@ -1170,6 +1170,8 @@ MonoBehaviour:
     type: 3}
   plot: {fileID: 622606506}
   yearText: {fileID: 151961961}
+  trunkMaterial: {fileID: 2100000, guid: 1b7fd688dd63a514b8a53e637e8c734f, type: 2}
+  leafsMaterial: {fileID: 2100000, guid: 57cd40ba52f920a43bbb76dbd618d4d2, type: 2}
 --- !u!4 &671107855
 Transform:
   m_ObjectHideFlags: 0

@@ -40,11 +40,4 @@ public class Tree : MonoBehaviour
         this.rotation = tree.rotation;
     }
 
-    public void applyDataToTree()
-    {
-        gameObject.transform.localScale = new Vector3(1, h * 0.25f,1);
-        trunk.transform.localScale = new Vector3(d * 0.1f, 1, d * 0.1f);
-        leafs.transform.localScale = new Vector3(cw , 1, cw);
-    }
-
 }

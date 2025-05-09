@@ -28,8 +28,8 @@ public class Manager : MonoBehaviour
                 }
                 else
                 {
-                    visualizer.receiveTreeData(outputData[current_year]);
-                    visualizer.displayTrees(outputData[current_year].Values.First().Year);
+                    visualizer.receiveTreeData(outputData[current_year], outputData[current_year].Values.First().Year);
+                    visualizer.displayTrees();
                 }
             }
 
@@ -46,8 +46,8 @@ public class Manager : MonoBehaviour
                 }
                 else
                 {
-                    visualizer.receiveTreeData(outputData[current_year]);
-                    visualizer.displayTrees(outputData[current_year].Values.First().Year);
+                    visualizer.receiveTreeData(outputData[current_year], outputData[current_year].Values.First().Year);
+                    visualizer.displayTrees();
                 }
             }
 
@@ -58,7 +58,7 @@ public class Manager : MonoBehaviour
             cameraBehaviour.EnableRotation();
             dataCanvas.gameObject.SetActive(false);
             visulaizationCanvas.gameObject.SetActive(true);
-            visualizer.displayTrees(outputData[current_year].Values.First().Year);
+            visualizer.displayTrees();
         }
         else if (Input.GetKeyDown(KeyCode.Space) && isVisualizationActive)
         {
@@ -87,7 +87,7 @@ public class Manager : MonoBehaviour
             msg += $"id_presc: {t.id_presc}, ciclo: {t.ciclo}, Year: {t.Year}, t: {t.t}, id_arv: {t.id_arv}, Xarv: {t.Xarv}, Yarv: {t.Yarv}, d: {t.d}, h: {t.h}, cw: {t.cw}, estado: {t.estado}\n";
         }
         ShowMessage(msg, Color.white);
-        visualizer.receiveTreeData(trees);
+        visualizer.receiveTreeData(trees, trees.Values.First().Year);
     }
 
     void ShowMessage(string msg, Color color)
