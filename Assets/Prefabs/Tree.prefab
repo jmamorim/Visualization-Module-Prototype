@@ -19,7 +19,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &3893609680427410469
 Transform:
@@ -511,7 +511,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &3676955896343007241
 Transform:
@@ -1917,13 +1917,12 @@ GameObject:
   m_Component:
   - component: {fileID: 2709895983915298053}
   - component: {fileID: 7589230823079865336}
-  - component: {fileID: -2735005600771081793}
   m_Layer: 0
   m_Name: Tree
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &2709895983915298053
 Transform:
@@ -1956,6 +1955,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trunk: {fileID: 8370328007270314494}
   leafs: {fileID: 1963167550683945249}
+  treeInfoText: {fileID: 0}
   id_presc: 0
   ciclo: 0
   Year: 0
@@ -1968,23 +1968,3 @@ MonoBehaviour:
   h: 0
   cw: 0
   rotation: 0
---- !u!205 &-2735005600771081793
-LODGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8570143492988011871}
-  serializedVersion: 2
-  m_LocalReferencePoint: {x: -0.012385368, y: 3.2004158, z: 0.0039510727}
-  m_Size: 6.4008317
-  m_FadeMode: 1
-  m_AnimateCrossFading: 0
-  m_LastLODIsBillboard: 0
-  m_LODs:
-  - screenRelativeHeight: 0.03295809
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 3826506517581098950}
-    - renderer: {fileID: 8508207953151140125}
-  m_Enabled: 1

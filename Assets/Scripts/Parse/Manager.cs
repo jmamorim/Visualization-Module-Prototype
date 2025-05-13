@@ -7,6 +7,7 @@ using UnityEngine;
 public class Manager : MonoBehaviour
 {
     public TMP_Text feedbackText;
+    public TMP_Text treeInfoText;
     public Visualizer visualizer;
     public Canvas dataCanvas, visulaizationCanvas;
     public CameraBahaviour cameraBehaviour;
@@ -96,6 +97,22 @@ public class Manager : MonoBehaviour
         {
             feedbackText.text = msg;
             feedbackText.color = color;
+        }
+    }
+
+    public void ShowTreeInfo(Tree t)
+    {
+        if (treeInfoText != null)
+        {
+            treeInfoText.text = $"Informação da árvore:\n" +
+                                $"Id árvore: {t.id_arv}\n" +
+                                $"Id Prescrição: {t.id_presc}\n" +
+                                $"Ciclo: {t.ciclo}\n" +
+                                $"Ano: {t.Year}\n" +
+                                $"Idade: {t.t}\n" +
+                                $"Diâmetro: {t.d}\n" +
+                                $"Altura: {t.h}\n" +
+                                $"Largura da coroa: {t.cw}";
         }
     }
 }

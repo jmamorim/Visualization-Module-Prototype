@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Visualizer : MonoBehaviour
 {
-    public GameObject treePrefab; // Must have children: "trunk" and "leafs"
+    public GameObject treePrefab; 
     public GameObject plot;
     public TMP_Text yearText;
     public Material trunkMaterial;
@@ -36,6 +36,7 @@ public class Visualizer : MonoBehaviour
     {
         trees = data.Values.ToList();
         this.currentYear = currentYear;
+        createObjects();
     }
 
     public void displayTrees()
@@ -82,5 +83,47 @@ public class Visualizer : MonoBehaviour
             Graphics.DrawMeshInstanced(leafsMesh, 0, leafsMaterial, leafsMatrices, batchSize);
         }
     }
+
+    //creates objects that act as complementary data
+    public void createObjects()
+    {
+        if (trees == null || trees.Count == 0) return;
+
+        // Clean up previous objects
+        if (plot != null)
+        {
+            foreach (Transform child in plot.transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        float xOffset = trees.Average(tree => tree.Xarv);
+        float yOffset = trees.Average(tree => tree.Yarv);
+
+        foreach (Tree tree in trees)
+        {
+            if (tree.estado == 4 || tree.estado == 6) continue;
+
+            float adjustedX = (tree.Xarv - xOffset) * 3f;
+            float adjustedZ = (tree.Yarv - yOffset) * 3f;
+            float treeHeight = tree.h * 0.25f;
+
+            Vector3 position = new Vector3(adjustedX, treeHeight, adjustedZ);
+
+            GameObject marker = new GameObject($"TreeMarker_{tree.id_arv}");
+            marker.transform.position = position;
+            marker.transform.rotation = Quaternion.Euler(0, tree.rotation, 0);
+            marker.transform.SetParent(plot != null ? plot.transform : plot.transform);
+
+            BoxCollider col = marker.AddComponent<BoxCollider>();
+            col.isTrigger = true;
+            col.size = new Vector3(tree.cw * 2, tree.h, tree.cw * 2);
+            col.center = new Vector3(0, treeHeight, 0);
+
+            marker.AddComponent<Tree>().initTree(tree);
+        }
+    }
+
 }
 

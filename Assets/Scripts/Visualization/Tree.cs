@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Tree : MonoBehaviour
@@ -7,6 +6,13 @@ public class Tree : MonoBehaviour
     public GameObject trunk, leafs;
     public int id_presc, ciclo, Year, id_arv, estado;
     public float t, Xarv, Yarv, d, h, cw, rotation;
+
+    private Manager manager;
+
+    private void Start()
+    {
+        manager = GameObject.Find("Manager").GetComponent<Manager>();
+    }
 
     public Tree(int id_presc, int ciclo, int Year, float t, int id_arv, float Xarv, float Yarv, float d, float h, float cw, int estado, float rotation)
     {
@@ -39,5 +45,11 @@ public class Tree : MonoBehaviour
         this.estado = tree.estado;
         this.rotation = tree.rotation;
     }
+
+    public void OnMouseDown()
+    {
+       manager.ShowTreeInfo(this);
+    }
+
 
 }
