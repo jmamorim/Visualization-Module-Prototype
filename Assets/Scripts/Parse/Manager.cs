@@ -112,7 +112,7 @@ public class Manager : MonoBehaviour
                                 $"Idade: {t.t}\n" +
                                 $"Diâmetro: {t.d}\n" +
                                 $"Altura: {t.h}\n" +
-                                $"Largura da coroa: {t.cw}";
+                                $"Largura da copa: {t.cw}";
         }
     }
 }
