@@ -1,5 +1,7 @@
 # Visualization Module Prototype
 
+![Visualization Prototype](VisualizationPrototype.png)
+
 Prototype for the **standSIM** forest simulator’s visualization module.
 
 ## 📦 How to Download
