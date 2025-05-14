@@ -4,7 +4,10 @@
 
 Prototype for the **standSIM** forest simulator’s visualization module.
 
-*Update*: Thinned trees appear as just a trunk and red trees means that tree was alive and it just died in that instant, use `P` to see the parallel view;
+*Update* 
+- Thinned trees appear as just a trunk;
+- When red trees appear means that the tree was alive and it just died in that instant
+- Use `P` to see the parallel view;
 
 ## 📦 How to Download
 
