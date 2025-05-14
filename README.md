@@ -4,6 +4,8 @@
 
 Prototype for the **standSIM** forest simulator’s visualization module.
 
+*Update*: Thinned trees appear as just a trunk and red trees means that tree was alive and it just died in that instant, use `P` to see the parallel view;
+
 ## 📦 How to Download
 
 1. Clone the repository.
@@ -28,6 +30,8 @@ Prototype for the **standSIM** forest simulator’s visualization module.
    - Zoom out: `X`  
    - Move the camera: drag the mouse
    - Click on a tree to see its detailed information
+   - Change to parallel view: `P`
+   - Note: Thinned trees appear as just a trunk and red trees means that tree was alive and it just died in that instant;
 
 ## 🕹️ TL;DR Controls
 
@@ -40,6 +44,7 @@ Prototype for the **standSIM** forest simulator’s visualization module.
 | `X`                | Zoom out (3D mode only)             |
 | Mouse Drag         | Move the camera (3D mode only)      |
 | Click on Tree      | Show information about the tree (3D mode only)    |
+| P      | Change to parallel view (3D mode only)    |
 
 ## 📬 Contact
 
