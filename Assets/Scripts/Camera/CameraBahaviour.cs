@@ -35,7 +35,6 @@ public class CameraBahaviour : MonoBehaviour
             }
             if (Input.GetKey(KeyCode.Z))
             {
-                Debug.Log("Zooming in");
                 float distance = Vector3.Distance(transform.position, target.position);
                 if (distance > minZoomDistance)
                 {
@@ -45,7 +44,6 @@ public class CameraBahaviour : MonoBehaviour
 
             if (Input.GetKey(KeyCode.X))
             {
-                Debug.Log("Zooming out");
                 float distance = Vector3.Distance(transform.position, target.position);
                 if (distance < maxZoomDistance)
                 {

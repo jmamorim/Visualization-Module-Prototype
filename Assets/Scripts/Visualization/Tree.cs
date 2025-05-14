@@ -6,6 +6,7 @@ public class Tree : MonoBehaviour
     public GameObject trunk, leafs;
     public int id_presc, ciclo, Year, id_arv, estado;
     public float t, Xarv, Yarv, d, h, cw, rotation;
+    public bool wasAlive;
 
     private Manager manager;
 
@@ -14,7 +15,7 @@ public class Tree : MonoBehaviour
         manager = GameObject.Find("Manager").GetComponent<Manager>();
     }
 
-    public Tree(int id_presc, int ciclo, int Year, float t, int id_arv, float Xarv, float Yarv, float d, float h, float cw, int estado, float rotation)
+    public Tree(int id_presc, int ciclo, int Year, float t, int id_arv, float Xarv, float Yarv, float d, float h, float cw, int estado, float rotation, bool wasAlive)
     {
         this.id_presc = id_presc;
         this.ciclo = ciclo;
@@ -28,6 +29,7 @@ public class Tree : MonoBehaviour
         this.cw = cw;
         this.estado = estado;
         this.rotation = rotation;
+        this.wasAlive = wasAlive;
     }
 
     public void initTree(Tree tree)
@@ -44,6 +46,7 @@ public class Tree : MonoBehaviour
         this.cw = tree.cw;
         this.estado = tree.estado;
         this.rotation = tree.rotation;
+        this.wasAlive = tree.wasAlive;
     }
 
     public void OnMouseDown()

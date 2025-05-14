@@ -86,21 +86,34 @@ public class Parser : MonoBehaviour
                     {
                         treesInfoPerYear.Add(new SortedDictionary<int, Tree>());
                     }
+                    
+                    int id_arv = int.Parse(treeInfo[6].Trim());
+                    bool wasAlive = true;
+                    float rotation = UnityEngine.Random.Range(0f, 360f);
+                    if (index != 0 && treesInfoPerYear[index - 1].ContainsKey(id_arv))
+                    {
+                        rotation = treesInfoPerYear[index - 1][id_arv].rotation;
+                    }
+
+                    if (index != 0 && treesInfoPerYear[index - 1].ContainsKey(id_arv))
+                    {
+                        wasAlive = treesInfoPerYear[index - 1][id_arv].estado == 0;
+                    }
                     Tree tree = new Tree(
                         int.Parse(treeInfo[1].Trim()),  //id_presc
                         int.Parse(treeInfo[2].Trim()),  //ciclo
                         int.Parse(treeInfo[3].Trim()),  //Year
                         float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture), //t
-                        int.Parse(treeInfo[6].Trim()),  //id_arv
+                        id_arv,  //id_arv
                         float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),  //Xarv
                         float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),  //Yarv
                         float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),  //d
                         float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture), //h
                         float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), //cw
                         int.Parse(treeInfo[24].Trim()), //estado
-                        index != 0 ? treesInfoPerYear[0][int.Parse(treeInfo[6].Trim())].rotation : UnityEngine.Random.Range(0f, 360f)    //rotation
+                        rotation,    //rotation
+                        wasAlive   //arvore estava viva na ultima instancia
                     );
-
                     treesInfoPerYear[index][tree.id_arv] = tree;
                     treeCount++;
                 }
@@ -134,19 +147,26 @@ public class Parser : MonoBehaviour
                     }
                     if (int.Parse(treeInfo[3].Trim()) == year)
                     {
+                        int id_arv = int.Parse(treeInfo[6].Trim());
+                        float rotation = UnityEngine.Random.Range(0f, 360f);
+                        if (index != 0 && treesInfoPerYear[index - 1].ContainsKey(id_arv))
+                        {
+                            rotation = treesInfoPerYear[index - 1][id_arv].rotation;
+                        }
                         Tree tree = new Tree(
                         int.Parse(treeInfo[1].Trim()),  // id_presc
                         int.Parse(treeInfo[2].Trim()),  // ciclo
                         int.Parse(treeInfo[3].Trim()),  // Year
                         float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture), // t
-                        int.Parse(treeInfo[6].Trim()),  // id_arv
+                        id_arv,  // id_arv
                         float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),  // Xarv
                         float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),  // Yarv
                         float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),  // d
                         float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture), // h
                         float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), // cw
                         int.Parse(treeInfo[24].Trim()), // estado
-                        index != 0 ? treesInfoPerYear[0][int.Parse(treeInfo[6].Trim())].rotation : UnityEngine.Random.Range(0f, 360f) // rotation
+                        rotation, // rotation
+                        false
                     );
 
                         treesInfoPerYear[index][tree.id_arv] = tree;

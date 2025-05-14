@@ -11,14 +11,17 @@ public class Manager : MonoBehaviour
     public Visualizer visualizer;
     public Canvas dataCanvas, visulaizationCanvas;
     public CameraBahaviour cameraBehaviour;
+    public GameObject mainCamera;
+    public GameObject paralelCamera;
 
     private List<SortedDictionary<int, Tree>> outputData;
     private int current_year;
     private bool isVisualizationActive = false;
+    private bool isParalelCameraActive = false;
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        if (Input.GetKeyDown(KeyCode.RightArrow) && outputData != null)
         {
             if (current_year < outputData.Count - 1)
             {
@@ -36,7 +39,7 @@ public class Manager : MonoBehaviour
 
 
         }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && outputData != null)
         {
             if (current_year > 0)
             {
@@ -53,7 +56,15 @@ public class Manager : MonoBehaviour
             }
 
         }
-        else if (Input.GetKeyDown(KeyCode.Space) && !isVisualizationActive && outputData != null)
+        if (Input.GetKeyDown(KeyCode.Space) && isVisualizationActive)
+        {
+            isVisualizationActive = false;
+            cameraBehaviour.DisableRotation();
+            dataCanvas.gameObject.SetActive(true);
+            visulaizationCanvas.gameObject.SetActive(false);
+            showInfo(outputData[current_year].Values.First().Year);
+        }
+        if (Input.GetKeyDown(KeyCode.Space) && !isVisualizationActive && outputData != null)
         {
             isVisualizationActive = true;
             cameraBehaviour.EnableRotation();
@@ -61,13 +72,21 @@ public class Manager : MonoBehaviour
             visulaizationCanvas.gameObject.SetActive(true);
             visualizer.displayTrees();
         }
-        else if (Input.GetKeyDown(KeyCode.Space) && isVisualizationActive)
+
+        if (Input.GetKeyDown(KeyCode.P) && isVisualizationActive && outputData != null)
         {
-            isVisualizationActive = false;
-            cameraBehaviour.DisableRotation();
-            dataCanvas.gameObject.SetActive(true);
-            visulaizationCanvas.gameObject.SetActive(false);
-            showInfo(outputData[current_year].Values.First().Year);
+            if (!isParalelCameraActive)
+            {
+                isParalelCameraActive = true;
+                mainCamera.SetActive(false);
+                paralelCamera.SetActive(true);
+            }
+            else
+            {
+                isParalelCameraActive = false;
+                mainCamera.SetActive(true);
+                paralelCamera.SetActive(false);
+            }
         }
     }
 

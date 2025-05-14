@@ -10,6 +10,7 @@ public class Visualizer : MonoBehaviour
     public TMP_Text yearText;
     public Material trunkMaterial;
     public Material leafsMaterial;
+    public Material deadTreeMaterial;
 
     private int currentYear;
     private List<Tree> trees;
@@ -48,41 +49,66 @@ public class Visualizer : MonoBehaviour
         float xOffset = trees.Average(tree => tree.Xarv);
         float yOffset = trees.Average(tree => tree.Yarv);
 
-        trunkMatrices = new Matrix4x4[trees.Count];
-        leafsMatrices = new Matrix4x4[trees.Count];
+        List<Matrix4x4> trunkMatricesList = new List<Matrix4x4>();
+        List<Matrix4x4> leafsMatricesAlive = new List<Matrix4x4>();
+        List<Matrix4x4> leafsMatricesDead = new List<Matrix4x4>();
 
-        int count = 0;
         foreach (Tree tree in trees)
         {
-            if (tree.estado == 4 || tree.estado == 6) continue;
-
             float adjustedX = (tree.Xarv - xOffset) * 3f;
             float adjustedZ = (tree.Yarv - yOffset) * 3f;
-            float treeHeight = tree.h * 0.25f;
-            float trunkRadius = tree.d * 0.1f;
-
-            Vector3 basePosition = new Vector3(adjustedX, trunkMesh.bounds.size.y/2 * treeHeight, adjustedZ);
-
+            Vector3 basePosition;
             Quaternion rotation = Quaternion.Euler(0, tree.rotation, 0);
-            Vector3 trunkScale = new Vector3(trunkRadius, treeHeight, trunkRadius);
-            trunkMatrices[count] = Matrix4x4.TRS(basePosition, rotation, trunkScale);
 
-            float crownWidth = tree.cw;
-            Vector3 leafScale = new Vector3(crownWidth, treeHeight, crownWidth);
-            Vector3 leafOffset = new Vector3(0, trunkMesh.bounds.size.y * treeHeight, 0);
-            leafsMatrices[count] = Matrix4x4.TRS(basePosition + leafOffset, rotation, leafScale);
+            if (tree.estado == 6)
+            {
+                basePosition = new Vector3(adjustedX, trunkMesh.bounds.size.y / 2, adjustedZ);
+                Vector3 trunkScale = Vector3.one;
+                trunkMatricesList.Add(Matrix4x4.TRS(basePosition, rotation, trunkScale));
+                // No leaves for estado 6
+            }
+            else if (tree.estado == 4 && tree.wasAlive)
+            {
+                basePosition = new Vector3(adjustedX, trunkMesh.bounds.size.y / 2, adjustedZ);
+                Vector3 trunkScale = new Vector3(1, 1, 1);
+                trunkMatricesList.Add(Matrix4x4.TRS(basePosition, rotation, trunkScale));
 
-            count++;
+                Vector3 leafScale = new Vector3(1, 1, 1);
+                Vector3 leafOffset = new Vector3(0, trunkMesh.bounds.size.y, 0);
+                leafsMatricesDead.Add(Matrix4x4.TRS(basePosition + leafOffset, rotation, leafScale));
+            }
+            else if (tree.estado == 0)
+            {
+                float treeHeight = tree.h * 0.25f;
+                float trunkRadius = tree.d * 0.1f;
+
+                basePosition = new Vector3(adjustedX, trunkMesh.bounds.size.y / 2 * treeHeight, adjustedZ);
+
+                Vector3 trunkScale = new Vector3(trunkRadius, treeHeight, trunkRadius);
+                trunkMatricesList.Add(Matrix4x4.TRS(basePosition, rotation, trunkScale));
+
+                float crownWidth = tree.cw;
+                Vector3 leafScale = new Vector3(crownWidth, treeHeight, crownWidth);
+                Vector3 leafOffset = new Vector3(0, trunkMesh.bounds.size.y * treeHeight, 0);
+                leafsMatricesAlive.Add(Matrix4x4.TRS(basePosition + leafOffset, rotation, leafScale));
+            }
         }
 
-        // Batch draw instanced meshes (limit 1023 per batch)
-        for (int i = 0; i < trees.Count; i += 1023)
+        DrawBatched(trunkMesh, trunkMaterial, trunkMatricesList);
+        DrawBatched(leafsMesh, leafsMaterial, leafsMatricesAlive);
+        DrawBatched(leafsMesh, deadTreeMaterial, leafsMatricesDead);
+    }
+
+    // Helper function for batching
+    private void DrawBatched(Mesh mesh, Material material, List<Matrix4x4> matrices)
+    {
+        for (int i = 0; i < matrices.Count; i += 1023)
         {
-            int batchSize = Mathf.Min(1023, trees.Count - i);
-            Graphics.DrawMeshInstanced(trunkMesh, 0, trunkMaterial, trunkMatrices, batchSize);
-            Graphics.DrawMeshInstanced(leafsMesh, 0, leafsMaterial, leafsMatrices, batchSize);
+            int batchSize = Mathf.Min(1023, matrices.Count - i);
+            Graphics.DrawMeshInstanced(mesh, 0, material, matrices.GetRange(i, batchSize));
         }
     }
+
 
     //creates objects that act as complementary data
     public void createObjects()
