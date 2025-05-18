@@ -47,7 +47,7 @@ Prototype for the **standSIM** forest simulator’s visualization module.
 | `X`                | Zoom out (3D mode only)             |
 | Mouse Drag         | Move the camera (3D mode only)      |
 | Click on Tree      | Show information about the tree (3D mode only)    |
-| P      | Change to parallel view (3D mode only)    |
+| `P`      | Change to parallel view (3D mode only)    |
 
 ## 📬 Contact
 
