@@ -21,7 +21,7 @@ Prototype for the **standSIM** forest simulator’s visualization module.
 2. **Provide a CSV file** with the tree data output from standSIM.  
    - An example CSV is included in the root of the project — you can use it to test the visualization.
 3. **Set the parsing interval** using the input box.  
-   - For example, entering `5` will only parse data every 5 years.
+   - For example, entering `5` will only parse data every 5 years or don't to see everything.
 4. **Parsed data** will be displayed in a draggable table.
 5. **Navigate through years** using the arrow keys.  
    - Left arrow (`←`): Previous year.  
