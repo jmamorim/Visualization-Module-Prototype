@@ -26,6 +26,7 @@ public class Manager : MonoBehaviour
             if (current_year < outputData.Count - 1)
             {
                 current_year++;
+                treeInfoText.text = "";
                 if (!isVisualizationActive)
                 {
                     showInfo(current_year);
@@ -44,6 +45,7 @@ public class Manager : MonoBehaviour
             if (current_year > 0)
             {
                 current_year--;
+                treeInfoText.text = "";
                 if (!isVisualizationActive)
                 {
                     showInfo(current_year);
@@ -64,7 +66,7 @@ public class Manager : MonoBehaviour
             visulaizationCanvas.gameObject.SetActive(false);
             showInfo(outputData[current_year].Values.First().Year);
         }
-        if (Input.GetKeyDown(KeyCode.Space) && !isVisualizationActive && outputData != null)
+        else if (Input.GetKeyDown(KeyCode.Space) && !isVisualizationActive && outputData != null)
         {
             isVisualizationActive = true;
             cameraBehaviour.EnableRotation();

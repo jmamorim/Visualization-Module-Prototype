@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
 public class Visualizer : MonoBehaviour
@@ -11,6 +12,7 @@ public class Visualizer : MonoBehaviour
     public Material trunkMaterial;
     public Material leafsMaterial;
     public Material deadTreeMaterial;
+    public GraphGenerator graphGenerator;
 
     private int currentYear;
     private List<Tree> trees;
@@ -18,8 +20,6 @@ public class Visualizer : MonoBehaviour
     private Mesh trunkMesh;
     private Mesh leafsMesh;
 
-    private Matrix4x4[] trunkMatrices;
-    private Matrix4x4[] leafsMatrices;
     public void Start()
     {
         var temp = Instantiate(treePrefab);
@@ -38,6 +38,7 @@ public class Visualizer : MonoBehaviour
         trees = data.Values.ToList();
         this.currentYear = currentYear;
         createObjects();
+        graphGenerator.receiveData(data);
     }
 
     public void displayTrees()
