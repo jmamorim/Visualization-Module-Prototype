@@ -14,16 +14,17 @@ public class Manager : MonoBehaviour
     public GameObject mainCamera;
     public GameObject paralelCamera;
 
-    private List<SortedDictionary<int, Tree>> outputData;
+    private List<SortedDictionary<int, Tree>> outputSoloTreesData;
+    private List<YieldTableEntry> outputYieldTableData;
     private int current_year;
     private bool isVisualizationActive = false;
     private bool isParalelCameraActive = false;
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightArrow) && outputData != null)
+        if (Input.GetKeyDown(KeyCode.RightArrow) && outputSoloTreesData != null)
         {
-            if (current_year < outputData.Count - 1)
+            if (current_year < outputSoloTreesData.Count - 1)
             {
                 current_year++;
                 treeInfoText.text = "";
@@ -33,14 +34,14 @@ public class Manager : MonoBehaviour
                 }
                 else
                 {
-                    visualizer.receiveTreeData(outputData[current_year], outputData[current_year].Values.First().Year);
+                    visualizer.receiveTreeData(outputSoloTreesData[current_year], outputSoloTreesData[current_year].Values.First().Year);
                     visualizer.displayTrees();
                 }
             }
 
 
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow) && outputData != null)
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && outputSoloTreesData != null)
         {
             if (current_year > 0)
             {
@@ -52,7 +53,7 @@ public class Manager : MonoBehaviour
                 }
                 else
                 {
-                    visualizer.receiveTreeData(outputData[current_year], outputData[current_year].Values.First().Year);
+                    visualizer.receiveTreeData(outputSoloTreesData[current_year], outputSoloTreesData[current_year].Values.First().Year);
                     visualizer.displayTrees();
                 }
             }
@@ -64,9 +65,9 @@ public class Manager : MonoBehaviour
             cameraBehaviour.DisableRotation();
             dataCanvas.gameObject.SetActive(true);
             visulaizationCanvas.gameObject.SetActive(false);
-            showInfo(outputData[current_year].Values.First().Year);
+            showInfo(outputSoloTreesData[current_year].Values.First().Year);
         }
-        else if (Input.GetKeyDown(KeyCode.Space) && !isVisualizationActive && outputData != null)
+        else if (Input.GetKeyDown(KeyCode.Space) && !isVisualizationActive && outputSoloTreesData != null)
         {
             isVisualizationActive = true;
             cameraBehaviour.EnableRotation();
@@ -75,7 +76,7 @@ public class Manager : MonoBehaviour
             visualizer.displayTrees();
         }
 
-        if (Input.GetKeyDown(KeyCode.P) && isVisualizationActive && outputData != null)
+        if (Input.GetKeyDown(KeyCode.P) && isVisualizationActive && outputSoloTreesData != null)
         {
             if (!isParalelCameraActive)
             {
@@ -92,17 +93,36 @@ public class Manager : MonoBehaviour
         }
     }
 
-    public void receiveData(List<SortedDictionary<int, Tree>> data)
+    public void receiveSoloTreesData(List<SortedDictionary<int, Tree>> data)
     {
-        outputData = data;
+        outputSoloTreesData = data;
         current_year = 0;
         showInfo(current_year);
     }
 
+    public void receiveYieldTableData(List<YieldTableEntry> data)
+    {
+        outputYieldTableData = data;
+        if (outputYieldTableData != null)
+        {
+            foreach (var entry in outputYieldTableData)
+            {
+                Debug.Log(
+                    $"YieldTableEntry: " +
+                    $"year={entry.year}, Nst={entry.Nst}, N={entry.N}, Ndead={entry.Ndead}, " +
+                    $"hdom={entry.hdom}, G={entry.G}, dg={entry.dg}, Vu_st={entry.Vu_st}, Vst={entry.Vst}, " +
+                    $"Vu_as1={entry.Vu_as1}, Vu_as2={entry.Vu_as2}, Vu_as3={entry.Vu_as3}, Vu_as4={entry.Vu_as4}, Vu_as5={entry.Vu_as5}, " +
+                    $"maiV={entry.maiV}, iV={entry.iV}, Ww={entry.Ww}, Wb={entry.Wb}, Wbr={entry.Wbr}, Wl={entry.Wl}, Wa={entry.Wa}, Wr={entry.Wr}, " +
+                    $"NPVsum={entry.NPVsum}, EEA={entry.EEA}"
+                );
+            }
+        }
+    }
+
     void showInfo(int currentyear)
     {
-        string msg = $"{outputData[current_year].Values.First().Year}\n";
-        SortedDictionary<int, Tree> trees = outputData[current_year];
+        string msg = $"{outputSoloTreesData[current_year].Values.First().Year}\n";
+        SortedDictionary<int, Tree> trees = outputSoloTreesData[current_year];
         foreach (KeyValuePair<int, Tree> kvp in trees)
         {
             Tree t = kvp.Value;

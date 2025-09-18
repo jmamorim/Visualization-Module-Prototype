@@ -7,10 +7,11 @@ public class CameraBahaviour : MonoBehaviour
     public Transform target;
     public float rotationSpeed = 5.0f;
     public float zoomSpeed = 20.0f;
-    public float minZoomDistance = 20.0f;
-    public float maxZoomDistance = 150.0f;
+    public float minZoomDistance = 0f;
+    public float maxZoomDistance = 100000.0f;
 
     private Vector3 lastMousePosition;
+    [SerializeField]
     private bool canRotate = false;
 
     void Update()
@@ -42,7 +43,7 @@ public class CameraBahaviour : MonoBehaviour
                 }
             }
 
-            if (Input.GetKey(KeyCode.X))
+            if (Input.GetKey(KeyCode.C))
             {
                 float distance = Vector3.Distance(transform.position, target.position);
                 if (distance < maxZoomDistance)
