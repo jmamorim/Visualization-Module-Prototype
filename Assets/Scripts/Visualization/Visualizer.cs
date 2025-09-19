@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
+// Needs use of terrain and the speedtree models
 public class Visualizer : MonoBehaviour
 {
     public GameObject treePrefab; 

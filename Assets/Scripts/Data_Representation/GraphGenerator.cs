@@ -2,15 +2,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using XCharts.Runtime;
 
+//class to generate the line graphs for the yield table data
 public class GraphGenerator : MonoBehaviour
 {
     public BarChart diameterChart, heightChart;
-    private const int CLASS_WIDTH = 10;
 
-    public void receiveData(SortedDictionary<int, Tree> data)
+    private const int CLASS_WIDTH = 10;
+    private List<YieldTableEntry> outputYieldTableData;
+
+    public void receiveData(SortedDictionary<int, Tree> data, List<YieldTableEntry> tableData)
     {
         ClearCharts();
 
+        //data to make graphs
+        outputYieldTableData = tableData;
         var diameterData = CalculateFrequencyDistribution(data, tree => tree.d);
         var heightData = CalculateFrequencyDistribution(data, tree => tree.h);
 

@@ -4,6 +4,8 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
+// Manages the overall application state, including data reception, user input handling, and UI updates.
+// needs to change so it can adapt visualization and data representation for yield table data and multi visualization 
 public class Manager : MonoBehaviour
 {
     public TMP_Text feedbackText;
