@@ -39,7 +39,7 @@ public class Visualizer : MonoBehaviour
         trees = data.Values.ToList();
         this.currentYear = currentYear;
         createObjects();
-        graphGenerator.receiveData(data);
+        graphGenerator.receiveData(data, null);
     }
 
     public void displayTrees()
