@@ -9,12 +9,13 @@ public class CSVPicker : MonoBehaviour
 {
     public Button pickFileButton;
     public TMP_Text feedbackText;
-    public TMP_Text fileNameText;
     public TMP_InputField intervalInputField;
     public Parser parser;
 
+    string filePath = "";
+
     [SerializeField]
-    private bool isYieldTable = false;
+    bool isYieldTable = false;
     
     void Start()
     {
@@ -30,39 +31,17 @@ public class CSVPicker : MonoBehaviour
 
         string[] paths = StandaloneFileBrowser.OpenFilePanel("Open File", "", filters, false);
 
-        if (paths.Length == 0 || string.IsNullOrEmpty(paths[0]))
-        {
-            ShowMessage("No file selected", Color.red);
-            return;
-        }
-        string filePath = paths[0];
-
-        ShowFileName(Path.GetFileName(filePath));
+        string currentFilePath = paths[0];
 
         if (isYieldTable)
         {
-            parser.receiveYieldTableData(filePath);
+            parser.receiveYieldTablePath(currentFilePath, filePath);
+            filePath = currentFilePath;
         }
         else
         {
-            parser.receiveSoloTreeData(filePath);
-        }
-    }
-
-    void ShowMessage(string msg, Color color)
-    {
-        if (feedbackText != null)
-        {
-            feedbackText.text = msg;
-            feedbackText.color = color;
-        }
-    }
-
-    void ShowFileName(string msg)
-    {
-        if (fileNameText != null)
-        {
-            fileNameText.text = msg;
+            parser.receiveSoloTreePath(currentFilePath, filePath);
+            filePath = currentFilePath;
         }
     }
 }

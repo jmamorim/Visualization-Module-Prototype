@@ -16,8 +16,8 @@ public class Parser : MonoBehaviour
     private readonly string[] expectedSoloTreesHeaders = { "id_presc", "ciclo", "Year", "t", "id_arv", "Xarv", "Yarv", "d", "h", "cw", "estado" };
     private readonly string[] expectedYieldTableHeaders = { "year", "hdom", "Nst", "N", "Ndead", "G", "dg", "Vu_st", "Vst", "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5", "maiV", "iV", "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr", "NPVsum", "EEA" };
     private string[] lines;
-    private string soloTreePath;
-    private string yieldTablePath;
+    private List<string> soloTreePaths = new List<string>();
+    private List<string> yieldTablePaths = new List<string>();
     private int interval = 0;
 
     public void parse()
@@ -28,12 +28,20 @@ public class Parser : MonoBehaviour
             return;
         }
 
-        parseSoloTrees();
-        parseYieldTable();
+        List<List<SortedDictionary<int, Tree>>> outputSoloTreesData = new List<List<SortedDictionary<int, Tree>>>();
+        List<List<YieldTableEntry>> outputYieldTableData = new List<List<YieldTableEntry>>();
 
+        foreach (string s in soloTreePaths)
+            parseSoloTrees(outputSoloTreesData, s);
+        foreach (string s in yieldTablePaths)
+            parseYieldTable(outputYieldTableData, s);
+        Debug.Log($"Parsed {outputSoloTreesData.Count} solo tree files and {outputYieldTableData.Count} yield table files.");
+
+        //send all info to manager
+        sendDataToManager(outputSoloTreesData, outputYieldTableData);
     }
 
-    private void parseSoloTrees()
+    private void parseSoloTrees(List<List<SortedDictionary<int, Tree>>> output, string soloTreePath)
     {
         if (string.IsNullOrEmpty(soloTreePath))
         {
@@ -54,9 +62,12 @@ public class Parser : MonoBehaviour
             return;
         }
 
-        for (int i = 1; i == int.Parse(lines[i].Trim().Split(',')[6].Trim()); i++)
+        string[] headers = lines[0].Trim().Split(',');
+
+        if (!VerifyHeaders(headers, expectedSoloTreesHeaders))
         {
-            numberOfTrees++;
+            ShowMessage("Incorect headers", Color.red);
+            return;
         }
 
         Debug.Log($"Starting year: {starting_year}, Ending year: {ending_year}, Number of Trees: {numberOfTrees}");
@@ -67,12 +78,9 @@ public class Parser : MonoBehaviour
             return;
         }
 
-        string[] headers = lines[0].Trim().Split(',');
-
-        if (!VerifyHeaders(headers, expectedSoloTreesHeaders))
+        for (int i = 1; i == int.Parse(lines[i].Trim().Split(',')[6].Trim()); i++)
         {
-            ShowMessage("Incorect headers", Color.red);
-            return;
+            numberOfTrees++;
         }
 
         List<SortedDictionary<int, Tree>> treesInfoPerYear = new List<SortedDictionary<int, Tree>>();
@@ -133,7 +141,7 @@ public class Parser : MonoBehaviour
                 }
             }
 
-            manager.receiveSoloTreesData(treesInfoPerYear);
+            output.Add(treesInfoPerYear);
         }
         else
         {
@@ -176,7 +184,7 @@ public class Parser : MonoBehaviour
                         float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), // cw
                         int.Parse(treeInfo[24].Trim()), // estado
                         rotation, // rotation
-                        false
+                        false //arvore estava viva na ultima instancia
                     );
 
                         treesInfoPerYear[index][tree.id_arv] = tree;
@@ -188,11 +196,11 @@ public class Parser : MonoBehaviour
                     Debug.LogError($"Error parsing line {i}: {ex.Message}");
                 }
             }
-            manager.receiveSoloTreesData(treesInfoPerYear);
+            output.Add(treesInfoPerYear);
         }
     }
 
-    private void parseYieldTable()
+    private void parseYieldTable(List<List<YieldTableEntry>> output,string yieldTablePath)
     {
         if (string.IsNullOrEmpty(yieldTablePath))
         {
@@ -281,7 +289,7 @@ public class Parser : MonoBehaviour
                 Debug.LogError($"Unexpected error parsing line {i}: {ex.Message}");
             }
         }
-        manager.receiveYieldTableData(yieldTable);
+        output.Add(yieldTable);
     }
 
     bool VerifyHeaders(string[] headers, string[] expectedHeaders)
@@ -306,14 +314,38 @@ public class Parser : MonoBehaviour
         }
     }
 
-    public void receiveSoloTreeData(string path)
+    public void receiveSoloTreePath(string path, string prevPath)
     {
-        this.soloTreePath = path;
+        insertPath(soloTreePaths, path, prevPath);
     }
 
-    public void receiveYieldTableData(string path)
+    public void receiveYieldTablePath(string path, string prevPath)
     {
-        this.yieldTablePath = path;
+        insertPath(yieldTablePaths, path, prevPath);
+    }
+
+    void insertPath(List<string> list, string path, string prevPath)
+    {
+        int index = list.IndexOf(prevPath);
+        if (index >= 0)
+        {
+            list[index] = path;
+        }
+        else
+        {
+            list.Add(path);
+        }
+        if (feedbackText != null)
+            feedbackText.text += $"File selected: {Path.GetFileName(path)}\n";
+    }
+
+    void sendDataToManager(List<List<SortedDictionary<int, Tree>>> outputSoloTrees, List<List<YieldTableEntry>> outputYieldTable)
+    {
+        if (outputSoloTrees.Any() && outputYieldTable.Any())
+        {
+            manager.receiveSoloTreesData(outputSoloTrees);
+            manager.receiveYieldTableData(outputYieldTable);
+        }
     }
 
 }
