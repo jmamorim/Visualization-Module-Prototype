@@ -1,7 +1,17 @@
 fileFormatVersion: 2
 guid: 160736ab28a32da4691744d9fbdeee1d
 SpeedTreeImporter:
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pb_jovem
+    second: {fileID: 2100000, guid: 05292c4819bc1f1479752c1336336176, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pb_jovem_Billboard_LOD3
+    second: {fileID: 2100000, guid: 6e13479e82bc56d41996735cbb7f8f5b, type: 2}
   serializedVersion: 7
   mainColor: {r: 1, g: 1, b: 1, a: 1}
   hueVariation: {r: 1, g: 0.5, b: 0, a: 0.1}
@@ -24,7 +34,7 @@ SpeedTreeImporter:
     useLightProbes: 1
     reflectionProbeUsage: 1
     enableBump: 1
-    enableHue: 1
+    enableHue: 0
     enableSubsurface: 1
     windQuality: 0
   - enableSettingOverride: 0
@@ -34,7 +44,7 @@ SpeedTreeImporter:
     useLightProbes: 1
     reflectionProbeUsage: 1
     enableBump: 1
-    enableHue: 1
+    enableHue: 0
     enableSubsurface: 1
     windQuality: 0
   - enableSettingOverride: 0
@@ -44,17 +54,17 @@ SpeedTreeImporter:
     useLightProbes: 1
     reflectionProbeUsage: 1
     enableBump: 1
-    enableHue: 1
+    enableHue: 0
     enableSubsurface: 1
     windQuality: 0
-  - enableSettingOverride: 0
+  - enableSettingOverride: 1
     height: 0.01
     castShadows: 1
     receiveShadows: 1
     useLightProbes: 0
     reflectionProbeUsage: 0
     enableBump: 1
-    enableHue: 1
+    enableHue: 0
     enableSubsurface: 1
     windQuality: 0
   enableSmoothLODTransition: 1
@@ -64,6 +74,8 @@ SpeedTreeImporter:
   scaleFactor: 0.3048
   unitConversionEnumValue: 1
   motionVectorModeEnumValue: 1
+  generateColliders: 1
+  generateRigidbody: 1
   materialVersion: 3
   materialLocation: 1
   fileIDType: 2

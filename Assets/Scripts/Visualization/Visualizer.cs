@@ -1,38 +1,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
 // Needs use of terrain and the speedtree models
 public class Visualizer : MonoBehaviour
 {
-    public GameObject treePrefab; 
+    //Pinheiro-bravo models yongest to seniour
+    public List<GameObject> pbPrefabs;
     public GameObject plot;
     public TMP_Text yearText;
-    public Material trunkMaterial;
-    public Material leafsMaterial;
-    public Material deadTreeMaterial;
     public GraphGenerator graphGenerator;
 
     private int currentYear;
     private List<Tree> trees;
+    private List<GameObject> treeInstances;
 
-    private Mesh trunkMesh;
-    private Mesh leafsMesh;
-
-    public void Start()
-    {
-        var temp = Instantiate(treePrefab);
-        trunkMesh = temp.transform.Find("Trunk").GetComponent<MeshFilter>().sharedMesh;
-        leafsMesh = temp.transform.Find("Leafs").GetComponent<MeshFilter>().sharedMesh;
-        Destroy(temp);
-    }
-
-    private void Update()
-    {
-        displayTrees();
-    }
+    [SerializeField]
+    //ages 3-7-10-15-20
+    float pbAdultStartingAge, pbYoungAdultAge, pbMidAdultAge, pbSeniourStartingAge;
+    [SerializeField]
+    //heights
+    float thresholdPbYoungHeight, thresholdPbAdultHeight, thresholdPbSeniourHeight;
 
     public void receiveTreeData(SortedDictionary<int, Tree> data, int currentYear)
     {
@@ -40,6 +29,7 @@ public class Visualizer : MonoBehaviour
         this.currentYear = currentYear;
         createObjects();
         graphGenerator.receiveData(data, null);
+        displayTrees();
     }
 
     public void displayTrees()
@@ -48,69 +38,70 @@ public class Visualizer : MonoBehaviour
 
         if (trees == null || trees.Count == 0) return;
 
+        // Apaga instâncias antigas
+        if (treeInstances != null)
+        {
+            foreach (GameObject obj in treeInstances)
+            {
+                if (obj != null) Destroy(obj);
+            }
+        }
+        treeInstances = new List<GameObject>();
+
         float xOffset = trees.Average(tree => tree.Xarv);
         float yOffset = trees.Average(tree => tree.Yarv);
 
-        List<Matrix4x4> trunkMatricesList = new List<Matrix4x4>();
-        List<Matrix4x4> leafsMatricesAlive = new List<Matrix4x4>();
-        List<Matrix4x4> leafsMatricesDead = new List<Matrix4x4>();
-
         foreach (Tree tree in trees)
         {
-            float adjustedX = (tree.Xarv - xOffset) * 3f;
-            float adjustedZ = (tree.Yarv - yOffset) * 3f;
-            Vector3 basePosition;
-            Quaternion rotation = Quaternion.Euler(0, tree.rotation, 0);
-
-            if (tree.estado == 6)
+            // Só mostra árvores vivas por agora
+            if (tree.estado == 0)
             {
-                basePosition = new Vector3(adjustedX, trunkMesh.bounds.size.y / 2, adjustedZ);
-                Vector3 trunkScale = Vector3.one;
-                trunkMatricesList.Add(Matrix4x4.TRS(basePosition, rotation, trunkScale));
-                // No leaves for estado 6
-            }
-            else if (tree.estado == 4 && tree.wasAlive)
-            {
-                basePosition = new Vector3(adjustedX, trunkMesh.bounds.size.y / 2, adjustedZ);
-                Vector3 trunkScale = new Vector3(1, 1, 1);
-                trunkMatricesList.Add(Matrix4x4.TRS(basePosition, rotation, trunkScale));
 
-                Vector3 leafScale = new Vector3(1, 1, 1);
-                Vector3 leafOffset = new Vector3(0, trunkMesh.bounds.size.y, 0);
-                leafsMatricesDead.Add(Matrix4x4.TRS(basePosition + leafOffset, rotation, leafScale));
-            }
-            else if (tree.estado == 0)
-            {
-                float treeHeight = tree.h * 0.25f;
-                float trunkRadius = tree.d * 0.1f;
+                float adjustedX = (tree.Xarv - xOffset) * 3f;
+                float adjustedZ = (tree.Yarv - yOffset) * 3f;
+                Vector3 position = new Vector3(adjustedX, 0f, adjustedZ);
+                Quaternion rotation = Quaternion.Euler(0, tree.rotation, 0);
 
-                basePosition = new Vector3(adjustedX, trunkMesh.bounds.size.y / 2 * treeHeight, adjustedZ);
+                GameObject prefab = getPrefabForCurrentHeight(tree.t);
+                float factor = calculatePBFactor(tree.h, tree.t);
 
-                Vector3 trunkScale = new Vector3(trunkRadius, treeHeight, trunkRadius);
-                trunkMatricesList.Add(Matrix4x4.TRS(basePosition, rotation, trunkScale));
+                GameObject instance = Instantiate(prefab, position, rotation, plot.transform);
+                instance.transform.localScale = Vector3.one * factor;
 
-                float crownWidth = tree.cw;
-                Vector3 leafScale = new Vector3(crownWidth, treeHeight, crownWidth);
-                Vector3 leafOffset = new Vector3(0, trunkMesh.bounds.size.y * treeHeight, 0);
-                leafsMatricesAlive.Add(Matrix4x4.TRS(basePosition + leafOffset, rotation, leafScale));
+                treeInstances.Add(instance);
             }
         }
-
-        DrawBatched(trunkMesh, trunkMaterial, trunkMatricesList);
-        DrawBatched(leafsMesh, leafsMaterial, leafsMatricesAlive);
-        DrawBatched(leafsMesh, deadTreeMaterial, leafsMatricesDead);
     }
 
-    // Helper function for batching
-    private void DrawBatched(Mesh mesh, Material material, List<Matrix4x4> matrices)
+    private GameObject getPrefabForCurrentHeight(float currentAge)
     {
-        for (int i = 0; i < matrices.Count; i += 1023)
-        {
-            int batchSize = Mathf.Min(1023, matrices.Count - i);
-            Graphics.DrawMeshInstanced(mesh, 0, material, matrices.GetRange(i, batchSize));
-        }
+        if (currentAge < pbAdultStartingAge)
+            return pbPrefabs[0];
+        else if (currentAge >= pbAdultStartingAge && currentAge < pbYoungAdultAge)
+            return pbPrefabs[1];
+        else if (currentAge >= pbAdultStartingAge && currentAge < pbMidAdultAge)
+            return pbPrefabs[2];
+        else if (currentAge >= pbAdultStartingAge && currentAge < pbSeniourStartingAge)
+            return pbPrefabs[3];
+        else
+            return pbPrefabs[4];
     }
 
+    private float calculatePBFactor(float currentHeight, float currentAge)
+    {
+        if (currentAge < pbAdultStartingAge)
+        {
+            return currentHeight / thresholdPbYoungHeight;
+        }
+        else if (currentAge >= pbAdultStartingAge && currentAge < pbSeniourStartingAge)
+        {
+            return currentHeight / thresholdPbAdultHeight;
+        }
+        else
+        {
+            return currentHeight / thresholdPbSeniourHeight;
+        }
+    }
 
     //creates objects that act as complementary data
     public void createObjects()

@@ -5,18 +5,26 @@ using UnityEngine;
 
 public class TreeGrowthExperiment : MonoBehaviour
 {
-    public GameObject youngTreePrefab, adultTreePrefab, seniourTreePrefab;
+    //from yongest to seniour
+    public List<GameObject> prefabs;
     public Transform treeLocation;
 
-    const float minHeight = 1f;
-    const float stepHeight = 0.5f;
+    const float minHeight = 0.5f;
+    const float maxHeight = 35f;
+    const float stepHeight = 0.8f;
+    const int minAge = 1;
 
     float factor;
     float currentHeight = 1f;
+    int currentAge = 1;
     GameObject treeInstance;
     GameObject currentPrefab;
 
     [SerializeField]
+    //ages 3-7-10-15-20
+    float adultStartingAge, youngAdultAge, midAdultAge, seniourStartingAge;
+    [SerializeField]
+    //heights
     float thresholdYoungHeight, thresholdAdultHeight, thresholdSeniourHeight;
 
     private void Start()
@@ -27,17 +35,17 @@ public class TreeGrowthExperiment : MonoBehaviour
 
     private void Update()
     {
-        if (currentHeight <= thresholdSeniourHeight && currentHeight >= minHeight) {
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                currentHeight = Mathf.Min(currentHeight + stepHeight, thresholdSeniourHeight);
-                instatiateTree();
-            }
-            if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                currentHeight = Mathf.Max(currentHeight - stepHeight, minHeight);
-                instatiateTree();
-            }
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            currentHeight = Mathf.Min(currentHeight + stepHeight, maxHeight);
+            currentAge += 1;
+            instatiateTree();
+        }
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            currentHeight = Mathf.Max(currentHeight - stepHeight, minHeight);
+            currentAge = Mathf.Max(currentAge - 1, minAge);
+            instatiateTree();
         }
     }
 
@@ -61,11 +69,11 @@ public class TreeGrowthExperiment : MonoBehaviour
     //h = f*initialh 
     private float calculateFactor()
     {
-        if (currentHeight < thresholdYoungHeight)
+        if (currentAge < adultStartingAge)
         {
             return currentHeight / thresholdYoungHeight;
         }
-        else if (thresholdYoungHeight <= currentHeight && currentHeight < thresholdAdultHeight)
+        else if (currentAge >= adultStartingAge && currentAge < seniourStartingAge)
         {
             return currentHeight / thresholdAdultHeight;
         }
@@ -86,11 +94,15 @@ public class TreeGrowthExperiment : MonoBehaviour
 
     private GameObject getPrefabForCurrentHeight()
     {
-        if (currentHeight < thresholdYoungHeight)
-            return youngTreePrefab;
-        else if (currentHeight < thresholdAdultHeight)
-            return adultTreePrefab;
+        if (currentAge < adultStartingAge)
+            return prefabs[0];
+        else if (currentAge >= adultStartingAge && currentAge < youngAdultAge)
+            return prefabs[1];
+        else if (currentAge >= youngAdultAge && currentAge < midAdultAge)
+            return prefabs[2];
+        else if (currentAge >= midAdultAge && currentAge < seniourStartingAge)
+            return prefabs[3];
         else
-            return seniourTreePrefab;
+            return prefabs[4];
     }
 }
