@@ -5,6 +5,7 @@
 Prototype for the **standSIM** forest simulator’s visualization module.
 
 *Update* 
+- Parsing of yield table data functional;
 - Experiments with speedtree models;
 - Main scene uses speedtree models for pinheiro-bravo.
 
