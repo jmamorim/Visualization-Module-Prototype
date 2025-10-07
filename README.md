@@ -5,8 +5,8 @@
 Prototype for the **standSIM** forest simulator’s visualization module.
 
 *Update* 
-- Added example graphs to visualization;
-- Changed some configurations
+- Experiments with speedtree models;
+- Main scene uses speedtree models for pinheiro-bravo.
 
 ## 📦 How to Download
 
