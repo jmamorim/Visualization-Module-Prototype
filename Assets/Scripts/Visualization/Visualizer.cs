@@ -1,27 +1,53 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
-// Needs use of terrain and the speedtree models
 public class Visualizer : MonoBehaviour
 {
     //Pinheiro-bravo models yongest to seniour
+    [Header("Pinheiro-bravo Prefabs")]
     public List<GameObject> pbPrefabs;
+    [Header("Pinheiro-manso Prefabs")]
+    public List<GameObject> pmPrefabs;
+    public string activeSpecie;
+
+    [Header("Scene References")]
     public GameObject plot;
     public TMP_Text yearText;
     public GraphGenerator graphGenerator;
 
-    private int currentYear;
-    private List<Tree> trees;
-    private List<GameObject> treeInstances;
+    [Header("Pinheiro-bravo Parameters"), Tooltip("Ages at which Pinheiro-bravo transitions between stages")]
+    [SerializeField] float pbAdultStartingAge;
+    [SerializeField] float pbYoungAdultAge;
+    [SerializeField] float pbMidAdultAge;
+    [SerializeField] float pbSeniourStartingAge;
 
-    [SerializeField]
-    //ages 3-7-10-15-20
-    float pbAdultStartingAge, pbYoungAdultAge, pbMidAdultAge, pbSeniourStartingAge;
-    [SerializeField]
-    //heights
-    float thresholdPbYoungHeight, thresholdPbAdultHeight, thresholdPbSeniourHeight;
+    [Space(5)]
+    [Header("Pinheiro-bravo Height Thresholds")]
+    [SerializeField] float thresholdPbYoungHeight;
+    [SerializeField] float thresholdPbAdultHeight;
+    [SerializeField] float thresholdPbSeniourHeight;
+
+    [Header("Pinheiro-manso Parameters"), Tooltip("Ages at which Pinheiro-manso transitions between stages")]
+    [SerializeField] float pmMidYougAge;
+    [SerializeField] float pmAdultStartingAge;
+    [SerializeField] float pmYoungAdultAge;
+    //[SerializeField] float pmMidAdultAge;
+    [SerializeField] float pmSeniourStartingAge;
+
+    [Space(5)]
+    [Header("Pinheiro-manso Height Thresholds")]
+    [SerializeField] float thresholdPmYoungHeight;
+    [SerializeField] float thresholdPmAdultHeight;
+    [SerializeField] float thresholdPmSeniourHeight;
+
+    int currentYear;
+    List<Tree> trees;
+    List<GameObject> treeInstances;
+    readonly List<string> species = new List<string> { "pb", "pm", "eg", "cs" };
+
 
     public void receiveTreeData(SortedDictionary<int, Tree> data, int currentYear)
     {
@@ -62,8 +88,11 @@ public class Visualizer : MonoBehaviour
                 Vector3 position = new Vector3(adjustedX, 0f, adjustedZ);
                 Quaternion rotation = Quaternion.Euler(0, tree.rotation, 0);
 
-                GameObject prefab = getPrefabForCurrentHeight(tree.t);
-                float factor = calculatePBFactor(tree.h, tree.t);
+                //needs to be changes so it takes into account the specie
+                GameObject prefab = null;
+                float factor = 0;
+
+                GetFactorAndPrefabSpecie(activeSpecie, tree.h, tree.t, out factor, out prefab);
 
                 GameObject instance = Instantiate(prefab, position, rotation, plot.transform);
                 instance.transform.localScale = Vector3.one * factor;
@@ -73,7 +102,24 @@ public class Visualizer : MonoBehaviour
         }
     }
 
-    private GameObject getPrefabForCurrentHeight(float currentAge)
+    private void GetFactorAndPrefabSpecie(string specie, float height, float age, out float factor, out GameObject prefab)
+    {
+        factor = 0f;
+        prefab = null;
+
+        if (specie.Equals(species[0]))
+        {
+            prefab = getPBPrefabForCurrentAge(age);
+            factor = calculatePBFactor(height, age);
+        }
+        else if (specie.Equals(species[1]))
+        {
+            prefab = getPmPrefabForCurrentHeight(age);
+            factor = calculatePMFactor(height, age);
+        }
+    }
+
+    private GameObject getPBPrefabForCurrentAge(float currentAge)
     {
         if (currentAge < pbAdultStartingAge)
             return pbPrefabs[0];
@@ -85,6 +131,18 @@ public class Visualizer : MonoBehaviour
             return pbPrefabs[3];
         else
             return pbPrefabs[4];
+    }
+
+    private GameObject getPmPrefabForCurrentHeight(float currentAge)
+    {
+        if (currentAge < pmMidYougAge)
+            return pmPrefabs[0];
+        else if (currentAge >= pmMidYougAge && currentAge < pmAdultStartingAge)
+            return pmPrefabs[1];
+        else if (currentAge >= pmAdultStartingAge && currentAge < pmSeniourStartingAge)
+            return pmPrefabs[2];
+        else
+            return pmPrefabs[3];
     }
 
     private float calculatePBFactor(float currentHeight, float currentAge)
@@ -103,7 +161,23 @@ public class Visualizer : MonoBehaviour
         }
     }
 
-    //creates objects that act as complementary data
+    private float calculatePMFactor(float currentHeight, float currentAge)
+    {
+        if (currentAge < pmAdultStartingAge)
+        {
+            return currentHeight / thresholdPmYoungHeight;
+        }
+        else if (currentAge >= pmAdultStartingAge && currentAge < pmSeniourStartingAge)
+        {
+            return currentHeight / thresholdPmAdultHeight;
+        }
+        else
+        {
+            return currentHeight / thresholdPmSeniourHeight;
+        }
+    }
+
+    //creates empty objects that act as an hitbox for each tree so when clicking on a tree displays tree data
     public void createObjects()
     {
         if (trees == null || trees.Count == 0) return;

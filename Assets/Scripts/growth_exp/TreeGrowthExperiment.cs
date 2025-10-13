@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -8,21 +9,25 @@ public class TreeGrowthExperiment : MonoBehaviour
     //from yongest to seniour
     public List<GameObject> prefabs;
     public Transform treeLocation;
+    public float stepHeight;
 
     const float minHeight = 0.5f;
     const float maxHeight = 35f;
-    const float stepHeight = 0.8f;
     const int minAge = 1;
 
-    float factor;
-    float currentHeight = 1f;
-    int currentAge = 1;
+
     GameObject treeInstance;
     GameObject currentPrefab;
 
     [SerializeField]
+    int currentAge = 1;
+    [SerializeField]
+    float currentHeight = 3f;
+    [SerializeField]
+    float factor;
+    [SerializeField]
     //ages 3-7-10-15-20
-    float adultStartingAge, youngAdultAge, midAdultAge, seniourStartingAge;
+    float midYoungAge, adultStartingAge, youngAdultAge, midAdultAge, seniourStartingAge;
     [SerializeField]
     //heights
     float thresholdYoungHeight, thresholdAdultHeight, thresholdSeniourHeight;
@@ -94,11 +99,11 @@ public class TreeGrowthExperiment : MonoBehaviour
 
     private GameObject getPrefabForCurrentHeight()
     {
-        if (currentAge < adultStartingAge)
+        if (currentAge < midYoungAge)
             return prefabs[0];
-        else if (currentAge >= adultStartingAge && currentAge < youngAdultAge)
+        else if (currentAge >= midYoungAge && currentAge < adultStartingAge)
             return prefabs[1];
-        else if (currentAge >= youngAdultAge && currentAge < midAdultAge)
+        else if (currentAge >= adultStartingAge && currentAge < youngAdultAge)
             return prefabs[2];
         else if (currentAge >= midAdultAge && currentAge < seniourStartingAge)
             return prefabs[3];
