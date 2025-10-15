@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class Tree : MonoBehaviour
 {
-    public GameObject trunk, leafs;
     public int id_presc, ciclo, Year, id_arv, estado;
     public float t, Xarv, Yarv, d, h, cw, rotation;
     public bool wasAlive;
@@ -15,24 +14,7 @@ public class Tree : MonoBehaviour
         manager = GameObject.Find("Manager").GetComponent<Manager>();
     }
 
-    public Tree(int id_presc, int ciclo, int Year, float t, int id_arv, float Xarv, float Yarv, float d, float h, float cw, int estado, float rotation, bool wasAlive)
-    {
-        this.id_presc = id_presc;
-        this.ciclo = ciclo;
-        this.Year = Year;
-        this.t = t;
-        this.id_arv = id_arv;
-        this.Xarv = Xarv;
-        this.Yarv = Yarv;
-        this.d = d;
-        this.h = h;
-        this.cw = cw;
-        this.estado = estado;
-        this.rotation = rotation;
-        this.wasAlive = wasAlive;
-    }
-
-    public void initTree(Tree tree)
+    public void initTree(TreeData tree)
     {
         this.id_presc = tree.id_presc;
         this.ciclo = tree.ciclo;
@@ -49,9 +31,23 @@ public class Tree : MonoBehaviour
         this.wasAlive = tree.wasAlive;
     }
 
-    public void OnMouseDown()
+    private void OnMouseDown()
     {
-       manager.ShowTreeInfo(this);
+        Vector3 mousePos = Input.mousePosition;
+
+        foreach (Camera cam in Camera.allCameras)
+        {
+            Vector2 normalizedMouse = new Vector2(mousePos.x / Screen.width, mousePos.y / Screen.height);
+
+            if (cam.rect.Contains(normalizedMouse))
+            {
+                if ((cam.cullingMask & (1 << gameObject.layer)) != 0)
+                {
+                    manager.ShowTreeInfo(this);
+                    return;
+                }
+            }
+        }
     }
 
 

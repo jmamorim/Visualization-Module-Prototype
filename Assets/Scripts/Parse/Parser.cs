@@ -28,7 +28,7 @@ public class Parser : MonoBehaviour
             return;
         }
 
-        List<List<SortedDictionary<int, Tree>>> outputSoloTreesData = new List<List<SortedDictionary<int, Tree>>>();
+        List<List<SortedDictionary<int, TreeData>>> outputSoloTreesData = new List<List<SortedDictionary<int, TreeData>>>();
         List<List<YieldTableEntry>> outputYieldTableData = new List<List<YieldTableEntry>>();
 
         foreach (string s in soloTreePaths)
@@ -41,7 +41,7 @@ public class Parser : MonoBehaviour
         sendDataToManager(outputSoloTreesData, outputYieldTableData);
     }
 
-    private void parseSoloTrees(List<List<SortedDictionary<int, Tree>>> output, string soloTreePath)
+    private void parseSoloTrees(List<List<SortedDictionary<int, TreeData>>> output, string soloTreePath)
     {
         if (string.IsNullOrEmpty(soloTreePath))
         {
@@ -83,7 +83,7 @@ public class Parser : MonoBehaviour
             numberOfTrees++;
         }
 
-        List<SortedDictionary<int, Tree>> treesInfoPerYear = new List<SortedDictionary<int, Tree>>();
+        List<SortedDictionary<int, TreeData>> treesInfoPerYear = new List<SortedDictionary<int, TreeData>>();
         int index = 0;
         int treeCount = 0;
 
@@ -102,7 +102,7 @@ public class Parser : MonoBehaviour
                 {
                     if (index >= treesInfoPerYear.Count)
                     {
-                        treesInfoPerYear.Add(new SortedDictionary<int, Tree>());
+                        treesInfoPerYear.Add(new SortedDictionary<int, TreeData>());
                     }
 
                     int id_arv = int.Parse(treeInfo[6].Trim());
@@ -117,7 +117,7 @@ public class Parser : MonoBehaviour
                     {
                         wasAlive = treesInfoPerYear[index - 1][id_arv].estado == 0;
                     }
-                    Tree tree = new Tree(
+                    TreeData tree = new TreeData(
                         int.Parse(treeInfo[1].Trim()),  //id_presc
                         int.Parse(treeInfo[2].Trim()),  //ciclo
                         int.Parse(treeInfo[3].Trim()),  //Year
@@ -161,7 +161,7 @@ public class Parser : MonoBehaviour
                 {
                     if (index >= treesInfoPerYear.Count)
                     {
-                        treesInfoPerYear.Add(new SortedDictionary<int, Tree>());
+                        treesInfoPerYear.Add(new SortedDictionary<int, TreeData>());
                     }
                     if (int.Parse(treeInfo[3].Trim()) == year)
                     {
@@ -171,7 +171,7 @@ public class Parser : MonoBehaviour
                         {
                             rotation = treesInfoPerYear[index - 1][id_arv].rotation;
                         }
-                        Tree tree = new Tree(
+                        TreeData tree = new TreeData(
                         int.Parse(treeInfo[1].Trim()),  // id_presc
                         int.Parse(treeInfo[2].Trim()),  // ciclo
                         int.Parse(treeInfo[3].Trim()),  // Year
@@ -339,7 +339,7 @@ public class Parser : MonoBehaviour
             feedbackText.text += $"File selected: {Path.GetFileName(path)}\n";
     }
 
-    void sendDataToManager(List<List<SortedDictionary<int, Tree>>> outputSoloTrees, List<List<YieldTableEntry>> outputYieldTable)
+    void sendDataToManager(List<List<SortedDictionary<int, TreeData>>> outputSoloTrees, List<List<YieldTableEntry>> outputYieldTable)
     {
         if (outputSoloTrees.Any() && outputYieldTable.Any())
         {

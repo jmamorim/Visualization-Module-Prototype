@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using TreeEditor;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
@@ -17,6 +18,8 @@ public class Visualizer : MonoBehaviour
     public GameObject plot;
     public TMP_Text yearText;
     public GraphGenerator graphGenerator;
+    public Terrain terrain1;
+    public Terrain terrain2;
 
     [Header("Pinheiro-bravo Parameters"), Tooltip("Ages at which Pinheiro-bravo transitions between stages")]
     [SerializeField] float pbAdultStartingAge;
@@ -44,62 +47,86 @@ public class Visualizer : MonoBehaviour
     [SerializeField] float thresholdPmSeniourHeight;
 
     int currentYear;
-    List<Tree> trees;
-    List<GameObject> treeInstances;
     readonly List<string> species = new List<string> { "pb", "pm", "eg", "cs" };
 
-
-    public void receiveTreeData(SortedDictionary<int, Tree> data, int currentYear)
+    private void Start()
     {
-        trees = data.Values.ToList();
-        this.currentYear = currentYear;
-        createObjects();
-        graphGenerator.receiveData(data, null);
-        displayTrees();
+        clear();
     }
 
-    public void displayTrees()
+    public void receiveTreeData(SortedDictionary<int, TreeData> data1, SortedDictionary<int, TreeData> data2, int currentYear)
+    {
+        clear();
+        this.currentYear = currentYear;
+        var trees1 = data1.Values.ToList();
+        createObjects(trees1, terrain1, false);
+        graphGenerator.receiveData(data1, null);
+        displayTrees(trees1, terrain1);
+        if (data2 != null)
+        {
+            var trees2 = data2.Values.ToList();
+            createObjects(trees2, terrain2, true);
+            //graphGenerator.receiveData(data2, null);
+            displayTrees(trees2, terrain2);
+        }
+    }
+
+    public void displayTrees(List<TreeData> trees, Terrain terrain)
     {
         yearText.text = $"Year: {currentYear}";
 
         if (trees == null || trees.Count == 0) return;
 
-        // Apaga instâncias antigas
-        if (treeInstances != null)
+        //terrain handling
+        terrain.terrainData.treeInstances = new TreeInstance[0];
+        TreePrototype[] prototypes = new TreePrototype[pbPrefabs.Count + pmPrefabs.Count];
+        for (int i = 0; i < pbPrefabs.Count; i++)
         {
-            foreach (GameObject obj in treeInstances)
-            {
-                if (obj != null) Destroy(obj);
-            }
+            prototypes[i] = new TreePrototype { prefab = pbPrefabs[i] };
         }
-        treeInstances = new List<GameObject>();
-
-        float xOffset = trees.Average(tree => tree.Xarv);
-        float yOffset = trees.Average(tree => tree.Yarv);
-
-        foreach (Tree tree in trees)
+        for (int i = 0; i < pmPrefabs.Count; i++)
         {
-            // Só mostra árvores vivas por agora
+            prototypes[pbPrefabs.Count + i] = new TreePrototype { prefab = pmPrefabs[i] };
+        }
+        terrain.terrainData.treePrototypes = prototypes;
+
+        List<TreeInstance> treeInstancesTerrain = new List<TreeInstance>();
+
+        foreach (TreeData tree in trees)
+        {
             if (tree.estado == 0)
             {
+                float adjustedX = (tree.Xarv) * 3f;
+                float adjustedZ = (tree.Yarv) * 3f;
 
-                float adjustedX = (tree.Xarv - xOffset) * 3f;
-                float adjustedZ = (tree.Yarv - yOffset) * 3f;
-                Vector3 position = new Vector3(adjustedX, 0f, adjustedZ);
-                Quaternion rotation = Quaternion.Euler(0, tree.rotation, 0);
+                float worldX = terrain.transform.position.x + adjustedX;
+                float worldZ = terrain.transform.position.z + adjustedZ;
 
-                //needs to be changes so it takes into account the specie
+                float normX = (worldX - terrain.transform.position.x) / terrain.terrainData.size.x;
+                float normZ = (worldZ - terrain.transform.position.z) / terrain.terrainData.size.z;
+
                 GameObject prefab = null;
                 float factor = 0;
-
                 GetFactorAndPrefabSpecie(activeSpecie, tree.h, tree.t, out factor, out prefab);
 
-                GameObject instance = Instantiate(prefab, position, rotation, plot.transform);
-                instance.transform.localScale = Vector3.one * factor;
+                int protoIndex = System.Array.FindIndex(prototypes, p => p.prefab == prefab);
+                if (protoIndex < 0) continue;
 
-                treeInstances.Add(instance);
+                TreeInstance ti = new TreeInstance
+                {
+                    position = new Vector3(normX, 0, normZ),
+                    prototypeIndex = protoIndex,
+                    widthScale = factor,
+                    heightScale = factor,
+                    color = Color.white,
+                    lightmapColor = Color.white,
+                    rotation = tree.rotation
+                };
+                treeInstancesTerrain.Add(ti);
             }
         }
+
+        terrain.terrainData.treeInstances = treeInstancesTerrain.ToArray();
     }
 
     private void GetFactorAndPrefabSpecie(string specie, float height, float age, out float factor, out GameObject prefab)
@@ -110,12 +137,12 @@ public class Visualizer : MonoBehaviour
         if (specie.Equals(species[0]))
         {
             prefab = getPBPrefabForCurrentAge(age);
-            factor = calculatePBFactor(height, age);
+            factor = calculatePBFactor(height, age, prefab);
         }
         else if (specie.Equals(species[1]))
         {
             prefab = getPmPrefabForCurrentHeight(age);
-            factor = calculatePMFactor(height, age);
+            factor = calculatePMFactor(height, age, prefab);
         }
     }
 
@@ -145,13 +172,13 @@ public class Visualizer : MonoBehaviour
             return pmPrefabs[3];
     }
 
-    private float calculatePBFactor(float currentHeight, float currentAge)
+    private float calculatePBFactor(float currentHeight, float currentAge, GameObject prefab)
     {
-        if (currentAge < pbAdultStartingAge)
+        if (pbPrefabs[0] == prefab)
         {
             return currentHeight / thresholdPbYoungHeight;
         }
-        else if (currentAge >= pbAdultStartingAge && currentAge < pbSeniourStartingAge)
+        else if (pbPrefabs[1] == prefab || pbPrefabs[2] == prefab || pbPrefabs[3] == prefab)
         {
             return currentHeight / thresholdPbAdultHeight;
         }
@@ -161,13 +188,13 @@ public class Visualizer : MonoBehaviour
         }
     }
 
-    private float calculatePMFactor(float currentHeight, float currentAge)
+    private float calculatePMFactor(float currentHeight, float currentAge, GameObject prefab)
     {
-        if (currentAge < pmAdultStartingAge)
+        if (pmPrefabs[0] == prefab || pmPrefabs[1] == prefab)
         {
             return currentHeight / thresholdPmYoungHeight;
         }
-        else if (currentAge >= pmAdultStartingAge && currentAge < pmSeniourStartingAge)
+        else if (pmPrefabs[2] == prefab)
         {
             return currentHeight / thresholdPmAdultHeight;
         }
@@ -178,10 +205,44 @@ public class Visualizer : MonoBehaviour
     }
 
     //creates empty objects that act as an hitbox for each tree so when clicking on a tree displays tree data
-    public void createObjects()
+    public void createObjects(List<TreeData> trees, Terrain terrain, bool isPlot2)
     {
         if (trees == null || trees.Count == 0) return;
 
+        //if the origin of the plot is in the middle this is useful
+        //float xOffset = trees.Average(tree => tree.Xarv);
+        //float yOffset = trees.Average(tree => tree.Yarv);
+
+        foreach (TreeData tree in trees)
+        {
+            if (tree.estado == 4 || tree.estado == 6) continue;
+
+            float adjustedX = (tree.Xarv) * 3f;
+            float adjustedZ = (tree.Yarv) * 3f;
+
+            float worldX = terrain.transform.position.x + adjustedX;
+            float worldZ = terrain.transform.position.z + adjustedZ;
+            float treeHeight = terrain.transform.position.y;
+
+            Vector3 position = new Vector3(worldX, treeHeight, worldZ);
+
+            GameObject marker = new GameObject($"TreeMarker_{tree.id_arv}");
+            marker.transform.position = position;
+            marker.transform.rotation = Quaternion.Euler(0, tree.rotation, 0);
+            marker.transform.SetParent(plot.transform);
+
+            BoxCollider col = marker.AddComponent<BoxCollider>();
+            col.isTrigger = true;
+            col.size = new Vector3(tree.cw * 2, tree.h, tree.cw * 2);
+            col.center = new Vector3(0, treeHeight, 0);
+
+            marker.AddComponent<Tree>().initTree(tree);
+            marker.layer = isPlot2 ? LayerMask.NameToLayer("Plot2") : LayerMask.NameToLayer("Plot1");
+        }
+    }
+
+    private void clear()
+    {
         // Clean up previous objects
         if (plot != null)
         {
@@ -190,33 +251,9 @@ public class Visualizer : MonoBehaviour
                 Destroy(child.gameObject);
             }
         }
-
-        float xOffset = trees.Average(tree => tree.Xarv);
-        float yOffset = trees.Average(tree => tree.Yarv);
-
-        foreach (Tree tree in trees)
-        {
-            if (tree.estado == 4 || tree.estado == 6) continue;
-
-            float adjustedX = (tree.Xarv - xOffset) * 3f;
-            float adjustedZ = (tree.Yarv - yOffset) * 3f;
-            float treeHeight = tree.h * 0.25f;
-
-            Vector3 position = new Vector3(adjustedX, treeHeight, adjustedZ);
-
-            GameObject marker = new GameObject($"TreeMarker_{tree.id_arv}");
-            marker.transform.position = position;
-            marker.transform.rotation = Quaternion.Euler(0, tree.rotation, 0);
-            marker.transform.SetParent(plot != null ? plot.transform : plot.transform);
-
-            BoxCollider col = marker.AddComponent<BoxCollider>();
-            col.isTrigger = true;
-            col.size = new Vector3(tree.cw * 2, tree.h, tree.cw * 2);
-            col.center = new Vector3(0, treeHeight, 0);
-
-            marker.AddComponent<Tree>().initTree(tree);
-        }
+        // Reset terrains to avoid modifying original terrain data so unity doesnt serialize changes
+        terrain1.terrainData = Instantiate(terrain1.terrainData);
+        terrain2.terrainData = Instantiate(terrain2.terrainData);
     }
-
 }
 

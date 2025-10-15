@@ -12,11 +12,14 @@ public class Manager : MonoBehaviour
     public TMP_Text treeInfoText;
     public Visualizer visualizer;
     public Canvas dataCanvas, visulaizationCanvas;
-    public CameraBahaviour cameraBehaviour;
+    public GameObject Camera1;
+    public GameObject Camera2;
+    public CameraBahaviour cameraBehaviour1;
+    public CameraBahaviour cameraBehaviour2;
     public GameObject mainCamera;
     public GameObject paralelCamera;
 
-    private List<List<SortedDictionary<int, Tree>>> outputSoloTreesData;
+    private List<List<SortedDictionary<int, TreeData>>> outputSoloTreesData;
     private List<List<YieldTableEntry>> outputYieldTableData;
     private int current_year;
     private bool isVisualizationActive = false;
@@ -36,8 +39,10 @@ public class Manager : MonoBehaviour
                 }
                 else
                 {
-                    visualizer.receiveTreeData(outputSoloTreesData[0][current_year], outputSoloTreesData[0][current_year].Values.First().Year);
-                    visualizer.displayTrees();
+                    if(outputSoloTreesData.Count > 1)
+                        visualizer.receiveTreeData(outputSoloTreesData[0][current_year], outputSoloTreesData[1][current_year], outputSoloTreesData[0][current_year].Values.First().Year);
+                    else
+                        visualizer.receiveTreeData(outputSoloTreesData[0][current_year], null, outputSoloTreesData[0][current_year].Values.First().Year);
                 }
             }
 
@@ -55,8 +60,10 @@ public class Manager : MonoBehaviour
                 }
                 else
                 {
-                    visualizer.receiveTreeData(outputSoloTreesData[0][current_year], outputSoloTreesData[0][current_year].Values.First().Year);
-                    visualizer.displayTrees();
+                    if (outputSoloTreesData.Count > 1)
+                        visualizer.receiveTreeData(outputSoloTreesData[0][current_year], outputSoloTreesData[1][current_year], outputSoloTreesData[0][current_year].Values.First().Year);
+                    else
+                        visualizer.receiveTreeData(outputSoloTreesData[0][current_year], null, outputSoloTreesData[0][current_year].Values.First().Year);
                 }
             }
 
@@ -64,7 +71,8 @@ public class Manager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isVisualizationActive)
         {
             isVisualizationActive = false;
-            cameraBehaviour.DisableRotation();
+            cameraBehaviour1.DisableRotation();
+            cameraBehaviour2.DisableRotation();
             dataCanvas.gameObject.SetActive(true);
             visulaizationCanvas.gameObject.SetActive(false);
             showInfo(outputSoloTreesData[0][current_year].Values.First().Year);
@@ -72,10 +80,10 @@ public class Manager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Space) && !isVisualizationActive && outputSoloTreesData[0] != null)
         {
             isVisualizationActive = true;
-            cameraBehaviour.EnableRotation();
+            cameraBehaviour1.EnableRotation();
+            cameraBehaviour2.EnableRotation();
             dataCanvas.gameObject.SetActive(false);
             visulaizationCanvas.gameObject.SetActive(true);
-            visualizer.displayTrees();
         }
 
         if (Input.GetKeyDown(KeyCode.P) && isVisualizationActive && outputSoloTreesData[0] != null)
@@ -95,11 +103,25 @@ public class Manager : MonoBehaviour
         }
     }
 
-    public void receiveSoloTreesData(List<List<SortedDictionary<int, Tree>>> data)
+    public void receiveSoloTreesData(List<List<SortedDictionary<int, TreeData>>> data)
     {
         outputSoloTreesData = data;
         current_year = 0;
         showInfo(current_year);
+        if(data.Count > 1)
+        {
+            Camera2.SetActive(true);
+            cameraBehaviour1.isMultiVisualization = true;
+            cameraBehaviour2.isMultiVisualization = true;
+            Camera1.GetComponent<Camera>().rect = new Rect(0, 0, 0.5f, 1);
+        }
+        else
+        {
+            Camera2.SetActive(false);
+            cameraBehaviour1.isMultiVisualization = false;
+            cameraBehaviour2.isMultiVisualization = false;
+            Camera1.GetComponent<Camera>().rect = new Rect(0, 0, 1, 1);
+        }
     }
 
     public void receiveYieldTableData(List<List<YieldTableEntry>> data)
@@ -123,15 +145,18 @@ public class Manager : MonoBehaviour
 
     void showInfo(int currentyear)
     {
-        string msg = $"{outputSoloTreesData[0][current_year].Values.First().Year}\n";
-        SortedDictionary<int, Tree> trees = outputSoloTreesData[0][current_year];
-        foreach (KeyValuePair<int, Tree> kvp in trees)
+        SortedDictionary<int, TreeData> trees = outputSoloTreesData[0][current_year];
+        string msg = $"{trees.Values.First().Year}\n";
+        foreach (KeyValuePair<int, TreeData> kvp in trees)
         {
-            Tree t = kvp.Value;
+            TreeData t = kvp.Value;
             msg += $"id_presc: {t.id_presc}, ciclo: {t.ciclo}, Year: {t.Year}, t: {t.t}, id_arv: {t.id_arv}, Xarv: {t.Xarv}, Yarv: {t.Yarv}, d: {t.d}, h: {t.h}, cw: {t.cw}, estado: {t.estado}\n";
         }
         ShowMessage(msg, Color.white);
-        visualizer.receiveTreeData(trees, trees.Values.First().Year);
+        if (outputSoloTreesData.Count > 1)
+            visualizer.receiveTreeData(trees, outputSoloTreesData[1][current_year], trees.Values.First().Year);
+        else
+            visualizer.receiveTreeData(trees, null, trees.Values.First().Year);
     }
 
     void ShowMessage(string msg, Color color)

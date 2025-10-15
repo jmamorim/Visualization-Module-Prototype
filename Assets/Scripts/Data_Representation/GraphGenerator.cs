@@ -10,7 +10,7 @@ public class GraphGenerator : MonoBehaviour
     private const int CLASS_WIDTH = 10;
     private List<YieldTableEntry> outputYieldTableData;
 
-    public void receiveData(SortedDictionary<int, Tree> data, List<YieldTableEntry> tableData)
+    public void receiveData(SortedDictionary<int, TreeData> data, List<YieldTableEntry> tableData)
     {
         ClearCharts();
 
@@ -30,12 +30,12 @@ public class GraphGenerator : MonoBehaviour
     }
 
     private Dictionary<int, int> CalculateFrequencyDistribution(
-        SortedDictionary<int, Tree> data,
-        System.Func<Tree, float> valueSelector)
+        SortedDictionary<int, TreeData> data,
+        System.Func<TreeData, float> valueSelector)
     {
         var frequencyData = new Dictionary<int, int>();
 
-        foreach (Tree tree in data.Values)
+        foreach (TreeData tree in data.Values)
         {
             float value = valueSelector(tree);
             int classIndex = (int)(value / CLASS_WIDTH);
