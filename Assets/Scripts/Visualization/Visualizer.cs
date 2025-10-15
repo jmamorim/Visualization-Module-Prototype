@@ -16,7 +16,8 @@ public class Visualizer : MonoBehaviour
 
     [Header("Scene References")]
     public GameObject plot;
-    public TMP_Text yearText;
+    public TMP_Text yearText1;
+    public TMP_Text yearText2;
     public GraphGenerator graphGenerator;
     public Terrain terrain1;
     public Terrain terrain2;
@@ -51,30 +52,31 @@ public class Visualizer : MonoBehaviour
 
     private void Start()
     {
-        clear();
+        // Reset terrains to avoid modifying original terrain data so unity doesnt serialize changes
+        terrain1.terrainData = Instantiate(terrain1.terrainData);
+        terrain2.terrainData = Instantiate(terrain2.terrainData);
     }
 
-    public void receiveTreeData(SortedDictionary<int, TreeData> data1, SortedDictionary<int, TreeData> data2, int currentYear)
+    public void receiveTreeDataPlot1(SortedDictionary<int, TreeData> data, int currentYear)
     {
-        clear();
-        this.currentYear = currentYear;
-        var trees1 = data1.Values.ToList();
-        createObjects(trees1, terrain1, false);
-        graphGenerator.receiveData(data1, null);
-        displayTrees(trees1, terrain1);
-        if (data2 != null)
-        {
-            var trees2 = data2.Values.ToList();
-            createObjects(trees2, terrain2, true);
-            //graphGenerator.receiveData(data2, null);
-            displayTrees(trees2, terrain2);
-        }
+        clear("Plot1");
+        var trees = data.Values.ToList();
+        createObjects(trees, terrain1, false);
+        yearText1.text = "Year: " + currentYear.ToString();
+        displayTrees(trees, terrain1);
+    }
+
+    public void receiveTreeDataPlot2(SortedDictionary<int, TreeData> data, int currentYear)
+    {
+        clear("Plot2");
+        var trees = data.Values.ToList();
+        createObjects(trees, terrain2, true);
+        yearText2.text = "Year: " + currentYear.ToString();
+        displayTrees(trees, terrain2);
     }
 
     public void displayTrees(List<TreeData> trees, Terrain terrain)
     {
-        yearText.text = $"Year: {currentYear}";
-
         if (trees == null || trees.Count == 0) return;
 
         //terrain handling
@@ -241,19 +243,16 @@ public class Visualizer : MonoBehaviour
         }
     }
 
-    private void clear()
+    private void clear(string layerName = null)
     {
-        // Clean up previous objects
         if (plot != null)
         {
             foreach (Transform child in plot.transform)
             {
-                Destroy(child.gameObject);
+                if (string.IsNullOrEmpty(layerName) || child.gameObject.layer == LayerMask.NameToLayer(layerName))
+                    Destroy(child.gameObject);
             }
         }
-        // Reset terrains to avoid modifying original terrain data so unity doesnt serialize changes
-        terrain1.terrainData = Instantiate(terrain1.terrainData);
-        terrain2.terrainData = Instantiate(terrain2.terrainData);
     }
 }
 
