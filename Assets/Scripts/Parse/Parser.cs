@@ -35,7 +35,6 @@ public class Parser : MonoBehaviour
             parseSoloTrees(outputSoloTreesData, s);
         foreach (string s in yieldTablePaths)
             parseYieldTable(outputYieldTableData, s);
-        Debug.Log($"Parsed {outputSoloTreesData.Count} solo tree files and {outputYieldTableData.Count} yield table files.");
 
         //send all info to manager
         sendDataToManager(outputSoloTreesData, outputYieldTableData);
@@ -54,7 +53,6 @@ public class Parser : MonoBehaviour
 
         starting_year = int.Parse(lines[1].Trim().Split(',')[3].Trim());
         ending_year = int.Parse(lines[lines.Length - 1].Trim().Split(',')[3].Trim());
-        Debug.Log($"Interval: {interval}");
 
         if (interval > (ending_year - starting_year))
         {
@@ -97,7 +95,6 @@ public class Parser : MonoBehaviour
                     index++;
                     treeCount = 0;
                 }
-                Debug.Log($"index: {index} treecount: {treeCount}");
                 try
                 {
                     if (index >= treesInfoPerYear.Count)
@@ -270,7 +267,7 @@ public class Parser : MonoBehaviour
                     float.Parse(entryInfo[44].Trim(), CultureInfo.InvariantCulture), // Wa
                     float.Parse(entryInfo[45].Trim(), CultureInfo.InvariantCulture), // Wr
                     float.Parse(entryInfo[61].Trim(), CultureInfo.InvariantCulture), // NPVsum
-                    float.Parse(entryInfo[62].Trim(), CultureInfo.InvariantCulture)  // EEA
+                    0//float.Parse(entryInfo[62].Trim(), CultureInfo.InvariantCulture*)  // EEA
                 );
 
 

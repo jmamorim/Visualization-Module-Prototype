@@ -16,6 +16,7 @@ public class Manager : MonoBehaviour
     public GameObject Camera1;
     public GameObject Camera2;
     public Transform paralelPos;
+    public GraphGenerator graphGenerator;
 
     CameraBahaviour cameraBehaviour1;
     CameraBahaviour cameraBehaviour2;
@@ -97,7 +98,6 @@ public class Manager : MonoBehaviour
                 visulaizationCanvas.gameObject.SetActive(true);
             }
 
-            // No Update(), substitua o bloco de câmeras paralelas por:
             if (Input.GetKeyDown(KeyCode.P) && isVisualizationActive)
             {
                 if (!isParalelCameraActive)
@@ -238,46 +238,15 @@ public class Manager : MonoBehaviour
 
     public void receiveYieldTableData(List<List<YieldTableEntry>> data)
     {
-        outputYieldTableData = data;
-        if (outputYieldTableData != null)
-        {
-            foreach (var entry in outputYieldTableData[0])
-            {
-                Debug.Log(
-                    $"YieldTableEntry: " +
-                    $"year={entry.year}, Nst={entry.Nst}, N={entry.N}, Ndead={entry.Ndead}, " +
-                    $"hdom={entry.hdom}, G={entry.G}, dg={entry.dg}, Vu_st={entry.Vu_st}, Vst={entry.Vst}, " +
-                    $"Vu_as1={entry.Vu_as1}, Vu_as2={entry.Vu_as2}, Vu_as3={entry.Vu_as3}, Vu_as4={entry.Vu_as4}, Vu_as5={entry.Vu_as5}, " +
-                    $"maiV={entry.maiV}, iV={entry.iV}, Ww={entry.Ww}, Wb={entry.Wb}, Wbr={entry.Wbr}, Wl={entry.Wl}, Wa={entry.Wa}, Wr={entry.Wr}, " +
-                    $"NPVsum={entry.NPVsum}, EEA={entry.EEA}"
-                );
-            }
-        }
+        graphGenerator.receiveData(data);
     }
 
     //needs to change in the future
     void showInfo()
     {
-        SortedDictionary<int, TreeData> trees = outputSoloTreesData[0][current_year1];
-        string msg = $"{trees.Values.First().Year}\n";
-        foreach (KeyValuePair<int, TreeData> kvp in trees)
-        {
-            TreeData t = kvp.Value;
-            msg += $"id_presc: {t.id_presc}, ciclo: {t.ciclo}, Year: {t.Year}, t: {t.t}, id_arv: {t.id_arv}, Xarv: {t.Xarv}, Yarv: {t.Yarv}, d: {t.d}, h: {t.h}, cw: {t.cw}, estado: {t.estado}\n";
-        }
-        ShowMessage(msg, Color.white);
         visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
         if (outputSoloTreesData.Count > 1)
             visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
-    }
-
-    void ShowMessage(string msg, Color color)
-    {
-        if (feedbackText != null)
-        {
-            feedbackText.text = msg;
-            feedbackText.color = color;
-        }
     }
 
     public void ShowTreeInfo(Tree t)

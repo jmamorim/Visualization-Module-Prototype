@@ -18,7 +18,6 @@ public class Visualizer : MonoBehaviour
     public GameObject plot;
     public TMP_Text yearText1;
     public TMP_Text yearText2;
-    public GraphGenerator graphGenerator;
     public Terrain terrain1;
     public Terrain terrain2;
 
