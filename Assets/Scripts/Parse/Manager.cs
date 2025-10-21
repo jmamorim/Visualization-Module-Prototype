@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 // Manages the overall application state, including data reception, user input handling, and UI updates.
 // needs to change so it can adapt visualization and data representation for yield table data and multi visualization 
@@ -23,7 +24,6 @@ public class Manager : MonoBehaviour
     Camera cam1;
     Camera cam2;
     List<List<SortedDictionary<int, TreeData>>> outputSoloTreesData;
-    List<List<YieldTableEntry>> outputYieldTableData;
     int current_year1;
     int current_year2;
     bool isVisualizationActive = false;
@@ -50,22 +50,27 @@ public class Manager : MonoBehaviour
                 advancePlot1();
                 if (outputSoloTreesData.Count > 1)
                     advancePlot2();
+                changeHightlight();
+
             }
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
                 reversePlot1();
                 if (outputSoloTreesData.Count > 1)
                     reversePlot2();
+                changeHightlight();
             }
 
             //change year for each plot individualy
             if (Input.GetKeyDown(KeyCode.D))
             {
                 advancePlot1();
+                changeHightlight();
             }
             if (Input.GetKeyDown(KeyCode.A))
             {
                 reversePlot1();
+                changeHightlight();
             }
 
             if (outputSoloTreesData.Count > 1)
@@ -73,10 +78,12 @@ public class Manager : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.E))
                 {
                     advancePlot2();
+                    changeHightlight();
                 }
                 if (Input.GetKeyDown(KeyCode.Q))
                 {
                     reversePlot2();
+                    changeHightlight();
                 }
             }
 
@@ -142,6 +149,11 @@ public class Manager : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void changeHightlight()
+    {
+        graphGenerator.changeHightlightedYearGraphs(outputSoloTreesData[0][current_year1].Values.First().Year, outputSoloTreesData.Count() > 0 ? -1 : outputSoloTreesData[1][current_year2].Values.First().Year);
     }
 
     private void advancePlot1()
@@ -238,8 +250,9 @@ public class Manager : MonoBehaviour
 
     public void receiveYieldTableData(List<List<YieldTableEntry>> data)
     {
-        graphGenerator.receiveData(data);
+        graphGenerator.receiveData(data, outputSoloTreesData[0][current_year1].Values.First().Year, outputSoloTreesData.Count() > 0 ? -1 : outputSoloTreesData[1][current_year2].Values.First().Year);
     }
+
 
     //needs to change in the future
     void showInfo()

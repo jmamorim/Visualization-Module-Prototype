@@ -1,42 +1,56 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
+public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    public GraphGenerator graphGenerator;
-
+    public CameraBahaviour cam1, cam2;
+    
     private RectTransform rectTransform;
-    private bool isExpanded = false;
+    private Canvas canvas;
+    //private Vector2 originalPosition;
+    private Vector2 dragOffset;
 
-    private Vector2 originalPosition;
-    private Vector3 originalScale;
-
-    public float expandScale = 2f;
 
     private void Start()
     {
         rectTransform = GetComponent<RectTransform>();
+        //originalPosition = rectTransform.anchoredPosition;
 
-        originalPosition = rectTransform.anchoredPosition;
-        originalScale = rectTransform.localScale;
+        canvas = GetComponentInParent<Canvas>();
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public void OnBeginDrag(PointerEventData eventData)
     {
-        isExpanded = !isExpanded;
+        cam1.DisableRotation();
+        cam2.DisableRotation();
+        rectTransform.SetAsLastSibling();
 
-        if (isExpanded && graphGenerator.canExpandGraph())
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            rectTransform.parent as RectTransform,
+            eventData.position,
+            eventData.pressEventCamera,
+            out Vector2 localPoint
+        );
+
+        dragOffset = rectTransform.anchoredPosition - localPoint;
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            rectTransform.parent as RectTransform,
+            eventData.position,
+            eventData.pressEventCamera,
+            out Vector2 localPoint
+        ))
         {
-            rectTransform.SetAsLastSibling();
-            graphGenerator.setCanExpand(false);
-            rectTransform.anchoredPosition = Vector2.zero;
-            rectTransform.localScale = originalScale * expandScale;
+            rectTransform.anchoredPosition = localPoint + dragOffset;
         }
-        else
-        {
-            graphGenerator.setCanExpand(true);
-            rectTransform.anchoredPosition = originalPosition;
-            rectTransform.localScale = originalScale;
-        }
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        cam1.EnableRotation();
+        cam2.EnableRotation();
     }
 }

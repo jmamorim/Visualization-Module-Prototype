@@ -10,7 +10,7 @@ public class CameraBahaviour : MonoBehaviour
     public float minZoomDistance = 0f;
     public float maxZoomDistance = 100000.0f;
     public bool isMultiVisualization = false;
-
+    
     Vector3 lastMousePosition;
     [SerializeField] bool canRotate = false;
 

@@ -1,19 +1,23 @@
+using JetBrains.Annotations;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using XCharts.Runtime;
 
-//class to generate the line graphs for the yield table data
 public class GraphGenerator : MonoBehaviour
 {
     //public BarChart diameterChart, heightChart;
-    public LineChart NChart, NstChart, NDeadChart;
+    public List<LineChart> charts;
 
+    int highlightedIndex1, highlightedIndex2;
     bool canExpand = true;
+    List<int> sortedYears;
 
-    public void receiveData(List<List<YieldTableEntry>> tableData)
+    public void receiveData(List<List<YieldTableEntry>> tableData, int current_year1, int current_year2)
     {
-        NChart.ClearData();
+        highlightedIndex1 = -1;
+        highlightedIndex2 = -1;
 
         HashSet<int> allYears = new HashSet<int>();
         foreach (var seriesData in tableData)
@@ -22,21 +26,28 @@ public class GraphGenerator : MonoBehaviour
                 allYears.Add(entry.year);
         }
 
-        List<int> sortedYears = new List<int>(allYears);
+        sortedYears = new List<int>(allYears);
         sortedYears.Sort();
 
-        PopulateLineChart(NChart, sortedYears, tableData, e => e.N);
-        PopulateLineChart(NstChart, sortedYears, tableData, e => e.Nst);
-        PopulateLineChart(NDeadChart, sortedYears, tableData, e => e.Ndead);
+        PopulateLineChart(charts[0], sortedYears, tableData, e => e.N, current_year1, current_year2);
+        PopulateLineChart(charts[1], sortedYears, tableData, e => e.Nst, current_year1, current_year2);
+        PopulateLineChart(charts[2], sortedYears, tableData, e => e.Ndead, current_year1, current_year2);
+        highlightPoint(charts[0], current_year1, current_year2);
+        highlightPoint(charts[1], current_year1, current_year2);
+        highlightPoint(charts[2], current_year1, current_year2);
     }
 
     private void PopulateLineChart(
         LineChart chart,
         List<int> sortedYears,
         List<List<YieldTableEntry>> tableData,
-        System.Func<YieldTableEntry, float> valueSelector)
+        System.Func<YieldTableEntry, float> valueSelector,
+        int current_year1, int current_year2)
     {
         chart.ClearData();
+        chart.RemoveAllSerie();
+        chart.RemoveData();
+        chart.RefreshChart();
 
         // Add all years as X-axis labels
         foreach (int year in sortedYears)
@@ -54,23 +65,84 @@ public class GraphGenerator : MonoBehaviour
 
             Color lineColor = Color.HSVToRGB((i * 0.25f) % 1f, 0.8f, 0.9f);
             serie.lineStyle.color = lineColor;
+            serie.itemStyle.color = lineColor;
 
             Dictionary<int, float> yearToValue = new Dictionary<int, float>();
+            int index = 0;
             foreach (var entry in tableData[i])
                 yearToValue[entry.year] = valueSelector(entry);
 
             foreach (int year in sortedYears)
             {
                 if (yearToValue.TryGetValue(year, out float value))
+                {
                     chart.AddData(i, value);
+                    serie.GetSerieData(index);
+                }
                 else
+                {
                     chart.AddData(i, 0);
+                    serie.GetSerieData(index).ignore = true;
+                }
+
+                index++;
             }
         }
 
         chart.RefreshChart();
     }
 
+    private void removeHighlight(LineChart chart)
+    {
+        var serie1 = chart.GetSerie(0);
+        if (highlightedIndex1 >= 0)
+        {
+            serie1.GetSerieData(highlightedIndex1).state = SerieState.Normal;
+        }
+        if (chart.series.Count > 1)
+        {
+            var serie2 = chart.GetSerie(1);
+                if (highlightedIndex2 >= 0)
+                {
+                    serie2.GetSerieData(highlightedIndex2).state = SerieState.Normal;
+            }
+        }
+        chart.RefreshChart();
+    }
+
+    private void highlightPoint(LineChart chart, int currentYear1, int currentYear2)
+    {
+        var index1 = sortedYears.IndexOf(currentYear1);
+        var serie1 = chart.GetSerie(0);
+        if (index1 >= 0)
+        {
+            serie1.GetSerieData(index1).state = SerieState.Emphasis;
+            if (highlightedIndex1 != index1)
+                highlightedIndex1 = index1;
+        }
+
+        if (chart.series.Count > 1)
+        {
+            var index2 = sortedYears.IndexOf(currentYear2);
+            var serie2 = chart.GetSerie(1);
+            if (index2 >= 0)
+            {
+                serie2.GetSerieData(index2).state = SerieState.Emphasis;
+                if (highlightedIndex2 != index2)
+                    highlightedIndex2 = index2;
+            }
+        }
+        chart.RefreshChart();
+    }
+
+    public void changeHightlightedYearGraphs(int year1, int year2)
+    {
+        //changes to list of charts with changes to interface
+        foreach(LineChart chart in charts)
+            removeHighlight(chart);
+        foreach (LineChart chart in charts)
+            highlightPoint(chart, year1, year2);
+    }
 
     public bool canExpandGraph()
     {
@@ -81,71 +153,5 @@ public class GraphGenerator : MonoBehaviour
     {
         canExpand = value;
     }
-
-    /*private void ClearCharts()
-    {
-        diameterChart.ClearData();
-        heightChart.ClearData();
-    }
-
-    private Dictionary<int, int> CalculateFrequencyDistribution(
-        SortedDictionary<int, TreeData> data,
-        System.Func<TreeData, float> valueSelector)
-    {
-        var frequencyData = new Dictionary<int, int>();
-
-        foreach (TreeData tree in data.Values)
-        {
-            float value = valueSelector(tree);
-            int classIndex = (int)(value / CLASS_WIDTH);
-
-            if (!frequencyData.ContainsKey(classIndex))
-                frequencyData[classIndex] = 0;
-
-            frequencyData[classIndex]++;
-        }
-
-        return frequencyData;
-    }
-
-    private void PopulateChart(BarChart chart, Dictionary<int, int> data, string seriesLabel)
-    {
-        PrepareChart(chart);
-
-        var sortedClasses = GetSortedClasses(data);
-        var series = chart.AddSerie<Bar>(seriesLabel);
-
-        AddDataToChart(chart, series, sortedClasses, data);
-    }
-
-    private void PrepareChart(BarChart chart)
-    {
-        chart.RemoveData();
-        chart.series.Clear();
-    }
-
-    private List<int> GetSortedClasses(Dictionary<int, int> data)
-    {
-        var sortedClasses = new List<int>(data.Keys);
-        sortedClasses.Sort();
-        return sortedClasses;
-    }
-
-    private void AddDataToChart(BarChart chart, Bar series, List<int> sortedClasses, Dictionary<int, int> data)
-    {
-        foreach (int classIndex in sortedClasses)
-        {
-            string label = CreateClassLabel(classIndex);
-            chart.AddXAxisData(label);
-            series.AddData(data[classIndex]);
-        }
-    }
-
-    private string CreateClassLabel(int classIndex)
-    {
-        int lowerBound = classIndex * CLASS_WIDTH;
-        int upperBound = (classIndex + 1) * CLASS_WIDTH;
-        return $"{lowerBound}-{upperBound}";
-    }*/
 
 }
