@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -16,8 +17,6 @@ public class GraphGenerator : MonoBehaviour
 
     public void receiveData(List<List<YieldTableEntry>> tableData, int current_year1, int current_year2)
     {
-        highlightedIndex1 = -1;
-        highlightedIndex2 = -1;
 
         HashSet<int> allYears = new HashSet<int>();
         foreach (var seriesData in tableData)
@@ -29,35 +28,36 @@ public class GraphGenerator : MonoBehaviour
         sortedYears = new List<int>(allYears);
         sortedYears.Sort();
 
-        PopulateLineChart(charts[0], sortedYears, tableData, e => e.N, current_year1, current_year2);
-        PopulateLineChart(charts[1], sortedYears, tableData, e => e.Nst, current_year1, current_year2);
-        PopulateLineChart(charts[2], sortedYears, tableData, e => e.Ndead, current_year1, current_year2);
+        PopulateLineChart(charts[0], sortedYears, tableData, e => e.N);
+        PopulateLineChart(charts[1], sortedYears, tableData, e => e.Nst);
+        PopulateLineChart(charts[2], sortedYears, tableData, e => e.Ndead);
         highlightPoint(charts[0], current_year1, current_year2);
         highlightPoint(charts[1], current_year1, current_year2);
         highlightPoint(charts[2], current_year1, current_year2);
     }
 
-    private void PopulateLineChart(
+    public void PopulateLineChart(
         LineChart chart,
-        List<int> sortedYears,
+        List<int> years,
         List<List<YieldTableEntry>> tableData,
-        System.Func<YieldTableEntry, float> valueSelector,
-        int current_year1, int current_year2)
+        Func<YieldTableEntry, float> valueSelector)
     {
         chart.ClearData();
         chart.RemoveAllSerie();
         chart.RemoveData();
         chart.RefreshChart();
 
-        // Add all years as X-axis labels
-        foreach (int year in sortedYears)
+        highlightedIndex1 = -1;
+        highlightedIndex2 = -1;
+
+        sortedYears = years;
+
+        foreach (var year in years)
             chart.AddXAxisData(year.ToString());
 
-        // Create one line (series) per dataset
         for (int i = 0; i < tableData.Count; i++)
         {
             chart.AddSerie<Line>($"Plot{i + 1}");
-
             var serie = chart.GetSerie(i);
             serie.lineType = LineType.Normal;
             serie.symbol.show = true;
@@ -67,26 +67,73 @@ public class GraphGenerator : MonoBehaviour
             serie.lineStyle.color = lineColor;
             serie.itemStyle.color = lineColor;
 
-            Dictionary<int, float> yearToValue = new Dictionary<int, float>();
+            List<SerieData> serieDataList = new List<SerieData>();
+
             int index = 0;
+            Dictionary<int, float> yearToValue = new Dictionary<int, float>();
             foreach (var entry in tableData[i])
                 yearToValue[entry.year] = valueSelector(entry);
 
-            foreach (int year in sortedYears)
+            foreach (var year in years)
             {
                 if (yearToValue.TryGetValue(year, out float value))
-                {
                     chart.AddData(i, value);
-                    serie.GetSerieData(index);
-                }
                 else
-                {
-                    chart.AddData(i, 0);
-                    serie.GetSerieData(index).ignore = true;
-                }
+                    chart.AddData(i, 0); 
 
+                var data = serie.GetSerieData(index);
+                if (!yearToValue.ContainsKey(year))
+                    data.ignore = true; 
+                else
+                    data.state = SerieState.Normal;
+
+                serieDataList.Add(data);
                 index++;
             }
+        }
+
+        chart.RefreshChart();
+    }
+
+    public void highlightPoint(LineChart chart, int year1, int year2)
+    {
+        if (chart.series.Count > 0)
+        {
+            var serie1 = chart.GetSerie(0);
+
+            if (highlightedIndex1 >= 0 && highlightedIndex1 < serie1.dataCount)
+                serie1.GetSerieData(highlightedIndex1).state = SerieState.Normal;
+
+            // Find index for the year
+            int index1 = sortedYears.IndexOf(year1);
+            if (index1 >= 0 && index1 < serie1.dataCount)
+            {
+                var data1 = serie1.GetSerieData(index1);
+                if (!data1.ignore)
+                    data1.state = SerieState.Emphasis;
+                highlightedIndex1 = index1;
+            }
+            else
+                highlightedIndex1 = -1;
+        }
+
+        if (chart.series.Count > 1)
+        {
+            var serie2 = chart.GetSerie(1);
+
+            if (highlightedIndex2 >= 0 && highlightedIndex2 < serie2.dataCount)
+                serie2.GetSerieData(highlightedIndex2).state = SerieState.Normal;
+
+            int index2 = sortedYears.IndexOf(year2);
+            if (index2 >= 0 && index2 < serie2.dataCount)
+            {
+                var data2 = serie2.GetSerieData(index2);
+                if (!data2.ignore)
+                    data2.state = SerieState.Emphasis;
+                highlightedIndex2 = index2;
+            }
+            else
+                highlightedIndex2 = -1;
         }
 
         chart.RefreshChart();
@@ -102,34 +149,9 @@ public class GraphGenerator : MonoBehaviour
         if (chart.series.Count > 1)
         {
             var serie2 = chart.GetSerie(1);
-                if (highlightedIndex2 >= 0)
-                {
-                    serie2.GetSerieData(highlightedIndex2).state = SerieState.Normal;
-            }
-        }
-        chart.RefreshChart();
-    }
-
-    private void highlightPoint(LineChart chart, int currentYear1, int currentYear2)
-    {
-        var index1 = sortedYears.IndexOf(currentYear1);
-        var serie1 = chart.GetSerie(0);
-        if (index1 >= 0)
-        {
-            serie1.GetSerieData(index1).state = SerieState.Emphasis;
-            if (highlightedIndex1 != index1)
-                highlightedIndex1 = index1;
-        }
-
-        if (chart.series.Count > 1)
-        {
-            var index2 = sortedYears.IndexOf(currentYear2);
-            var serie2 = chart.GetSerie(1);
-            if (index2 >= 0)
+            if (highlightedIndex2 >= 0)
             {
-                serie2.GetSerieData(index2).state = SerieState.Emphasis;
-                if (highlightedIndex2 != index2)
-                    highlightedIndex2 = index2;
+                serie2.GetSerieData(highlightedIndex2).state = SerieState.Normal;
             }
         }
         chart.RefreshChart();
@@ -138,7 +160,7 @@ public class GraphGenerator : MonoBehaviour
     public void changeHightlightedYearGraphs(int year1, int year2)
     {
         //changes to list of charts with changes to interface
-        foreach(LineChart chart in charts)
+        foreach (LineChart chart in charts)
             removeHighlight(chart);
         foreach (LineChart chart in charts)
             highlightPoint(chart, year1, year2);

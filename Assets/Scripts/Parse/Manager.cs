@@ -151,6 +151,11 @@ public class Manager : MonoBehaviour
         }
     }
 
+    public bool isParalelCameraActiveFunc()
+    {
+        return isParalelCameraActive;
+    }
+
     private void changeHightlight()
     {
         graphGenerator.changeHightlightedYearGraphs(outputSoloTreesData[0][current_year1].Values.First().Year, outputSoloTreesData.Count() > 0 ? -1 : outputSoloTreesData[1][current_year2].Values.First().Year);
@@ -223,6 +228,57 @@ public class Manager : MonoBehaviour
             }
         }
     }
+
+    public void changeSimYearOnGraphClick(int serieId, int year)
+    {
+        if (serieId == 0)
+        {
+            var outputPlot1 = outputSoloTreesData[0];
+
+            int index = outputPlot1.FindIndex(e => e.Values.First().Year == year);
+
+            if (index >= 0 && index + 1 < outputPlot1.Count && outputPlot1[index + 1].Values.First().Year == year)
+            {
+                index = index + 1;
+            }
+
+            current_year1 = index;
+
+            if (current_year1 >= 0)
+            {
+                treeInfoText.text = "";
+                visualizer.receiveTreeDataPlot1(
+                    outputSoloTreesData[0][current_year1],
+                    outputSoloTreesData[0][current_year1].Values.First().Year
+                );
+                changeHightlight();
+            }
+        }
+        else if (serieId == 1)
+        {
+            var outputPlot2 = outputSoloTreesData[1];
+
+            int index = outputPlot2.FindIndex(e => e.Values.First().Year == year);
+
+            if (index >= 0 && index + 1 < outputPlot2.Count && outputPlot2[index + 1].Values.First().Year == year)
+            {
+                index = index + 1;
+            }
+
+            current_year2 = index;
+
+            if (current_year2 >= 0)
+            {
+                treeInfoText.text = "";
+                visualizer.receiveTreeDataPlot2(
+                    outputSoloTreesData[1][current_year2],
+                    outputSoloTreesData[1][current_year2].Values.First().Year
+                );
+                changeHightlight();
+            }
+        }
+    }
+
 
     public void receiveSoloTreesData(List<List<SortedDictionary<int, TreeData>>> data)
     {

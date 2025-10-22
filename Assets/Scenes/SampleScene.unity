@@ -11303,6 +11303,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GraphBehaviour
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
+  manager: {fileID: 1344679403}
 --- !u!222 &952360087
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -14491,6 +14492,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GraphBehaviour
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
+  manager: {fileID: 1344679403}
 --- !u!222 &1197477123
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -21645,6 +21647,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GraphBehaviour
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
+  manager: {fileID: 1344679403}
 --- !u!1 &1671856617
 GameObject:
   m_ObjectHideFlags: 0
