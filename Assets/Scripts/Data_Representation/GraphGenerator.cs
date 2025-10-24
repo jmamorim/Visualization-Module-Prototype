@@ -31,9 +31,12 @@ public class GraphGenerator : MonoBehaviour
         PopulateLineChart(charts[0], sortedYears, tableData, e => e.N);
         PopulateLineChart(charts[1], sortedYears, tableData, e => e.Nst);
         PopulateLineChart(charts[2], sortedYears, tableData, e => e.Ndead);
-        highlightPoint(charts[0], current_year1, current_year2);
-        highlightPoint(charts[1], current_year1, current_year2);
-        highlightPoint(charts[2], current_year1, current_year2);
+        PopulateLineChart(charts[3], sortedYears, tableData, e => e.hdom);
+        PopulateLineChart(charts[4], sortedYears, tableData, e => e.dg);
+        PopulateLineChart(charts[5], sortedYears, tableData, e => e.G);
+
+        foreach (LineChart chart in charts)
+            highlightPoint(chart, current_year1, current_year2);
     }
 
     public void PopulateLineChart(
@@ -104,7 +107,6 @@ public class GraphGenerator : MonoBehaviour
             if (highlightedIndex1 >= 0 && highlightedIndex1 < serie1.dataCount)
                 serie1.GetSerieData(highlightedIndex1).state = SerieState.Normal;
 
-            // Find index for the year
             int index1 = sortedYears.IndexOf(year1);
             if (index1 >= 0 && index1 < serie1.dataCount)
             {
@@ -159,7 +161,6 @@ public class GraphGenerator : MonoBehaviour
 
     public void changeHightlightedYearGraphs(int year1, int year2)
     {
-        //changes to list of charts with changes to interface
         foreach (LineChart chart in charts)
             removeHighlight(chart);
         foreach (LineChart chart in charts)
