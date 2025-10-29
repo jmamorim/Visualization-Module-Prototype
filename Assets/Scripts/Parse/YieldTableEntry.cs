@@ -5,7 +5,7 @@ using UnityEngine;
 public class YieldTableEntry
 {
     public int year, Nst, N, Ndead;
-    public float hdom, G, dg, Vu_st, Vst, Vu_as1, Vu_as2, Vu_as3, Vu_as4, Vu_as5, maiV, iV, Ww, Wb, Wbr, Wl, Wa, Wr, NPVsum, EEA;
+    public float hdom, G, dg, Vu_st, V, Vu_as1, Vu_as2, Vu_as3, Vu_as4, Vu_as5, maiV, iV, Ww, Wb, Wbr, Wl, Wa, Wr, NPVsum, EEA;
     
     public YieldTableEntry(
         int year,
@@ -16,7 +16,7 @@ public class YieldTableEntry
         float G,
         float dg,
         float Vu_st,
-        float Vst,
+        float V,
         float Vu_as1,
         float Vu_as2,
         float Vu_as3,
@@ -41,7 +41,7 @@ public class YieldTableEntry
         this.G = G;
         this.dg = dg;
         this.Vu_st = Vu_st;
-        this.Vst = Vst;
+        this.V = V;
         this.Vu_as1 = Vu_as1;
         this.Vu_as2 = Vu_as2;
         this.Vu_as3 = Vu_as3;

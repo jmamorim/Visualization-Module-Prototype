@@ -8,6 +8,7 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     public CameraBahaviour cam1, cam2;
     public Manager manager;
 
+    [SerializeField] private bool isMultiLine = false;
     private RectTransform rectTransform;
     private Canvas canvas;
     private Vector2 dragOffset;
@@ -71,7 +72,7 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             {
                 string xValue = xAxis.data[clickedDataIndex];
                 if (int.TryParse(xValue, out int year))
-                    manager.changeSimYearOnGraphClick(clickedSerieIndex, year);
+                    manager.changeSimYearOnGraphClick(clickedSerieIndex, year, isMultiLine);
             }
         }
     }
@@ -119,7 +120,6 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
             rectTransform.sizeDelta = newSize;
 
-            chart.RefreshChart();
             return;
         }
 

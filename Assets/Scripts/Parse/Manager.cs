@@ -24,6 +24,7 @@ public class Manager : MonoBehaviour
     Camera cam1;
     Camera cam2;
     List<List<SortedDictionary<int, TreeData>>> outputSoloTreesData;
+    List<List<YieldTableEntry>> YieldTableData;
     int current_year1;
     int current_year2;
     bool isVisualizationActive = false;
@@ -51,7 +52,10 @@ public class Manager : MonoBehaviour
                 if (outputSoloTreesData.Count > 1)
                     advancePlot2();
                 changeHightlight();
-
+                graphGenerator.populateBarChart(
+                    YieldTableData[0][current_year1],
+                    YieldTableData.Count > 1 ? YieldTableData[1][current_year2] : null
+                    );
             }
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
@@ -59,6 +63,10 @@ public class Manager : MonoBehaviour
                 if (outputSoloTreesData.Count > 1)
                     reversePlot2();
                 changeHightlight();
+                graphGenerator.populateBarChart(
+                    YieldTableData[0][current_year1],
+                    YieldTableData.Count > 1 ? YieldTableData[1][current_year2] : null
+                    );
             }
 
             //change year for each plot individualy
@@ -66,11 +74,19 @@ public class Manager : MonoBehaviour
             {
                 advancePlot1();
                 changeHightlight();
+                graphGenerator.populateBarChart(
+                    YieldTableData[0][current_year1],
+                    YieldTableData.Count > 1 ? YieldTableData[1][current_year2] : null
+                    );
             }
             if (Input.GetKeyDown(KeyCode.A))
             {
                 reversePlot1();
                 changeHightlight();
+                graphGenerator.populateBarChart(
+                    YieldTableData[0][current_year1],
+                    YieldTableData.Count > 1 ? YieldTableData[1][current_year2] : null
+                    );
             }
 
             if (outputSoloTreesData.Count > 1)
@@ -79,11 +95,19 @@ public class Manager : MonoBehaviour
                 {
                     advancePlot2();
                     changeHightlight();
+                    graphGenerator.populateBarChart(
+                    YieldTableData[0][current_year1],
+                    YieldTableData.Count > 1 ? YieldTableData[1][current_year2] : null
+                    );
                 }
                 if (Input.GetKeyDown(KeyCode.Q))
                 {
                     reversePlot2();
                     changeHightlight();
+                    graphGenerator.populateBarChart(
+                    YieldTableData[0][current_year1],
+                    YieldTableData.Count > 1 ? YieldTableData[1][current_year2] : null
+                    );
                 }
             }
 
@@ -158,7 +182,7 @@ public class Manager : MonoBehaviour
 
     private void changeHightlight()
     {
-        graphGenerator.changeHightlightedYearGraphs(outputSoloTreesData[0][current_year1].Values.First().Year, outputSoloTreesData.Count() > 0 ? -1 : outputSoloTreesData[1][current_year2].Values.First().Year);
+        graphGenerator.changeHighlightedYearGraphs(outputSoloTreesData[0][current_year1].Values.First().Year, outputSoloTreesData.Count() > 1 ? outputSoloTreesData[1][current_year2].Values.First().Year : -1);
     }
 
     private void advancePlot1()
@@ -229,56 +253,79 @@ public class Manager : MonoBehaviour
         }
     }
 
-    public void changeSimYearOnGraphClick(int serieId, int year)
+    public void changeSimYearOnGraphClick(int serieId, int year, bool isMultiLine)
     {
         if (serieId == 0)
         {
-            var outputPlot1 = outputSoloTreesData[0];
-
-            int index = outputPlot1.FindIndex(e => e.Values.First().Year == year);
-
-            if (index >= 0 && index + 1 < outputPlot1.Count && outputPlot1[index + 1].Values.First().Year == year)
-            {
-                index = index + 1;
-            }
-
-            current_year1 = index;
-
-            if (current_year1 >= 0)
-            {
-                treeInfoText.text = "";
-                visualizer.receiveTreeDataPlot1(
-                    outputSoloTreesData[0][current_year1],
-                    outputSoloTreesData[0][current_year1].Values.First().Year
-                );
-                changeHightlight();
-            }
+            changePlot1(year);
         }
         else if (serieId == 1)
         {
-            var outputPlot2 = outputSoloTreesData[1];
-
-            int index = outputPlot2.FindIndex(e => e.Values.First().Year == year);
-
-            if (index >= 0 && index + 1 < outputPlot2.Count && outputPlot2[index + 1].Values.First().Year == year)
+            if (isMultiLine)
+                changePlot1(year);
+            else
+                changePlot2(year);
+        }
+        if (isMultiLine)
+        {
+            if (serieId == 2)
             {
-                index = index + 1;
+                changePlot2(year);
             }
-
-            current_year2 = index;
-
-            if (current_year2 >= 0)
+            else if (serieId == 3)
             {
-                treeInfoText.text = "";
-                visualizer.receiveTreeDataPlot2(
-                    outputSoloTreesData[1][current_year2],
-                    outputSoloTreesData[1][current_year2].Values.First().Year
-                );
-                changeHightlight();
+                changePlot2(year);
             }
         }
     }
 
+    private void changePlot1(int year)
+    {
+        var outputPlot1 = outputSoloTreesData[0];
+
+        int index = outputPlot1.FindIndex(e => e.Values.First().Year == year);
+
+        if (index >= 0 && index + 1 < outputPlot1.Count && outputPlot1[index + 1].Values.First().Year == year)
+        {
+            index = index + 1;
+        }
+
+        current_year1 = index;
+
+        if (current_year1 >= 0)
+        {
+            treeInfoText.text = "";
+            visualizer.receiveTreeDataPlot1(
+                outputSoloTreesData[0][current_year1],
+                outputSoloTreesData[0][current_year1].Values.First().Year
+            );
+            changeHightlight();
+        }
+    }
+
+    private void changePlot2(int year)
+    {
+        var outputPlot2 = outputSoloTreesData[1];
+
+        int index = outputPlot2.FindIndex(e => e.Values.First().Year == year);
+
+        if (index >= 0 && index + 1 < outputPlot2.Count && outputPlot2[index + 1].Values.First().Year == year)
+        {
+            index = index + 1;
+        }
+
+        current_year2 = index;
+
+        if (current_year2 >= 0)
+        {
+            treeInfoText.text = "";
+            visualizer.receiveTreeDataPlot2(
+                outputSoloTreesData[1][current_year2],
+                outputSoloTreesData[1][current_year2].Values.First().Year
+            );
+            changeHightlight();
+        }
+    }
 
     public void receiveSoloTreesData(List<List<SortedDictionary<int, TreeData>>> data)
     {
@@ -306,7 +353,8 @@ public class Manager : MonoBehaviour
 
     public void receiveYieldTableData(List<List<YieldTableEntry>> data)
     {
-        graphGenerator.receiveData(data, outputSoloTreesData[0][current_year1].Values.First().Year, outputSoloTreesData.Count() > 0 ? -1 : outputSoloTreesData[1][current_year2].Values.First().Year);
+        YieldTableData = data;
+        graphGenerator.receiveData(data, outputSoloTreesData[0][current_year1].Values.First().Year, outputSoloTreesData.Count() > 1 ? outputSoloTreesData[1][current_year2].Values.First().Year : -1);
     }
 
 

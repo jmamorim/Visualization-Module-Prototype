@@ -13,12 +13,18 @@ public class Parser : MonoBehaviour
     public TMP_InputField intervalInputField;
     public Manager manager;
 
-    private readonly string[] expectedSoloTreesHeaders = { "id_presc", "ciclo", "Year", "t", "id_arv", "Xarv", "Yarv", "d", "h", "cw", "estado" };
-    private readonly string[] expectedYieldTableHeaders = { "year", "hdom", "Nst", "N", "Ndead", "G", "dg", "Vu_st", "Vst", "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5", "maiV", "iV", "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr", "NPVsum", "EEA" };
-    private string[] lines;
-    private List<string> soloTreePaths = new List<string>();
-    private List<string> yieldTablePaths = new List<string>();
-    private int interval = 0;
+    readonly string[] expectedSoloTreesHeaders = { "id_presc", "ciclo", "Year", "t", "id_arv", "Xarv", "Yarv", "d", "h", "cw", "estado" };
+    readonly string[] expectedYieldTableHeaders = { "year", "hdom", "Nst", "N", "Ndead", "G", "dg", "Vu_st", "Vst", "Vu_as1", "Vu_as2", 
+        "Vu_as3", "Vu_as4", "Vu_as5", "maiV", "iV", "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr", "NPVsum", "EEA" };
+    string[] lines;
+    List<string> soloTreePaths = new List<string>();
+    List<string> yieldTablePaths = new List<string>();
+    int interval = 0;
+    const int idIndex = 1, cicloIndex = 2, yearIndex = 3, tIndex = 4, XarvIndex = 7, YarvIndex = 8, dIndex = 9, 
+        hIndex = 10, cwIndex = 11, estadoIndex = 24, tableYearIndex = 6, nstIndex = 14, nIndex = 15, ndeadIndex = 16,
+        hdomIndex = 13, gIndex = 19, dgIndex = 20, vu_stIndex = 21, vIndex = 24, vu_as1Index = 30, vu_as2Index = 31, 
+        vu_as3Index = 32, vu_as4Index = 33, vu_as5Index = 34, maiVIndex = 38, iVIndex = 39, wwIndex = 40, wbIndex = 41, 
+        wbrIndex = 42, wlIndex = 43, waIndex = 44, wrIndex = 45, npvsumIndex = 60, eeaIndex = 61;
 
     public void parse()
     {
@@ -68,8 +74,6 @@ public class Parser : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Starting year: {starting_year}, Ending year: {ending_year}, Number of Trees: {numberOfTrees}");
-
         if (lines.Length == 0)
         {
             ShowMessage("File is empty", Color.red);
@@ -115,17 +119,17 @@ public class Parser : MonoBehaviour
                         wasAlive = treesInfoPerYear[index - 1][id_arv].estado == 0;
                     }
                     TreeData tree = new TreeData(
-                        int.Parse(treeInfo[1].Trim()),  //id_presc
-                        int.Parse(treeInfo[2].Trim()),  //ciclo
-                        int.Parse(treeInfo[3].Trim()),  //Year
-                        float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture), //t
+                        int.Parse(treeInfo[idIndex].Trim()),  //id_presc
+                        int.Parse(treeInfo[cicloIndex].Trim()),  //ciclo
+                        int.Parse(treeInfo[yearIndex].Trim()),  //Year
+                        float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture), //t
                         id_arv,  //id_arv
-                        float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),  //Xarv
-                        float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),  //Yarv
-                        float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),  //d
-                        float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture), //h
-                        float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), //cw
-                        int.Parse(treeInfo[24].Trim()), //estado
+                        float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),  //Xarv
+                        float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),  //Yarv
+                        float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),  //d
+                        float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture), //h
+                        float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture), //cw
+                        int.Parse(treeInfo[estadoIndex].Trim()), //estado
                         rotation,    //rotation
                         wasAlive   //arvore estava viva na ultima instancia
                     );
@@ -169,19 +173,19 @@ public class Parser : MonoBehaviour
                             rotation = treesInfoPerYear[index - 1][id_arv].rotation;
                         }
                         TreeData tree = new TreeData(
-                        int.Parse(treeInfo[1].Trim()),  // id_presc
-                        int.Parse(treeInfo[2].Trim()),  // ciclo
-                        int.Parse(treeInfo[3].Trim()),  // Year
-                        float.Parse(treeInfo[4].Trim(), CultureInfo.InvariantCulture), // t
-                        id_arv,  // id_arv
-                        float.Parse(treeInfo[7].Trim(), CultureInfo.InvariantCulture),  // Xarv
-                        float.Parse(treeInfo[8].Trim(), CultureInfo.InvariantCulture),  // Yarv
-                        float.Parse(treeInfo[9].Trim(), CultureInfo.InvariantCulture),  // d
-                        float.Parse(treeInfo[10].Trim(), CultureInfo.InvariantCulture), // h
-                        float.Parse(treeInfo[11].Trim(), CultureInfo.InvariantCulture), // cw
-                        int.Parse(treeInfo[24].Trim()), // estado
-                        rotation, // rotation
-                        false //arvore estava viva na ultima instancia
+                        int.Parse(treeInfo[idIndex].Trim()),  //id_presc
+                        int.Parse(treeInfo[cicloIndex].Trim()),  //ciclo
+                        int.Parse(treeInfo[yearIndex].Trim()),  //Year
+                        float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture), //t
+                        id_arv,  //id_arv
+                        float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),  //Xarv
+                        float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),  //Yarv
+                        float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),  //d
+                        float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture), //h
+                        float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture), //cw
+                        int.Parse(treeInfo[estadoIndex].Trim()), //estado
+                        rotation,    //rotation
+                        false   //arvore estava viva na ultima instancia
                     );
 
                         treesInfoPerYear[index][tree.id_arv] = tree;
@@ -244,32 +248,32 @@ public class Parser : MonoBehaviour
             try
             {
                 YieldTableEntry entry = new YieldTableEntry(
-                    int.Parse(entryInfo[6].Trim()), // year
-                    Mathf.RoundToInt(float.Parse(entryInfo[14].Trim(), CultureInfo.InvariantCulture)), // Nst
-                    Mathf.RoundToInt(float.Parse(entryInfo[15].Trim(), CultureInfo.InvariantCulture)), // N
-                    Mathf.RoundToInt(float.Parse(entryInfo[16].Trim(), CultureInfo.InvariantCulture)), // Ndead
-                    float.Parse(entryInfo[13].Trim(), CultureInfo.InvariantCulture), // hdom
-                    float.Parse(entryInfo[19].Trim(), CultureInfo.InvariantCulture), // G
-                    float.Parse(entryInfo[20].Trim(), CultureInfo.InvariantCulture), // dg
-                    float.Parse(entryInfo[21].Trim(), CultureInfo.InvariantCulture), // Vu_st
-                    float.Parse(entryInfo[23].Trim(), CultureInfo.InvariantCulture), // Vst
-                    float.Parse(entryInfo[30].Trim(), CultureInfo.InvariantCulture), // Vu_as1
-                    float.Parse(entryInfo[31].Trim(), CultureInfo.InvariantCulture), // Vu_as2
-                    float.Parse(entryInfo[32].Trim(), CultureInfo.InvariantCulture), // Vu_as3
-                    float.Parse(entryInfo[33].Trim(), CultureInfo.InvariantCulture), // Vu_as4
-                    float.Parse(entryInfo[34].Trim(), CultureInfo.InvariantCulture), // Vu_as5
-                    float.Parse(entryInfo[38].Trim(), CultureInfo.InvariantCulture), // maiV
-                    float.Parse(entryInfo[39].Trim(), CultureInfo.InvariantCulture), // iV
-                    float.Parse(entryInfo[40].Trim(), CultureInfo.InvariantCulture), // Ww
-                    float.Parse(entryInfo[41].Trim(), CultureInfo.InvariantCulture), // Wb
-                    float.Parse(entryInfo[42].Trim(), CultureInfo.InvariantCulture), // Wbr
-                    float.Parse(entryInfo[43].Trim(), CultureInfo.InvariantCulture), // Wl
-                    float.Parse(entryInfo[44].Trim(), CultureInfo.InvariantCulture), // Wa
-                    float.Parse(entryInfo[45].Trim(), CultureInfo.InvariantCulture), // Wr
-                    float.Parse(entryInfo[61].Trim(), CultureInfo.InvariantCulture), // NPVsum
-                    0//float.Parse(entryInfo[62].Trim(), CultureInfo.InvariantCulture*)  // EEA
+                    int.Parse(entryInfo[tableYearIndex].Trim()), // year
+                    Mathf.RoundToInt(float.Parse(entryInfo[nstIndex].Trim(), CultureInfo.InvariantCulture)), // Nst
+                    Mathf.RoundToInt(float.Parse(entryInfo[nIndex].Trim(), CultureInfo.InvariantCulture)), // N
+                    Mathf.RoundToInt(float.Parse(entryInfo[ndeadIndex].Trim(), CultureInfo.InvariantCulture)), // Ndead
+                    float.Parse(entryInfo[hdomIndex].Trim(), CultureInfo.InvariantCulture), // hdom
+                    float.Parse(entryInfo[gIndex].Trim(), CultureInfo.InvariantCulture), // G
+                    float.Parse(entryInfo[dgIndex].Trim(), CultureInfo.InvariantCulture), // dg 
+                    float.Parse(entryInfo[vu_stIndex].Trim(), CultureInfo.InvariantCulture), // Vu_st
+                    float.Parse(entryInfo[vIndex].Trim(), CultureInfo.InvariantCulture), // Vst 
+                    float.Parse(entryInfo[vu_as1Index].Trim(), CultureInfo.InvariantCulture), // Vu_as1 
+                    float.Parse(entryInfo[vu_as2Index].Trim(), CultureInfo.InvariantCulture), // Vu_as2 
+                    float.Parse(entryInfo[vu_as3Index].Trim(), CultureInfo.InvariantCulture), // Vu_as3 
+                    float.Parse(entryInfo[vu_as4Index].Trim(), CultureInfo.InvariantCulture), // Vu_as4 
+                    float.Parse(entryInfo[vu_as5Index].Trim(), CultureInfo.InvariantCulture), // Vu_as5 
+                    float.Parse(entryInfo[maiVIndex].Trim(), CultureInfo.InvariantCulture), // maiV 
+                    float.Parse(entryInfo[iVIndex].Trim(), CultureInfo.InvariantCulture), // iV 
+                    float.Parse(entryInfo[wwIndex].Trim(), CultureInfo.InvariantCulture), // Ww 
+                    float.Parse(entryInfo[wbIndex].Trim(), CultureInfo.InvariantCulture), // Wb 
+                    float.Parse(entryInfo[wbrIndex].Trim(), CultureInfo.InvariantCulture), // Wbr 
+                    float.Parse(entryInfo[wlIndex].Trim(), CultureInfo.InvariantCulture), // Wl 
+                    float.Parse(entryInfo[waIndex].Trim(), CultureInfo.InvariantCulture), // Wa 
+                    float.Parse(entryInfo[wrIndex].Trim(), CultureInfo.InvariantCulture), // Wr 
+                    float.Parse(entryInfo[npvsumIndex].Trim(), CultureInfo.InvariantCulture), // NPVsum 
+                    float.Parse(entryInfo[eeaIndex].Trim(), CultureInfo.InvariantCulture)  // EEA 
                 );
-
+                
 
                 yieldTable.Add(entry);
             }
