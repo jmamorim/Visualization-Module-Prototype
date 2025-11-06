@@ -12,11 +12,14 @@ public class CSVPicker : MonoBehaviour
     public TMP_InputField intervalInputField;
     public Parser parser;
 
+    //more then one scenario in one file
+    [SerializeField] bool isMulti = false;
+
     string filePath = "";
 
     [SerializeField]
     bool isYieldTable = false;
-    
+
     void Start()
     {
         pickFileButton.onClick.AddListener(OnPickFileClicked);
@@ -35,7 +38,14 @@ public class CSVPicker : MonoBehaviour
 
         if (isYieldTable)
         {
-            parser.receiveYieldTablePath(currentFilePath, filePath);
+            if (isMulti)
+            {
+                parser.receiveMultiYieldTablePath(currentFilePath, filePath);
+            }
+            else
+            {
+                parser.receiveYieldTablePath(currentFilePath, filePath);
+            }
             filePath = currentFilePath;
         }
         else

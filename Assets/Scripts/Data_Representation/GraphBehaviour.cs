@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using XCharts.Runtime;
@@ -8,22 +9,24 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     public CameraBahaviour cam1, cam2;
     public Manager manager;
 
-    [SerializeField] private bool isMultiLine = false;
-    private RectTransform rectTransform;
-    private Canvas canvas;
-    private Vector2 dragOffset;
-    private bool isDragging = false;
-    private bool isResizing = false;
-    private Vector2 originalSize;
-    private Vector2 originalMousePos;
-    private BaseChart chart;
-    private const float minSize = 100f;
+    [SerializeField] bool isMultiLine = false;
+    [SerializeField] bool isBar = false;
+    [SerializeField] BaseChart chart;
+    RectTransform rectTransform;
+    Canvas canvas;
+    Vector2 dragOffset;
+    bool isDragging = false;
+    bool isResizing = false;
+    Vector2 originalSize;
+    Vector2 originalMousePos;
+    bool showingPercentage = false;
+    List<List<double>> originalData = new List<List<double>>();
+    const float minSize = 100f;
 
     private void Start()
     {
         rectTransform = GetComponent<RectTransform>();
         canvas = GetComponentInParent<Canvas>();
-        chart = GetComponent<LineChart>();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -45,15 +48,12 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         for (int i = 0; i < chart.series.Count; i++)
         {
             var serie = chart.GetSerie(i);
-            if (serie == null) continue;
 
             for (int j = 0; j < serie.dataCount; j++)
             {
                 var serieData = serie.GetSerieData(j);
-                if (serieData == null || serieData.ignore) continue;
 
                 var dataPosition = serieData.context.position;
-                if (dataPosition == Vector3.zero) continue;
 
                 float distance = Vector2.Distance(localPoint, new Vector2(dataPosition.x, dataPosition.y));
                 if (distance < minDistance)
@@ -65,17 +65,51 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             }
         }
 
-        if (minDistance < 10f && clickedSerieIndex >= 0)
+        Debug.Log($"Clicked on serie {clickedSerieIndex}, data index {clickedDataIndex}");
+        manager.changeSimYearOnGraphClick(clickedSerieIndex, clickedDataIndex, isMultiLine, isBar);
+    }
+
+    public void SaveOriginalData()
+    {
+        originalData.Clear();
+
+        foreach (var serie in chart.series)
         {
-            var xAxis = chart.GetChartComponent<XAxis>();
-            if (xAxis != null && clickedDataIndex < xAxis.data.Count)
+            var serieValues = new List<double>();
+            for (int i = 0; i < serie.dataCount; i++)
             {
-                string xValue = xAxis.data[clickedDataIndex];
-                if (int.TryParse(xValue, out int year))
-                    manager.changeSimYearOnGraphClick(clickedSerieIndex, year, isMultiLine);
+                serieValues.Add(serie.GetYData(i));
             }
+            originalData.Add(serieValues);
         }
     }
+
+    public void TogglePercentageView()
+    {
+        showingPercentage = !showingPercentage;
+
+        int dataCount = chart.series[0].dataCount;
+
+        for (int i = 0; i < dataCount; i++)
+        {
+            double total = 0;
+            for (int s = 0; s < chart.series.Count; s++)
+            {
+                total += originalData[s][i];
+            }
+
+            for (int s = 0; s < chart.series.Count; s++)
+            {
+                double newValue = showingPercentage
+                    ? (total > 0 ? (originalData[s][i] / total) * 100.0 : 0.0)
+                    : originalData[s][i];
+
+                chart.series[s].GetSerieData(i).data[1] = newValue;
+            }
+        }
+        chart.RefreshChart();
+    }
+
 
     public void OnBeginDrag(PointerEventData eventData)
     {

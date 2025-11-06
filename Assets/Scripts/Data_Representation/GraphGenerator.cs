@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -19,7 +20,7 @@ public class GraphGenerator : MonoBehaviour
     public void receiveData(List<List<YieldTableEntry>> tableData, int current_year1, int current_year2)
     {
 
-        HashSet<int> allYears = new HashSet<int>();
+        List<int> allYears = new List<int>();
         foreach (var seriesData in tableData)
         {
             foreach (var entry in seriesData)
@@ -29,7 +30,9 @@ public class GraphGenerator : MonoBehaviour
         sortedYears = new List<int>(allYears);
         sortedYears.Sort();
 
-        //Populate line charts
+        foreach (LineChart chart in lineCharts)
+            prepareChart(chart, sortedYears);
+
         populateLineChart(lineCharts[0], sortedYears, tableData, e => e.N);
         populateLineChart(lineCharts[1], sortedYears, tableData, e => e.Nst);
         populateLineChart(lineCharts[2], sortedYears, tableData, e => e.Ndead);
@@ -39,11 +42,7 @@ public class GraphGenerator : MonoBehaviour
         populateLineChart(lineCharts[6], sortedYears, tableData, e => e.V);
         populateLineChart(lineCharts[7], sortedYears, tableData, e => e.Vu_st);
 
-        //populate bar charts
-        populateBarChart(
-            tableData[0][0],
-            tableData.Count > 1 ? tableData[1][0] : null
-            );
+        populateBarCharts(sortedYears, tableData);
 
         populateMultiLineChart(sortedYears, tableData);
 
@@ -59,222 +58,236 @@ public class GraphGenerator : MonoBehaviour
         List<List<YieldTableEntry>> tableData,
         Func<YieldTableEntry, float> valueSelector)
     {
+
+        highlightedIndex1 = -1;
+        highlightedIndex2 = -1;
+
+        for (int i = 0; i < tableData.Count; i++)
+        {
+            var entries = tableData[i];
+            if (entries == null || entries.Count == 0) continue;
+
+            string standId = entries.First().id_stand;
+            chart.AddSerie<Line>(standId);
+            var serie = chart.GetSerie(i);
+
+            Color lineColor = Color.HSVToRGB((i * 0.15f) % 1f, 1f, 1f);
+            setupSerieStyle(serie, lineColor);
+
+            for (int j = 0; j < years.Count; j++)
+            {
+                chart.AddData(i, 0f);
+                serie.GetSerieData(j).ignore = true;
+            }
+
+            foreach (var entry in entries)
+            {
+                int yearIndex = years.IndexOf(entry.year);
+                int correctedIndex = chart.GetData(i, years.IndexOf(entry.year)) != 0f ? yearIndex + 1 : yearIndex;
+                chart.UpdateData(i, correctedIndex, valueSelector(entry));
+                serie.GetSerieData(correctedIndex).ignore = false;
+            }
+        }
+
+        chart.RefreshChart();
+    }
+
+    private void prepareChart(BaseChart chart, List<int> years)
+    {
         chart.ClearData();
         chart.RemoveAllSerie();
         chart.RemoveData();
         chart.RefreshChart();
 
-        highlightedIndex1 = -1;
-        highlightedIndex2 = -1;
-
-        sortedYears = years;
-
-        foreach (var year in years)
-            chart.AddXAxisData(year.ToString());
-
-        for (int i = 0; i < tableData.Count; i++)
+        chart.GetChartComponent<XAxis>().data.Clear();
+        foreach (var y in years)
         {
-            chart.AddSerie<Line>($"Plot{i + 1}");
-            var serie = chart.GetSerie(i);
-            serie.lineType = LineType.Normal;
-            serie.symbol.show = true;
-            serie.lineStyle.width = 2f;
-
-            Color lineColor = Color.HSVToRGB((i * 0.25f) % 1f, 0.8f, 0.9f);
-            serie.lineStyle.color = lineColor;
-            serie.itemStyle.color = lineColor;
-
-            List<SerieData> serieDataList = new List<SerieData>();
-
-            int index = 0;
-            Dictionary<int, float> yearToValue = new Dictionary<int, float>();
-            foreach (var entry in tableData[i])
-                yearToValue[entry.year] = valueSelector(entry);
-
-            foreach (var year in years)
-            {
-                if (yearToValue.TryGetValue(year, out float value))
-                    chart.AddData(i, value);
-                else
-                    chart.AddData(i, 0);
-
-                var data = serie.GetSerieData(index);
-                if (!yearToValue.ContainsKey(year))
-                    data.ignore = true;
-                else
-                    data.state = SerieState.Normal;
-
-                serieDataList.Add(data);
-                index++;
-            }
+            chart.AddXAxisData(y.ToString());
         }
-
-        chart.RefreshChart();
     }
 
-    public void populateBarChart(YieldTableEntry data1, YieldTableEntry data2)
+
+    private void populateBarCharts(List<int> years, List<List<YieldTableEntry>> tableData)
     {
-        for (int i = 0; i < barCharts.Count; i++)
+        var chart1 = barCharts[0];
+        var gb1 = chart1.GetComponent<GraphBehaviour>();
+
+        prepareChart(chart1, years);
+        string[] volumeComponents = { "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5" };
+
+        for (int standIndex = 0; standIndex < tableData.Count; standIndex++)
         {
-            BarChart chart = barCharts[i];
-            chart.RemoveAllSerie();
-            chart.RefreshChart();
+            var plotData = tableData[standIndex];
+            if (plotData == null || plotData.Count == 0) continue;
 
-            var xAxis = chart.GetChartComponent<XAxis>();
-            if (xAxis == null || xAxis.data.Count == 0)
+            string standId = plotData[0].id_stand;
+
+            for (int c = 0; c < volumeComponents.Length; c++)
             {
-                Debug.LogWarning("BarChart has no X-axis labels configured.");
-                continue;
-            }
+                var serie = chart1.AddSerie<Bar>($"{standId} {volumeComponents[c]}");
+                serie.stack = $"volume_{standId}";
+                Color color = Color.HSVToRGB((float)(c * 0.12f + standIndex * 0.2f) % 1f, 0.8f, 1f);
+                serie.itemStyle.color = color;
 
-            int xCount = xAxis.data.Count;
-
-            //Vu_as 
-            if (i == 0)
-            {
-                chart.AddSerie<Bar>("Plot1");
-                float[] volumeValues1 = {
-                data1.Vu_as1, data1.Vu_as2, data1.Vu_as3,
-                data1.Vu_as4, data1.Vu_as5
-            };
-                for (int j = 0; j < xCount && j < volumeValues1.Length; j++)
-                    chart.AddData(0, j, volumeValues1[j]);
-
-                if (data2 != null)
+                for (int j = 0; j < years.Count; j++)
                 {
-                    chart.AddSerie<Bar>("Plot2");
-                    float[] volumeValues2 = {
-                    data2.Vu_as1, data2.Vu_as2, data2.Vu_as3,
-                    data2.Vu_as4, data2.Vu_as5
-                };
-                    for (int j = 0; j < xCount && j < volumeValues2.Length; j++)
-                        chart.AddData(1, j, volumeValues2[j]);
+                    chart1.AddData(serie.index, 0f);
+                    serie.GetSerieData(j).ignore = true;
+                }
+
+                foreach (var entry in plotData)
+                {
+                    int yearIndex = years.IndexOf(entry.year);
+                    int correctedIndex = chart1.GetData(serie.index, yearIndex) != 0f ? yearIndex + 1 : yearIndex;
+
+                    float v = 0f;
+                    switch (volumeComponents[c])
+                    {
+                        case "Vu_as1": v = entry.Vu_as1; break;
+                        case "Vu_as2": v = entry.Vu_as2; break;
+                        case "Vu_as3": v = entry.Vu_as3; break;
+                        case "Vu_as4": v = entry.Vu_as4; break;
+                        case "Vu_as5": v = entry.Vu_as5; break;
+                    }
+
+                    chart1.UpdateData(serie.index, correctedIndex, v);
+                    serie.GetSerieData(correctedIndex).ignore = false;
                 }
             }
-            //Biomassa
-            else if (i == 1)
-            {
-                chart.AddSerie<Bar>("Plot1");
-                float[] biomassValues1 = {
-                data1.Ww, data1.Wb, data1.Wbr,
-                data1.Wl, data1.Wa, data1.Wr
-            };
-                for (int j = 0; j < xCount && j < biomassValues1.Length; j++)
-                    chart.AddData(0, j, biomassValues1[j]);
-
-                if (data2 != null)
-                {
-                    chart.AddSerie<Bar>("Plot2");
-                    float[] biomassValues2 = {
-                    data2.Ww, data2.Wb, data2.Wbr,
-                    data2.Wl, data2.Wa, data2.Wr
-                };
-                    for (int j = 0; j < xCount && j < biomassValues2.Length; j++)
-                        chart.AddData(1, j, biomassValues2[j]);
-                }
-            }
-
-            chart.RefreshChart();
         }
+
+        chart1.RefreshChart();
+        gb1.SaveOriginalData();
+
+        var chart2 = barCharts[1];
+        var gb2 = chart2.GetComponent<GraphBehaviour>();
+        
+        prepareChart(chart2, years);
+
+        string[] biomassComponents = { "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr" };
+
+        for (int standIndex = 0; standIndex < tableData.Count; standIndex++)
+        {
+            var plotData = tableData[standIndex];
+            if (plotData == null || plotData.Count == 0) continue;
+
+            string standId = plotData[0].id_stand;
+
+            for (int c = 0; c < biomassComponents.Length; c++)
+            {
+                var serie = chart2.AddSerie<Bar>($"{standId} {biomassComponents[c]}");
+                serie.stack = $"biomass_{standId}";
+                Color color = Color.HSVToRGB((float)(c * 0.12f + standIndex * 0.2f) % 1f, 0.8f, 1f);
+                serie.itemStyle.color = color;
+
+                for (int j = 0; j < years.Count; j++)
+                {
+                    chart2.AddData(serie.index, 0f);
+                    serie.GetSerieData(j).ignore = true;
+                }
+
+                foreach (var entry in plotData)
+                {
+                    int yearIndex = years.IndexOf(entry.year);
+                    int correctedIndex = chart2.GetData(serie.index, yearIndex) != 0f ? yearIndex + 1 : yearIndex;
+
+                    float v = 0f;
+                    switch (biomassComponents[c])
+                    {
+                        case "Ww": v = entry.Ww; break;
+                        case "Wb": v = entry.Wb; break;
+                        case "Wbr": v = entry.Wbr; break;
+                        case "Wl": v = entry.Wl; break;
+                        case "Wa": v = entry.Wa; break;
+                        case "Wr": v = entry.Wr; break;
+                    }
+
+                    chart2.UpdateData(serie.index, correctedIndex, v);
+                    serie.GetSerieData(correctedIndex).ignore = false;
+                }
+            }
+        }
+
+        chart2.RefreshChart();
+        gb2.SaveOriginalData();
     }
+
+
 
     private void populateMultiLineChart(List<int> years, List<List<YieldTableEntry>> tableData)
     {
         for (int chartIndex = 0; chartIndex < MultiLineCharts.Count; chartIndex++)
         {
             var chart = MultiLineCharts[chartIndex];
+            if (chart == null) continue;
 
-            chart.ClearData();
-            chart.RemoveAllSerie();
-            chart.RemoveData();
-            chart.RefreshChart();
+            prepareChart(chart, years);
 
             highlightedIndex1 = -1;
             highlightedIndex2 = -1;
 
-            sortedYears = years;
-
-            foreach (var year in years)
-                chart.AddXAxisData(year.ToString());
-
             for (int plotIndex = 0; plotIndex < tableData.Count; plotIndex++)
             {
                 var plotData = tableData[plotIndex];
-
                 if (plotData == null || plotData.Count == 0)
                     continue;
 
-                Color baseColor = Color.HSVToRGB((plotIndex * 0.25f) % 1f, 0.8f, 0.9f);
-                Color secondaryColor = new Color(baseColor.r * 0.8f, baseColor.g * 0.8f, baseColor.b * 0.8f);
+                string id_stand = plotData.First().id_stand;
+                Color baseColor = Color.HSVToRGB((plotIndex * 0.2f) % 1f, 0.8f, 1f);
+                Color secondaryColor = Color.HSVToRGB(((plotIndex * 0.2f) + 0.4f) % 1f, 0.8f, 1f);
 
-                //iV and maiV
+                string serieName1, serieName2;
+                Func<YieldTableEntry, float> valueSelector1, valueSelector2;
+
                 if (chartIndex == 0)
                 {
-                    string serieName1 = $"iV Plot{plotIndex + 1}";
-                    string serieName2 = $"maiV Plot{plotIndex + 1}";
-
-                    chart.AddSerie<Line>(serieName1);
-                    chart.AddSerie<Line>(serieName2);
-
-                    var serie1 = chart.GetSerie(chart.series.Count - 2);
-                    var serie2 = chart.GetSerie(chart.series.Count - 1);
-
-                    setupSerieStyle(serie1, baseColor);
-                    setupSerieStyle(serie2, secondaryColor);
-
-                    Dictionary<int, float> yearToIV = new Dictionary<int, float>();
-                    Dictionary<int, float> yearToMAIV = new Dictionary<int, float>();
-
-                    foreach (var entry in plotData)
-                    {
-                        yearToIV[entry.year] = entry.iV;
-                        yearToMAIV[entry.year] = entry.maiV;
-                    }
-
-                    for (int yearIndex = 0; yearIndex < years.Count; yearIndex++)
-                    {
-                        int year = years[yearIndex];
-                        chart.AddData(chart.series.Count - 2, yearIndex, yearToIV.TryGetValue(year, out float iv) ? iv : 0);
-                        chart.AddData(chart.series.Count - 1, yearIndex, yearToMAIV.TryGetValue(year, out float maiv) ? maiv : 0);
-                    }
+                    serieName1 = $"iV {id_stand}";
+                    serieName2 = $"maiV {id_stand}";
+                    valueSelector1 = e => e.iV;
+                    valueSelector2 = e => e.maiV;
+                }
+                else
+                {
+                    serieName1 = $"sumNPV {id_stand}";
+                    serieName2 = $"EEA {id_stand}";
+                    valueSelector1 = e => e.NPVsum;
+                    valueSelector2 = e => e.EEA;
                 }
 
-                //sumNPV and EEA
-                else if (chartIndex == 1)
+                chart.AddSerie<Line>(serieName1);
+                chart.AddSerie<Line>(serieName2);
+
+                var serie1 = chart.GetSerie(chart.series.Count - 2);
+                var serie2 = chart.GetSerie(chart.series.Count - 1);
+
+                setupSerieStyle(serie1, baseColor);
+                setupSerieStyle(serie2, secondaryColor);
+
+                for (int j = 0; j < years.Count; j++)
                 {
-                    string serieName1 = $"sumNPV Plot{plotIndex + 1}";
-                    string serieName2 = $"EEA Plot{plotIndex + 1}";
+                    chart.AddData(serie1.index, 0f);
+                    chart.AddData(serie2.index, 0f);
+                    serie1.GetSerieData(j).ignore = true;
+                    serie2.GetSerieData(j).ignore = true;
+                }
 
-                    chart.AddSerie<Line>(serieName1);
-                    chart.AddSerie<Line>(serieName2);
+                foreach (var entry in plotData)
+                {
+                    int yearIndex = years.IndexOf(entry.year);
+                    int correctedIndex = chart.GetData(serie1.index, yearIndex) != 0f ? yearIndex + 1 : yearIndex;
 
-                    var serie1 = chart.GetSerie(chart.series.Count - 2);
-                    var serie2 = chart.GetSerie(chart.series.Count - 1);
+                    chart.UpdateData(serie1.index, correctedIndex, valueSelector1(entry));
+                    chart.UpdateData(serie2.index, correctedIndex, valueSelector2(entry));
 
-                    setupSerieStyle(serie1, baseColor);
-                    setupSerieStyle(serie2, secondaryColor);
-
-                    Dictionary<int, float> yearToNPV = new Dictionary<int, float>();
-                    Dictionary<int, float> yearToEEA = new Dictionary<int, float>();
-
-                    foreach (var entry in plotData)
-                    {
-                        yearToNPV[entry.year] = entry.NPVsum;
-                        yearToEEA[entry.year] = entry.EEA;
-                    }
-
-                    for (int yearIndex = 0; yearIndex < years.Count; yearIndex++)
-                    {
-                        int year = years[yearIndex];
-                        chart.AddData(chart.series.Count - 2, yearIndex, yearToNPV.TryGetValue(year, out float npv) ? npv : 0);
-                        chart.AddData(chart.series.Count - 1, yearIndex, yearToEEA.TryGetValue(year, out float eea) ? eea : 0);
-                    }
+                    serie1.GetSerieData(correctedIndex).ignore = false;
+                    serie2.GetSerieData(correctedIndex).ignore = false;
                 }
             }
 
             chart.RefreshChart();
         }
     }
+
 
     private void setupSerieStyle(Serie serie, Color color)
     {
@@ -298,15 +311,14 @@ public class GraphGenerator : MonoBehaviour
         if (chart.series.Count > 0)
         {
             var serie1 = chart.GetSerie(0);
-            int index1 = sortedYears.IndexOf(year1);
 
-            if (index1 >= 0 && index1 < serie1.dataCount)
+            if (year1 >= 0 && year1 < serie1.dataCount)
             {
-                var data1 = serie1.GetSerieData(index1);
+                var data1 = serie1.GetSerieData(year1);
                 if (!data1.ignore)
                 {
                     data1.state = SerieState.Emphasis;
-                    highlightedIndex1 = index1;
+                    highlightedIndex1 = year1;
                 }
             }
             else
@@ -318,14 +330,13 @@ public class GraphGenerator : MonoBehaviour
         if (chart.series.Count > 1)
         {
             var serie2 = chart.GetSerie(1);
-            int index2 = sortedYears.IndexOf(year2);
-            if (index2 >= 0 && index2 < serie2.dataCount)
+            if (year2 >= 0 && year2 < serie2.dataCount)
             {
-                var data2 = serie2.GetSerieData(index2);
+                var data2 = serie2.GetSerieData(year2);
                 if (!data2.ignore)
                 {
                     data2.state = SerieState.Emphasis;
-                    highlightedIndex2 = index2;
+                    highlightedIndex2 = year2;
                 }
             }
             else
@@ -339,36 +350,32 @@ public class GraphGenerator : MonoBehaviour
 
     private void highlightPointMultiLine(LineChart chart, int year1, int year2)
     {
-        if (chart.series.Count < 2)
-            return;
+        foreach (Serie serie in chart.series)
         {
-            foreach (Serie serie in chart.series)
-            {
-                for (int j = 0; j < serie.dataCount; j++)
-                {
-                    serie.GetSerieData(j).state = SerieState.Normal;
-                }
-            }
-            chart.RefreshChart();
+            for (int j = 0; j < serie.dataCount; j++)
+                serie.GetSerieData(j).state = SerieState.Normal;
+        }
 
-        for (int i = 0; i < chart.series.Count; i += 2)
+        int[] years = { year1, year2 };
+        int[] highlightedIndexes = { highlightedIndex1, highlightedIndex2 };
 
-            if (i + 1 < chart.series.Count)
-            {
-                int tempHighlightIndex = (i == 0) ? highlightedIndex1 : highlightedIndex2;
-                HighlightPair(chart.GetSerie(i), chart.GetSerie(i + 1), year1, ref tempHighlightIndex);
+        for (int i = 0; i + 1 < chart.series.Count && i / 2 < years.Length; i += 2)
+        {
+            int year = years[i / 2];
+            ref int highlightedIndex = ref highlightedIndexes[i / 2];
 
-                if (i == 0)
-                    highlightedIndex1 = tempHighlightIndex;
-                else if (i == 2)
-                    highlightedIndex2 = tempHighlightIndex;
-            }
+            HighlightPair(chart.GetSerie(i), chart.GetSerie(i + 1), year, ref highlightedIndex);
+
+            if (i == 0)
+                highlightedIndex1 = highlightedIndex;
+            else if (i == 2)
+                highlightedIndex2 = highlightedIndex;
         }
 
         chart.RefreshChart();
     }
 
-    void HighlightPair(Serie serieA, Serie serieB, int year, ref int highlightedIndex)
+    private void HighlightPair(Serie serieA, Serie serieB, int year, ref int highlightedIndex)
     {
         if (highlightedIndex >= 0 &&
             highlightedIndex < serieA.dataCount &&
@@ -378,13 +385,12 @@ public class GraphGenerator : MonoBehaviour
             serieB.GetSerieData(highlightedIndex).state = SerieState.Normal;
         }
 
-        int index = sortedYears.IndexOf(year);
-        if (index >= 0 &&
-            index < serieA.dataCount &&
-            index < serieB.dataCount)
+        if (year >= 0 &&
+            year < serieA.dataCount &&
+            year < serieB.dataCount)
         {
-            var dataA = serieA.GetSerieData(index);
-            var dataB = serieB.GetSerieData(index);
+            var dataA = serieA.GetSerieData(year);
+            var dataB = serieB.GetSerieData(year);
 
             if (!dataA.ignore && !dataB.ignore)
             {
@@ -392,13 +398,14 @@ public class GraphGenerator : MonoBehaviour
                 dataB.state = SerieState.Emphasis;
             }
 
-            highlightedIndex = index;
+            highlightedIndex = year;
         }
         else
         {
             highlightedIndex = -1;
         }
     }
+
 
     private void removeHighlight(LineChart chart)
     {
@@ -440,7 +447,6 @@ public class GraphGenerator : MonoBehaviour
             }
         }
     }
-
 
     public void changeHighlightedYearGraphs(int year1, int year2)
     {

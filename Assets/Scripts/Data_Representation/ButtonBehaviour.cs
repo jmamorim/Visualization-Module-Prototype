@@ -24,7 +24,7 @@ public class ButtonBehaviour : MonoBehaviour
             rectTransform.anchoredPosition = origianlPos;
             if (disablesSelf)
             {
-                if(self == null)
+                if (self == null)
                     gameObject.SetActive(false);
                 else
                     self.SetActive(false);

@@ -19,9 +19,10 @@ public class Parser : MonoBehaviour
     string[] lines;
     List<string> soloTreePaths = new List<string>();
     List<string> yieldTablePaths = new List<string>();
+    List<string> multiYieldTablePaths = new List<string>();
     int interval = 0;
     const int idIndex = 1, cicloIndex = 2, yearIndex = 3, tIndex = 4, XarvIndex = 7, YarvIndex = 8, dIndex = 9, 
-        hIndex = 10, cwIndex = 11, estadoIndex = 24, tableYearIndex = 6, nstIndex = 14, nIndex = 15, ndeadIndex = 16,
+        hIndex = 10, cwIndex = 11, estadoIndex = 24, tableIdIndex = 0, tableSIndex = 1, tableYearIndex = 6, nstIndex = 14, nIndex = 15, ndeadIndex = 16,
         hdomIndex = 13, gIndex = 19, dgIndex = 20, vu_stIndex = 21, vIndex = 24, vu_as1Index = 30, vu_as2Index = 31, 
         vu_as3Index = 32, vu_as4Index = 33, vu_as5Index = 34, maiVIndex = 38, iVIndex = 39, wwIndex = 40, wbIndex = 41, 
         wbrIndex = 42, wlIndex = 43, waIndex = 44, wrIndex = 45, npvsumIndex = 60, eeaIndex = 61;
@@ -41,6 +42,8 @@ public class Parser : MonoBehaviour
             parseSoloTrees(outputSoloTreesData, s);
         foreach (string s in yieldTablePaths)
             parseYieldTable(outputYieldTableData, s);
+        foreach (string s in multiYieldTablePaths)
+            receiveMultiYieldTable(outputYieldTableData, s);
 
         //send all info to manager
         sendDataToManager(outputSoloTreesData, outputYieldTableData);
@@ -248,10 +251,12 @@ public class Parser : MonoBehaviour
             try
             {
                 YieldTableEntry entry = new YieldTableEntry(
+                    entryInfo[tableIdIndex].Trim(), // id_stand
                     int.Parse(entryInfo[tableYearIndex].Trim()), // year
                     Mathf.RoundToInt(float.Parse(entryInfo[nstIndex].Trim(), CultureInfo.InvariantCulture)), // Nst
                     Mathf.RoundToInt(float.Parse(entryInfo[nIndex].Trim(), CultureInfo.InvariantCulture)), // N
                     Mathf.RoundToInt(float.Parse(entryInfo[ndeadIndex].Trim(), CultureInfo.InvariantCulture)), // Ndead
+                    Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)), //S
                     float.Parse(entryInfo[hdomIndex].Trim(), CultureInfo.InvariantCulture), // hdom
                     float.Parse(entryInfo[gIndex].Trim(), CultureInfo.InvariantCulture), // G
                     float.Parse(entryInfo[dgIndex].Trim(), CultureInfo.InvariantCulture), // dg 
@@ -293,6 +298,98 @@ public class Parser : MonoBehaviour
         output.Add(yieldTable);
     }
 
+    //refactor needed!!!
+    private void receiveMultiYieldTable(List<List<YieldTableEntry>> output, string yieldTablePath)
+    {
+        if (string.IsNullOrEmpty(yieldTablePath))
+        {
+            ShowMessage("No file selected", Color.red);
+            return;
+        }
+
+        var lines = File.ReadAllLines(yieldTablePath);
+        if (lines.Length == 0)
+        {
+            ShowMessage("File is empty", Color.red);
+            return;
+        }
+
+        string[] headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
+        if (!VerifyHeaders(headers, expectedYieldTableHeaders))
+        {
+            ShowMessage("Incorrect headers", Color.red);
+            return;
+        }
+
+        output.Add(new List<YieldTableEntry>()); 
+        int index = 0;
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
+
+            for (int j = 0; j < entryInfo.Length; j++)
+            {
+                string s = entryInfo[j];
+                if (string.IsNullOrWhiteSpace(s)) entryInfo[j] = "0";
+                else if (s.EndsWith(".")) entryInfo[j] = s + "0";
+            }
+
+            try
+            {
+                var entry = new YieldTableEntry(
+                    entryInfo[tableIdIndex].Trim(),
+                    int.Parse(entryInfo[tableYearIndex].Trim()),
+                    Mathf.RoundToInt(float.Parse(entryInfo[nstIndex].Trim(), CultureInfo.InvariantCulture)),
+                    Mathf.RoundToInt(float.Parse(entryInfo[nIndex].Trim(), CultureInfo.InvariantCulture)),
+                    Mathf.RoundToInt(float.Parse(entryInfo[ndeadIndex].Trim(), CultureInfo.InvariantCulture)),
+                    Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)),
+                    float.Parse(entryInfo[hdomIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[gIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[dgIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[vu_stIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[vIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[vu_as1Index].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[vu_as2Index].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[vu_as3Index].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[vu_as4Index].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[vu_as5Index].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[maiVIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[iVIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[wwIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[wbIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[wbrIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[wlIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[waIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[wrIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[npvsumIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(entryInfo[eeaIndex].Trim(), CultureInfo.InvariantCulture)
+                );
+
+                if (output[index].Count > 0 && entry.S != output[index].First().S)
+                {
+                    index++;
+                    output.Add(new List<YieldTableEntry>());
+                }
+
+                output[index].Add(entry);
+            }
+            catch (FormatException fe)
+            {
+                Debug.LogError($"Format error parsing line {i}: {fe.Message}\nOffending data: {string.Join(" | ", entryInfo)}");
+            }
+            catch (IndexOutOfRangeException ioe)
+            {
+                Debug.LogError($"Index out of range on line {i}: {ioe.Message}\nLine has {entryInfo.Length} columns.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Unexpected error parsing line {i}: {ex.Message}");
+            }
+        }
+    }
+
+
     bool VerifyHeaders(string[] headers, string[] expectedHeaders)
     {
         foreach (string h in expectedHeaders)
@@ -323,6 +420,11 @@ public class Parser : MonoBehaviour
     public void receiveYieldTablePath(string path, string prevPath)
     {
         insertPath(yieldTablePaths, path, prevPath);
+    }
+
+    public void receiveMultiYieldTablePath(string path, string prevPath)
+    {
+        insertPath(multiYieldTablePaths, path, prevPath);
     }
 
     void insertPath(List<string> list, string path, string prevPath)

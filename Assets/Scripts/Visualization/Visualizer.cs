@@ -12,6 +12,10 @@ public class Visualizer : MonoBehaviour
     public List<GameObject> pbPrefabs;
     [Header("Pinheiro-manso Prefabs")]
     public List<GameObject> pmPrefabs;
+    [Header("Eucalipto Prefabs")]
+    public List<GameObject> egPrefabs;
+    [Header("Castanheiro Prefabs")]
+    public List<GameObject> casPrefabs;
     public string activeSpecie;
 
     [Header("Scene References")]
@@ -46,8 +50,28 @@ public class Visualizer : MonoBehaviour
     [SerializeField] float thresholdPmAdultHeight;
     [SerializeField] float thresholdPmSeniourHeight;
 
+    [Header("Eucalipto Parameters"), Tooltip("Ages at which Pinheiro-bravo transitions between stages")]
+    [SerializeField] float egAdultStartingAge;
+    [SerializeField] float egSeniourStartingAge;
+
+    [Space(5)]
+    [Header("Eucalipto Height Thresholds")]
+    [SerializeField] float thresholdEgYoungHeight;
+    [SerializeField] float thresholdEgAdultHeight;
+    [SerializeField] float thresholdEgSeniourHeight;
+
+    [Header("Castanheiro Parameters"), Tooltip("Ages at which Pinheiro-bravo transitions between stages")]
+    [SerializeField] float casAdultStartingAge;
+    [SerializeField] float casSeniourStartingAge; 
+
+    [Space(5)]
+    [Header("Castanheiro Height Thresholds")]
+    [SerializeField] float thresholdCasYoungHeight;
+    [SerializeField] float thresholdCasAdultHeight;
+    [SerializeField] float thresholdCasSeniourHeight;
+
     int currentYear;
-    readonly List<string> species = new List<string> { "pb", "pm", "eg", "cs" };
+    readonly List<string> species = new List<string> { "pb", "pm", "eg", "cas" };
 
     private void Start()
     {
@@ -56,6 +80,7 @@ public class Visualizer : MonoBehaviour
         terrain2.terrainData = Instantiate(terrain2.terrainData);
     }
 
+    //refactor this to a single method with plot identifier
     public void receiveTreeDataPlot1(SortedDictionary<int, TreeData> data, int currentYear)
     {
         clear("Plot1");
@@ -74,13 +99,14 @@ public class Visualizer : MonoBehaviour
         displayTrees(trees, terrain2);
     }
 
+    //needs to handle terrain dimensions and shape accordingly after interface input-TODO in the future
     public void displayTrees(List<TreeData> trees, Terrain terrain)
     {
         if (trees == null || trees.Count == 0) return;
 
         //terrain handling
         terrain.terrainData.treeInstances = new TreeInstance[0];
-        TreePrototype[] prototypes = new TreePrototype[pbPrefabs.Count + pmPrefabs.Count];
+        TreePrototype[] prototypes = new TreePrototype[pbPrefabs.Count + pmPrefabs.Count + egPrefabs.Count + casPrefabs.Count];
         for (int i = 0; i < pbPrefabs.Count; i++)
         {
             prototypes[i] = new TreePrototype { prefab = pbPrefabs[i] };
@@ -88,6 +114,14 @@ public class Visualizer : MonoBehaviour
         for (int i = 0; i < pmPrefabs.Count; i++)
         {
             prototypes[pbPrefabs.Count + i] = new TreePrototype { prefab = pmPrefabs[i] };
+        }
+        for (int i = 0; i < egPrefabs.Count; i++)
+        {
+            prototypes[pbPrefabs.Count + pmPrefabs.Count + i] = new TreePrototype { prefab = egPrefabs[i] };
+        }
+        for (int i = 0; i < casPrefabs.Count; i++)
+        {
+            prototypes[pbPrefabs.Count + pmPrefabs.Count + egPrefabs.Count + i] = new TreePrototype { prefab = casPrefabs[i] };
         }
         terrain.terrainData.treePrototypes = prototypes;
 
@@ -132,8 +166,8 @@ public class Visualizer : MonoBehaviour
 
     private void GetFactorAndPrefabSpecie(string specie, float height, float age, out float factor, out GameObject prefab)
     {
-        factor = 0f;
         prefab = null;
+        factor = 0f;
 
         if (specie.Equals(species[0]))
         {
@@ -142,11 +176,22 @@ public class Visualizer : MonoBehaviour
         }
         else if (specie.Equals(species[1]))
         {
-            prefab = getPmPrefabForCurrentHeight(age);
+            prefab = getPMPrefabForCurrentHeight(age);
             factor = calculatePMFactor(height, age, prefab);
+        }
+        else if (specie.Equals(species[2]))
+        {
+            prefab = getEGPrefabForCurrentHeight(age);
+            factor = calculateEGFactor(height, age, prefab);
+        }
+        else if (specie.Equals(species[3]))
+        {
+            prefab = getCASPrefabForCurrentHeight(age);
+            factor = calculateCASFactor(height, age, prefab);
         }
     }
 
+    //-----Prefab selection methods-----//
     private GameObject getPBPrefabForCurrentAge(float currentAge)
     {
         if (currentAge < pbAdultStartingAge)
@@ -161,7 +206,7 @@ public class Visualizer : MonoBehaviour
             return pbPrefabs[4];
     }
 
-    private GameObject getPmPrefabForCurrentHeight(float currentAge)
+    private GameObject getPMPrefabForCurrentHeight(float currentAge)
     {
         if (currentAge < pmMidYougAge)
             return pmPrefabs[0];
@@ -173,36 +218,66 @@ public class Visualizer : MonoBehaviour
             return pmPrefabs[3];
     }
 
+    private GameObject getEGPrefabForCurrentHeight(float currentAge)
+    {
+        if(currentAge < egAdultStartingAge)
+            return egPrefabs[0];
+        else if (currentAge >= egAdultStartingAge && currentAge < egSeniourStartingAge)
+            return egPrefabs[1];
+        else
+            return egPrefabs[2];
+    }
+
+    private GameObject getCASPrefabForCurrentHeight(float currentAge)
+    {
+        if(currentAge < casAdultStartingAge)
+            return casPrefabs[0];
+        else if (currentAge >= casAdultStartingAge && currentAge < casSeniourStartingAge)
+            return casPrefabs[1];
+        else
+            return casPrefabs[2];
+    }
+
+    //-----Scale factor calculation methods-----//
     private float calculatePBFactor(float currentHeight, float currentAge, GameObject prefab)
     {
         if (pbPrefabs[0] == prefab)
-        {
             return currentHeight / thresholdPbYoungHeight;
-        }
         else if (pbPrefabs[1] == prefab || pbPrefabs[2] == prefab || pbPrefabs[3] == prefab)
-        {
             return currentHeight / thresholdPbAdultHeight;
-        }
         else
-        {
             return currentHeight / thresholdPbSeniourHeight;
-        }
     }
 
     private float calculatePMFactor(float currentHeight, float currentAge, GameObject prefab)
     {
         if (pmPrefabs[0] == prefab || pmPrefabs[1] == prefab)
-        {
             return currentHeight / thresholdPmYoungHeight;
-        }
         else if (pmPrefabs[2] == prefab)
-        {
             return currentHeight / thresholdPmAdultHeight;
-        }
         else
-        {
             return currentHeight / thresholdPmSeniourHeight;
-        }
+    }
+
+    //both need more experiments
+    private float calculateEGFactor(float currentHeight, float currentAge, GameObject prefab)
+    {
+        if (egPrefabs[0] == prefab)
+            return currentHeight / thresholdEgYoungHeight;
+        else if (egPrefabs[1] == prefab)
+            return currentHeight / thresholdEgAdultHeight;
+        else
+            return currentHeight / thresholdEgSeniourHeight;
+    }
+
+    private float calculateCASFactor(float currentHeight, float currentAge, GameObject prefab)
+    {
+        if (casPrefabs[0] == prefab)
+            return currentHeight / thresholdCasYoungHeight;
+        else if (casPrefabs[1] == prefab)
+            return currentHeight / thresholdCasAdultHeight;
+        else
+            return currentHeight / thresholdCasSeniourHeight;
     }
 
     //creates empty objects that act as an hitbox for each tree so when clicking on a tree displays tree data
