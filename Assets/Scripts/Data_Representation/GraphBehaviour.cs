@@ -93,6 +93,7 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         for (int i = 0; i < dataCount; i++)
         {
             double total = 0;
+            Debug.Log($"series count:{chart.series.Count} data count:{dataCount}");
             for (int s = 0; s < chart.series.Count; s++)
             {
                 total += originalData[s][i];

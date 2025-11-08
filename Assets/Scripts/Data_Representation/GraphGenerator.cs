@@ -27,24 +27,24 @@ public class GraphGenerator : MonoBehaviour
                 allYears.Add(entry.year);
         }
 
-        sortedYears = new List<int>(allYears);
+        sortedYears =  allYears;
         sortedYears.Sort();
 
         foreach (LineChart chart in lineCharts)
-            prepareChart(chart, sortedYears);
+            prepareChart(chart);
 
-        populateLineChart(lineCharts[0], sortedYears, tableData, e => e.N);
-        populateLineChart(lineCharts[1], sortedYears, tableData, e => e.Nst);
-        populateLineChart(lineCharts[2], sortedYears, tableData, e => e.Ndead);
-        populateLineChart(lineCharts[3], sortedYears, tableData, e => e.hdom);
-        populateLineChart(lineCharts[4], sortedYears, tableData, e => e.dg);
-        populateLineChart(lineCharts[5], sortedYears, tableData, e => e.G);
-        populateLineChart(lineCharts[6], sortedYears, tableData, e => e.V);
-        populateLineChart(lineCharts[7], sortedYears, tableData, e => e.Vu_st);
+        populateLineChart(lineCharts[0], tableData, e => e.N);
+        populateLineChart(lineCharts[1], tableData, e => e.Nst);
+        populateLineChart(lineCharts[2], tableData, e => e.Ndead);
+        populateLineChart(lineCharts[3], tableData, e => e.hdom);
+        populateLineChart(lineCharts[4], tableData, e => e.dg);
+        populateLineChart(lineCharts[5], tableData, e => e.G);
+        populateLineChart(lineCharts[6], tableData, e => e.V);
+        populateLineChart(lineCharts[7], tableData, e => e.Vu_st);
 
         populateBarCharts(sortedYears, tableData);
 
-        populateMultiLineChart(sortedYears, tableData);
+        populateMultiLineChart(tableData);
 
         foreach (LineChart chart in lineCharts)
             highlightPoint(chart, current_year1, current_year2);
@@ -54,7 +54,6 @@ public class GraphGenerator : MonoBehaviour
 
     private void populateLineChart(
         LineChart chart,
-        List<int> years,
         List<List<YieldTableEntry>> tableData,
         Func<YieldTableEntry, float> valueSelector)
     {
@@ -74,25 +73,37 @@ public class GraphGenerator : MonoBehaviour
             Color lineColor = Color.HSVToRGB((i * 0.15f) % 1f, 1f, 1f);
             setupSerieStyle(serie, lineColor);
 
-            for (int j = 0; j < years.Count; j++)
-            {
-                chart.AddData(i, 0f);
-                serie.GetSerieData(j).ignore = true;
-            }
-
             foreach (var entry in entries)
             {
-                int yearIndex = years.IndexOf(entry.year);
-                int correctedIndex = chart.GetData(i, years.IndexOf(entry.year)) != 0f ? yearIndex + 1 : yearIndex;
-                chart.UpdateData(i, correctedIndex, valueSelector(entry));
-                serie.GetSerieData(correctedIndex).ignore = false;
+                chart.AddData(i, entry.year, valueSelector(entry));
             }
         }
 
         chart.RefreshChart();
     }
 
-    private void prepareChart(BaseChart chart, List<int> years)
+    private void prepareChart(BaseChart chart)
+    {
+        chart.ClearData();
+        chart.RemoveAllSerie();
+        chart.RemoveData();
+        chart.RefreshChart();
+
+        var xAxis = chart.GetChartComponent<XAxis>();
+        xAxis.type = Axis.AxisType.Value;
+        xAxis.minMaxType = Axis.AxisMinMaxType.Custom;
+
+        if (sortedYears.Count > 0)
+        {
+            int minYear = sortedYears.Min();
+            int maxYear = sortedYears.Max();
+
+            xAxis.min = minYear;
+            xAxis.max = maxYear;
+        }
+    }
+
+    private void prepareBarChart(BaseChart chart, List<int> years)
     {
         chart.ClearData();
         chart.RemoveAllSerie();
@@ -100,6 +111,8 @@ public class GraphGenerator : MonoBehaviour
         chart.RefreshChart();
 
         chart.GetChartComponent<XAxis>().data.Clear();
+        var xAxis = chart.GetChartComponent<XAxis>();
+        xAxis.type = Axis.AxisType.Category;
         foreach (var y in years)
         {
             chart.AddXAxisData(y.ToString());
@@ -112,7 +125,7 @@ public class GraphGenerator : MonoBehaviour
         var chart1 = barCharts[0];
         var gb1 = chart1.GetComponent<GraphBehaviour>();
 
-        prepareChart(chart1, years);
+        prepareBarChart(chart1, years);
         string[] volumeComponents = { "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5" };
 
         for (int standIndex = 0; standIndex < tableData.Count; standIndex++)
@@ -161,8 +174,8 @@ public class GraphGenerator : MonoBehaviour
 
         var chart2 = barCharts[1];
         var gb2 = chart2.GetComponent<GraphBehaviour>();
-        
-        prepareChart(chart2, years);
+
+        prepareBarChart(chart2, years);
 
         string[] biomassComponents = { "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr" };
 
@@ -207,21 +220,18 @@ public class GraphGenerator : MonoBehaviour
                 }
             }
         }
-
         chart2.RefreshChart();
         gb2.SaveOriginalData();
     }
 
-
-
-    private void populateMultiLineChart(List<int> years, List<List<YieldTableEntry>> tableData)
+    private void populateMultiLineChart(List<List<YieldTableEntry>> tableData)
     {
         for (int chartIndex = 0; chartIndex < MultiLineCharts.Count; chartIndex++)
         {
             var chart = MultiLineCharts[chartIndex];
             if (chart == null) continue;
 
-            prepareChart(chart, years);
+            prepareChart(chart);
 
             highlightedIndex1 = -1;
             highlightedIndex2 = -1;
@@ -263,24 +273,10 @@ public class GraphGenerator : MonoBehaviour
                 setupSerieStyle(serie1, baseColor);
                 setupSerieStyle(serie2, secondaryColor);
 
-                for (int j = 0; j < years.Count; j++)
-                {
-                    chart.AddData(serie1.index, 0f);
-                    chart.AddData(serie2.index, 0f);
-                    serie1.GetSerieData(j).ignore = true;
-                    serie2.GetSerieData(j).ignore = true;
-                }
-
                 foreach (var entry in plotData)
                 {
-                    int yearIndex = years.IndexOf(entry.year);
-                    int correctedIndex = chart.GetData(serie1.index, yearIndex) != 0f ? yearIndex + 1 : yearIndex;
-
-                    chart.UpdateData(serie1.index, correctedIndex, valueSelector1(entry));
-                    chart.UpdateData(serie2.index, correctedIndex, valueSelector2(entry));
-
-                    serie1.GetSerieData(correctedIndex).ignore = false;
-                    serie2.GetSerieData(correctedIndex).ignore = false;
+                    chart.AddData(serie1.index, entry.year, valueSelector1(entry));
+                    chart.AddData(serie2.index, entry.year, valueSelector2(entry));
                 }
             }
 
