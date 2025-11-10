@@ -19,8 +19,8 @@ public class Manager : MonoBehaviour
     public Transform paralelPos;
     public GraphGenerator graphGenerator;
 
-    CameraBahaviour cameraBehaviour1;
-    CameraBahaviour cameraBehaviour2;
+    CameraBehaviour cameraBehaviour1;
+    CameraBehaviour cameraBehaviour2;
     Camera cam1;
     Camera cam2;
     List<List<SortedDictionary<int, TreeData>>> outputSoloTreesData;
@@ -36,8 +36,8 @@ public class Manager : MonoBehaviour
 
     private void Start()
     {
-        cameraBehaviour1 = Camera1.GetComponent<CameraBahaviour>();
-        cameraBehaviour2 = Camera2.GetComponent<CameraBahaviour>();
+        cameraBehaviour1 = Camera1.GetComponent<CameraBehaviour>();
+        cameraBehaviour2 = Camera2.GetComponent<CameraBehaviour>();
         cam1 = Camera1.GetComponent<Camera>();
         cam2 = Camera2.GetComponent<Camera>();
     }

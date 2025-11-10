@@ -6,7 +6,7 @@ using XCharts.Runtime;
 
 public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
-    public CameraBahaviour cam1, cam2;
+    public CameraBehaviour cam1, cam2;
     public Manager manager;
 
     [SerializeField] bool isMultiLine = false;

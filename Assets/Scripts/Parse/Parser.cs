@@ -42,9 +42,7 @@ public class Parser : MonoBehaviour
             parseSoloTrees(outputSoloTreesData, s);
         foreach (string s in yieldTablePaths)
             parseYieldTable(outputYieldTableData, s);
-        foreach (string s in multiYieldTablePaths)
-            receiveMultiYieldTable(outputYieldTableData, s);
-
+        
         //send all info to manager
         sendDataToManager(outputSoloTreesData, outputYieldTableData);
     }
@@ -278,8 +276,6 @@ public class Parser : MonoBehaviour
                     float.Parse(entryInfo[npvsumIndex].Trim(), CultureInfo.InvariantCulture), // NPVsum 
                     float.Parse(entryInfo[eeaIndex].Trim(), CultureInfo.InvariantCulture)  // EEA 
                 );
-                
-
                 yieldTable.Add(entry);
             }
             catch (FormatException fe)
@@ -297,98 +293,6 @@ public class Parser : MonoBehaviour
         }
         output.Add(yieldTable);
     }
-
-    //refactor needed!!!
-    private void receiveMultiYieldTable(List<List<YieldTableEntry>> output, string yieldTablePath)
-    {
-        if (string.IsNullOrEmpty(yieldTablePath))
-        {
-            ShowMessage("No file selected", Color.red);
-            return;
-        }
-
-        var lines = File.ReadAllLines(yieldTablePath);
-        if (lines.Length == 0)
-        {
-            ShowMessage("File is empty", Color.red);
-            return;
-        }
-
-        string[] headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
-        if (!VerifyHeaders(headers, expectedYieldTableHeaders))
-        {
-            ShowMessage("Incorrect headers", Color.red);
-            return;
-        }
-
-        output.Add(new List<YieldTableEntry>()); 
-        int index = 0;
-
-        for (int i = 1; i < lines.Length; i++)
-        {
-            string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
-
-            for (int j = 0; j < entryInfo.Length; j++)
-            {
-                string s = entryInfo[j];
-                if (string.IsNullOrWhiteSpace(s)) entryInfo[j] = "0";
-                else if (s.EndsWith(".")) entryInfo[j] = s + "0";
-            }
-
-            try
-            {
-                var entry = new YieldTableEntry(
-                    entryInfo[tableIdIndex].Trim(),
-                    int.Parse(entryInfo[tableYearIndex].Trim()),
-                    Mathf.RoundToInt(float.Parse(entryInfo[nstIndex].Trim(), CultureInfo.InvariantCulture)),
-                    Mathf.RoundToInt(float.Parse(entryInfo[nIndex].Trim(), CultureInfo.InvariantCulture)),
-                    Mathf.RoundToInt(float.Parse(entryInfo[ndeadIndex].Trim(), CultureInfo.InvariantCulture)),
-                    Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)),
-                    float.Parse(entryInfo[hdomIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[gIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[dgIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[vu_stIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[vIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[vu_as1Index].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[vu_as2Index].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[vu_as3Index].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[vu_as4Index].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[vu_as5Index].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[maiVIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[iVIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[wwIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[wbIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[wbrIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[wlIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[waIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[wrIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[npvsumIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(entryInfo[eeaIndex].Trim(), CultureInfo.InvariantCulture)
-                );
-
-                if (output[index].Count > 0 && entry.S != output[index].First().S)
-                {
-                    index++;
-                    output.Add(new List<YieldTableEntry>());
-                }
-
-                output[index].Add(entry);
-            }
-            catch (FormatException fe)
-            {
-                Debug.LogError($"Format error parsing line {i}: {fe.Message}\nOffending data: {string.Join(" | ", entryInfo)}");
-            }
-            catch (IndexOutOfRangeException ioe)
-            {
-                Debug.LogError($"Index out of range on line {i}: {ioe.Message}\nLine has {entryInfo.Length} columns.");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Unexpected error parsing line {i}: {ex.Message}");
-            }
-        }
-    }
-
 
     bool VerifyHeaders(string[] headers, string[] expectedHeaders)
     {
