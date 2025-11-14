@@ -5,33 +5,35 @@ using System.IO;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-//Multi visualization support needed!!!!
 public class Parser : MonoBehaviour
 {
     public TMP_Text feedbackText;
     public TMP_InputField intervalInputField;
-    public Manager manager;
+    public InputAndParsedData so;
+    public ShapeInputController si1;
+    public ShapeInputController si2;
 
     readonly string[] expectedSoloTreesHeaders = { "id_presc", "ciclo", "Year", "t", "id_arv", "Xarv", "Yarv", "d", "h", "cw", "estado" };
-    readonly string[] expectedYieldTableHeaders = { "year", "hdom", "Nst", "N", "Ndead", "G", "dg", "Vu_st", "Vst", "Vu_as1", "Vu_as2", 
+    readonly string[] expectedYieldTableHeaders = { "year", "hdom", "Nst", "N", "Ndead", "G", "dg", "Vu_st", "Vst", "Vu_as1", "Vu_as2",
         "Vu_as3", "Vu_as4", "Vu_as5", "maiV", "iV", "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr", "NPVsum", "EEA" };
     string[] lines;
-    List<string> soloTreePaths = new List<string>();
-    List<string> yieldTablePaths = new List<string>();
-    List<string> multiYieldTablePaths = new List<string>();
+    List<string> soloTreePaths = new List<string> { null };
+    List<string> yieldTablePaths = new List<string> { null };
     int interval = 0;
-    const int idIndex = 1, cicloIndex = 2, yearIndex = 3, tIndex = 4, XarvIndex = 7, YarvIndex = 8, dIndex = 9, 
+    const int idIndex = 1, cicloIndex = 2, yearIndex = 3, tIndex = 4, XarvIndex = 7, YarvIndex = 8, dIndex = 9,
         hIndex = 10, cwIndex = 11, estadoIndex = 24, tableIdIndex = 0, tableSIndex = 1, tableYearIndex = 6, nstIndex = 14, nIndex = 15, ndeadIndex = 16,
-        hdomIndex = 13, gIndex = 19, dgIndex = 20, vu_stIndex = 21, vIndex = 24, vu_as1Index = 30, vu_as2Index = 31, 
-        vu_as3Index = 32, vu_as4Index = 33, vu_as5Index = 34, maiVIndex = 38, iVIndex = 39, wwIndex = 40, wbIndex = 41, 
+        hdomIndex = 13, gIndex = 19, dgIndex = 20, vu_stIndex = 21, vIndex = 24, vu_as1Index = 30, vu_as2Index = 31,
+        vu_as3Index = 32, vu_as4Index = 33, vu_as5Index = 34, maiVIndex = 38, iVIndex = 39, wwIndex = 40, wbIndex = 41,
         wbrIndex = 42, wlIndex = 43, waIndex = 44, wrIndex = 45, npvsumIndex = 60, eeaIndex = 61;
 
     public void parse()
     {
         if (!string.IsNullOrEmpty(intervalInputField.text) && !int.TryParse(intervalInputField.text, out interval))
         {
-            ShowMessage("Interval is not a number", Color.red);
+            ShowMessage("Interval is not a number\n");
             return;
         }
 
@@ -39,19 +41,28 @@ public class Parser : MonoBehaviour
         List<List<YieldTableEntry>> outputYieldTableData = new List<List<YieldTableEntry>>();
 
         foreach (string s in soloTreePaths)
-            parseSoloTrees(outputSoloTreesData, s);
+            if (s != null)
+                parseSoloTrees(outputSoloTreesData, s);
         foreach (string s in yieldTablePaths)
-            parseYieldTable(outputYieldTableData, s);
-        
-        //send all info to manager
-        sendDataToManager(outputSoloTreesData, outputYieldTableData);
+            if (s != null)
+                parseYieldTable(outputYieldTableData, s);
+
+        so.outputSoloTreesData = outputSoloTreesData;
+        so.outputYieldTable = outputYieldTableData;
+        List<(int, List<float>)> shapeData = new List<(int, List<float>)>();
+        shapeData.Add(si1.GetSelectedShapeFormat());
+        if(outputSoloTreesData.Count > 1)
+            shapeData.Add(si2.GetSelectedShapeFormat());
+        so.plotShapeAndDimensions = shapeData;
+        SceneManager.LoadScene(1);//GOTO VISUALIZATION SCENE
+        Debug.Log("Parsing completed.");
     }
 
     private void parseSoloTrees(List<List<SortedDictionary<int, TreeData>>> output, string soloTreePath)
     {
         if (string.IsNullOrEmpty(soloTreePath))
         {
-            ShowMessage("No file selected", Color.red);
+            ShowMessage("No file selected\n");
             return;
         }
 
@@ -63,7 +74,7 @@ public class Parser : MonoBehaviour
 
         if (interval > (ending_year - starting_year))
         {
-            ShowMessage("Interval is greater than the planing horizon", Color.red);
+            ShowMessage("Interval is greater than the planing horizon\n");
             return;
         }
 
@@ -71,13 +82,13 @@ public class Parser : MonoBehaviour
 
         if (!VerifyHeaders(headers, expectedSoloTreesHeaders))
         {
-            ShowMessage("Incorect headers", Color.red);
+            ShowMessage($"Incorect headers on {soloTreePath}\n");
             return;
         }
 
         if (lines.Length == 0)
         {
-            ShowMessage("File is empty", Color.red);
+            ShowMessage($"File is empty on {soloTreePath}\n");
             return;
         }
 
@@ -202,11 +213,11 @@ public class Parser : MonoBehaviour
         }
     }
 
-    private void parseYieldTable(List<List<YieldTableEntry>> output,string yieldTablePath)
+    private void parseYieldTable(List<List<YieldTableEntry>> output, string yieldTablePath)
     {
         if (string.IsNullOrEmpty(yieldTablePath))
         {
-            ShowMessage("No file selected", Color.red);
+            ShowMessage($"No file selected\n");
             return;
         }
 
@@ -214,7 +225,7 @@ public class Parser : MonoBehaviour
 
         if (lines.Length == 0)
         {
-            ShowMessage("File is empty", Color.red);
+            ShowMessage($"File is empty on {yieldTablePath}\n");
             return;
         }
 
@@ -222,7 +233,7 @@ public class Parser : MonoBehaviour
 
         if (!VerifyHeaders(headers, expectedYieldTableHeaders))
         {
-            ShowMessage("Incorrect headers", Color.red);
+            ShowMessage($"Incorrect headers on {yieldTablePath}\n");
             return;
         }
 
@@ -307,52 +318,42 @@ public class Parser : MonoBehaviour
         return true;
     }
 
-    void ShowMessage(string msg, Color color)
+    void ShowMessage(string msg)
     {
         if (feedbackText != null)
         {
-            feedbackText.text = msg;
-            feedbackText.color = color;
+            feedbackText.text += msg;
         }
     }
 
-    public void receiveSoloTreePath(string path, string prevPath)
+    public void receiveSoloTreePath(int index, string path)
     {
-        insertPath(soloTreePaths, path, prevPath);
+        insertPath(soloTreePaths, path, index, false);
     }
 
-    public void receiveYieldTablePath(string path, string prevPath)
+    public void receiveYieldTablePath(int index, string path)
     {
-        insertPath(yieldTablePaths, path, prevPath);
+        insertPath(yieldTablePaths, path, index, true);
     }
 
-    public void receiveMultiYieldTablePath(string path, string prevPath)
+    public void addEntryList()
     {
-        insertPath(multiYieldTablePaths, path, prevPath);
+        soloTreePaths.Add(null);
+        yieldTablePaths.Add(null);
     }
 
-    void insertPath(List<string> list, string path, string prevPath)
+    public void removeEntryList() {
+        if (soloTreePaths.Count > 1)
+            soloTreePaths.RemoveAt(soloTreePaths.Count - 1);
+        if (yieldTablePaths.Count > 1)
+            yieldTablePaths.RemoveAt(yieldTablePaths.Count - 1);
+    }
+
+    void insertPath(List<string> list, string path, int index, bool isYieldTable)
     {
-        int index = list.IndexOf(prevPath);
-        if (index >= 0)
-        {
-            list[index] = path;
-        }
-        else
-        {
-            list.Add(path);
-        }
+        list[index] = path;
+        string text = isYieldTable ? "Yield table" : "Solo trees";
         if (feedbackText != null)
-            feedbackText.text += $"File selected: {Path.GetFileName(path)}\n";
+            feedbackText.text += $"{text} selected for plot {index + 1}: {Path.GetFileName(path)}\n";
     }
-
-    void sendDataToManager(List<List<SortedDictionary<int, TreeData>>> outputSoloTrees, List<List<YieldTableEntry>> outputYieldTable)
-    {
-        if (outputSoloTrees.Any() && outputYieldTable.Any())
-        {
-            manager.receiveSoloTreesData(outputSoloTrees);
-            manager.receiveYieldTableData(outputYieldTable);
-        }
-    }
-
 }

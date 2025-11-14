@@ -17,6 +17,7 @@ public class Visualizer : MonoBehaviour
     [Header("Castanheiro Prefabs")]
     public List<GameObject> casPrefabs;
     public string activeSpecie;
+    public InputAndParsedData inputAndParsedData;
 
     [Header("Scene References")]
     public GameObject plot;
@@ -71,10 +72,13 @@ public class Visualizer : MonoBehaviour
     [SerializeField] float thresholdCasSeniourHeight;
 
     int currentYear;
+    List<(int, List<float>)> plotShapeAndDimensions;
     readonly List<string> species = new List<string> { "pb", "pm", "eg", "cas" };
 
     private void Start()
     {
+        plotShapeAndDimensions = inputAndParsedData.plotShapeAndDimensions;
+
         // Reset terrains to avoid modifying original terrain data so unity doesnt serialize changes
         terrain1.terrainData = Instantiate(terrain1.terrainData);
         terrain2.terrainData = Instantiate(terrain2.terrainData);

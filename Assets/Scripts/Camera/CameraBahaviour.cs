@@ -12,7 +12,7 @@ public class CameraBehaviour : MonoBehaviour
     public bool isMultiVisualization = false;
 
     Vector3 lastMousePosition;
-    [SerializeField] bool canRotate = false;
+    [SerializeField] bool canRotate = true;
 
     void Update()
     {

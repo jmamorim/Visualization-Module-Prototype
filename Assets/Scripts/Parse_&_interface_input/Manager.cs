@@ -10,14 +10,14 @@ using UnityEngine.Rendering;
 // needs to change so it can adapt visualization and data representation for yield table data and multi visualization 
 public class Manager : MonoBehaviour
 {
-    public TMP_Text feedbackText;
     public TMP_Text treeInfoText;
     public Visualizer visualizer;
-    public Canvas dataCanvas, visulaizationCanvas;
+    public Canvas visulaizationCanvas;
     public GameObject Camera1;
     public GameObject Camera2;
     public Transform paralelPos;
     public GraphGenerator graphGenerator;
+    public InputAndParsedData inputAndParsedData;
 
     CameraBehaviour cameraBehaviour1;
     CameraBehaviour cameraBehaviour2;
@@ -27,7 +27,7 @@ public class Manager : MonoBehaviour
     List<List<YieldTableEntry>> YieldTableData;
     int current_year1;
     int current_year2;
-    bool isVisualizationActive = false;
+    bool isVisualizationActive = true;
     bool isParalelCameraActive = false;
     Vector3 lastPosCamera1Position;
     Quaternion lastPosCamera1Rotation;
@@ -40,6 +40,12 @@ public class Manager : MonoBehaviour
         cameraBehaviour2 = Camera2.GetComponent<CameraBehaviour>();
         cam1 = Camera1.GetComponent<Camera>();
         cam2 = Camera2.GetComponent<Camera>();
+
+        outputSoloTreesData = inputAndParsedData.outputSoloTreesData;
+        YieldTableData = inputAndParsedData.outputYieldTable;
+
+        receiveSoloTreesData(outputSoloTreesData);
+        receiveYieldTableData(YieldTableData);
     }
 
     void Update()
@@ -85,24 +91,6 @@ public class Manager : MonoBehaviour
                     reversePlot2();
                     changeHightlight();
                 }
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space) && isVisualizationActive)
-            {
-                isVisualizationActive = false;
-                cameraBehaviour1.DisableRotation();
-                cameraBehaviour2.DisableRotation();
-                dataCanvas.gameObject.SetActive(true);
-                visulaizationCanvas.gameObject.SetActive(false);
-                showInfo();
-            }
-            else if (Input.GetKeyDown(KeyCode.Space) && !isVisualizationActive)
-            {
-                isVisualizationActive = true;
-                cameraBehaviour1.EnableRotation();
-                cameraBehaviour2.EnableRotation();
-                dataCanvas.gameObject.SetActive(false);
-                visulaizationCanvas.gameObject.SetActive(true);
             }
 
             if (Input.GetKeyDown(KeyCode.P) && isVisualizationActive)
@@ -167,14 +155,7 @@ public class Manager : MonoBehaviour
         {
             current_year1++;
             treeInfoText.text = "";
-            if (!isVisualizationActive)
-            {
-                showInfo();
-            }
-            else
-            {
-                visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
-            }
+            visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
         }
     }
 
@@ -184,14 +165,7 @@ public class Manager : MonoBehaviour
         {
             current_year1--;
             treeInfoText.text = "";
-            if (!isVisualizationActive)
-            {
-                showInfo();
-            }
-            else
-            {
-                visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
-            }
+            visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
         }
     }
 
@@ -201,14 +175,7 @@ public class Manager : MonoBehaviour
         {
             current_year2++;
             treeInfoText.text = "";
-            if (!isVisualizationActive)
-            {
-                showInfo();
-            }
-            else
-            {
-                visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
-            }
+            visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
         }
     }
 
@@ -218,14 +185,7 @@ public class Manager : MonoBehaviour
         {
             current_year2--;
             treeInfoText.text = "";
-            if (!isVisualizationActive)
-            {
-                showInfo();
-            }
-            else
-            {
-                visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
-            }
+            visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
         }
     }
 
@@ -234,7 +194,7 @@ public class Manager : MonoBehaviour
         if (isBar)
         {
             changePlot1(year);
-            if(YieldTableData.Count() >1)
+            if (YieldTableData.Count() > 1)
                 changePlot2(year);
             return;
         }
@@ -304,7 +264,10 @@ public class Manager : MonoBehaviour
         outputSoloTreesData = data;
         current_year1 = 0;
         current_year2 = 0;
-        showInfo();
+
+        visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
+        if (outputSoloTreesData.Count > 1)
+            visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
 
         //setup cameras viewport
         if (data.Count > 1)
@@ -328,16 +291,6 @@ public class Manager : MonoBehaviour
         YieldTableData = data;
         graphGenerator.receiveData(data, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1);
     }
-
-
-    //needs to change in the future
-    void showInfo()
-    {
-        visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
-        if (outputSoloTreesData.Count > 1)
-            visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
-    }
-
     public void ShowTreeInfo(Tree t)
     {
         if (treeInfoText != null)

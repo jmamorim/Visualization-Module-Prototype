@@ -11,11 +11,9 @@ public class CSVPicker : MonoBehaviour
     public TMP_Text feedbackText;
     public TMP_InputField intervalInputField;
     public Parser parser;
+    public InterfaceManager im;
 
-    string filePath = "";
-
-    [SerializeField]
-    bool isYieldTable = false;
+    [SerializeField] bool isYieldTable = false;
 
     void Start()
     {
@@ -35,13 +33,11 @@ public class CSVPicker : MonoBehaviour
 
         if (isYieldTable)
         {
-            parser.receiveYieldTablePath(currentFilePath, filePath);
-            filePath = currentFilePath;
+            parser.receiveYieldTablePath(im.getActivePlotIndex(), currentFilePath);
         }
         else
         {
-            parser.receiveSoloTreePath(currentFilePath, filePath);
-            filePath = currentFilePath;
+            parser.receiveSoloTreePath(im.getActivePlotIndex(), currentFilePath);
         }
     }
 }

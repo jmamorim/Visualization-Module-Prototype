@@ -13,9 +13,13 @@ public class GraphGenerator : MonoBehaviour
     public List<LineChart> lineCharts;
     public List<LineChart> MultiLineCharts;
     public List<BarChart> barCharts;
+    //text and buttons to enable/disable graphs if needed
+    public List<GameObject> textAndButtons;
 
     int highlightedIndex1, highlightedIndex2;
     List<int> sortedYears;
+    string[] volumeComponents = { "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5" };
+    string[] biomassComponents = { "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr" };
 
     public void receiveData(List<List<YieldTableEntry>> tableData, int current_year1, int current_year2)
     {
@@ -27,7 +31,7 @@ public class GraphGenerator : MonoBehaviour
                 allYears.Add(entry.year);
         }
 
-        sortedYears =  allYears;
+        sortedYears = allYears;
         sortedYears.Sort();
 
         foreach (LineChart chart in lineCharts)
@@ -122,106 +126,128 @@ public class GraphGenerator : MonoBehaviour
 
     private void populateBarCharts(List<int> years, List<List<YieldTableEntry>> tableData)
     {
-        var chart1 = barCharts[0];
-        var gb1 = chart1.GetComponent<GraphBehaviour>();
+        foreach (var go in textAndButtons)
+            go.SetActive(tableData.Count > 1);
 
-        prepareBarChart(chart1, years);
-        string[] volumeComponents = { "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5" };
+        string[] VolumeComponents = { "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5" };
+        Color[] volumeColors = {
+            new Color(0.36f, 0.20f, 0.09f), 
+            new Color(0.0f, 0.4f, 0.0f),    
+            new Color(0.2f, 0.6f, 0.2f),    
+            new Color(0.8f, 0.5f, 0.2f),    
+            new Color(0.6f, 0.9f, 0.5f) 
+        };
 
         for (int standIndex = 0; standIndex < tableData.Count; standIndex++)
         {
+            var chart = barCharts[standIndex];
+            var gb = chart.GetComponent<GraphBehaviour>();
+            prepareBarChart(chart, years);
+
             var plotData = tableData[standIndex];
             if (plotData == null || plotData.Count == 0) continue;
 
             string standId = plotData[0].id_stand;
+            chart.GetChartComponent<Title>().text = $"Vu_as {standId}";
 
-            for (int c = 0; c < volumeComponents.Length; c++)
+            for (int c = 0; c < VolumeComponents.Length; c++)
             {
-                var serie = chart1.AddSerie<Bar>($"{standId} {volumeComponents[c]}");
+                string comp = VolumeComponents[c];
+                var serie = chart.AddSerie<Bar>($"{standId} {comp}");
                 serie.stack = $"volume_{standId}";
-                Color color = Color.HSVToRGB((float)(c * 0.12f + standIndex * 0.2f) % 1f, 0.8f, 1f);
-                serie.itemStyle.color = color;
+                serie.itemStyle.color = volumeColors[c];
 
+                // initialize empty data
                 for (int j = 0; j < years.Count; j++)
                 {
-                    chart1.AddData(serie.index, 0f);
+                    chart.AddData(serie.index, 0f);
                     serie.GetSerieData(j).ignore = true;
                 }
 
                 foreach (var entry in plotData)
                 {
                     int yearIndex = years.IndexOf(entry.year);
-                    int correctedIndex = chart1.GetData(serie.index, yearIndex) != 0f ? yearIndex + 1 : yearIndex;
+                    int correctedIndex = chart.GetData(serie.index, yearIndex) != 0f ? yearIndex + 1 : yearIndex;
 
-                    float v = 0f;
-                    switch (volumeComponents[c])
+                    float v = comp switch
                     {
-                        case "Vu_as1": v = entry.Vu_as1; break;
-                        case "Vu_as2": v = entry.Vu_as2; break;
-                        case "Vu_as3": v = entry.Vu_as3; break;
-                        case "Vu_as4": v = entry.Vu_as4; break;
-                        case "Vu_as5": v = entry.Vu_as5; break;
-                    }
+                        "Vu_as1" => entry.Vu_as1,
+                        "Vu_as2" => entry.Vu_as2,
+                        "Vu_as3" => entry.Vu_as3,
+                        "Vu_as4" => entry.Vu_as4,
+                        "Vu_as5" => entry.Vu_as5,
+                        _ => 0f
+                    };
 
-                    chart1.UpdateData(serie.index, correctedIndex, v);
+                    chart.UpdateData(serie.index, correctedIndex, v);
                     serie.GetSerieData(correctedIndex).ignore = false;
                 }
             }
+
+            chart.RefreshChart();
+            gb.SaveOriginalData();
         }
 
-        chart1.RefreshChart();
-        gb1.SaveOriginalData();
+        string[] BiomassComponents = { "Wr", "Ww", "Wb", "Wbr", "Wl", "Wa" };
+        Color[] biomassColors = {
+            new Color(0.36f, 0.20f, 0.09f), // roots 
+            new Color(0.76f, 0.60f, 0.42f), // wood 
+            new Color(0.55f, 0.27f, 0.07f), // bark 
+            new Color(0.65f, 0.45f, 0.25f), // branches 
+            new Color(0.3f, 0.7f, 0.3f),    // leaves 
+            new Color(0.6f, 0.6f, 0.6f)     // aboveground total 
+        };
 
-        var chart2 = barCharts[1];
-        var gb2 = chart2.GetComponent<GraphBehaviour>();
-
-        prepareBarChart(chart2, years);
-
-        string[] biomassComponents = { "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr" };
 
         for (int standIndex = 0; standIndex < tableData.Count; standIndex++)
         {
+            var chart = barCharts[2 + standIndex];
+            var gb = chart.GetComponent<GraphBehaviour>();
+            prepareBarChart(chart, years);
+
             var plotData = tableData[standIndex];
             if (plotData == null || plotData.Count == 0) continue;
 
             string standId = plotData[0].id_stand;
+            chart.GetChartComponent<Title>().text = $"Biomass {standId}";
 
-            for (int c = 0; c < biomassComponents.Length; c++)
+            for (int c = 0; c < BiomassComponents.Length; c++)
             {
-                var serie = chart2.AddSerie<Bar>($"{standId} {biomassComponents[c]}");
+                string comp = BiomassComponents[c];
+                var serie = chart.AddSerie<Bar>($"{standId} {comp}");
                 serie.stack = $"biomass_{standId}";
-                Color color = Color.HSVToRGB((float)(c * 0.12f + standIndex * 0.2f) % 1f, 0.8f, 1f);
-                serie.itemStyle.color = color;
+                serie.itemStyle.color = biomassColors[c];
 
                 for (int j = 0; j < years.Count; j++)
                 {
-                    chart2.AddData(serie.index, 0f);
+                    chart.AddData(serie.index, 0f);
                     serie.GetSerieData(j).ignore = true;
                 }
 
                 foreach (var entry in plotData)
                 {
                     int yearIndex = years.IndexOf(entry.year);
-                    int correctedIndex = chart2.GetData(serie.index, yearIndex) != 0f ? yearIndex + 1 : yearIndex;
+                    int correctedIndex = chart.GetData(serie.index, yearIndex) != 0f ? yearIndex + 1 : yearIndex;
 
-                    float v = 0f;
-                    switch (biomassComponents[c])
+                    float v = comp switch
                     {
-                        case "Ww": v = entry.Ww; break;
-                        case "Wb": v = entry.Wb; break;
-                        case "Wbr": v = entry.Wbr; break;
-                        case "Wl": v = entry.Wl; break;
-                        case "Wa": v = entry.Wa; break;
-                        case "Wr": v = entry.Wr; break;
-                    }
+                        "Ww" => entry.Ww,
+                        "Wb" => entry.Wb,
+                        "Wbr" => entry.Wbr,
+                        "Wl" => entry.Wl,
+                        "Wa" => entry.Wa,
+                        "Wr" => entry.Wr,
+                        _ => 0f
+                    };
 
-                    chart2.UpdateData(serie.index, correctedIndex, v);
+                    chart.UpdateData(serie.index, correctedIndex, v);
                     serie.GetSerieData(correctedIndex).ignore = false;
                 }
             }
+
+            chart.RefreshChart();
+            gb.SaveOriginalData();
         }
-        chart2.RefreshChart();
-        gb2.SaveOriginalData();
     }
 
     private void populateMultiLineChart(List<List<YieldTableEntry>> tableData)
