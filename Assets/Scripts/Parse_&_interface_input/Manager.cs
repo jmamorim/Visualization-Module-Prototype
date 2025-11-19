@@ -15,9 +15,10 @@ public class Manager : MonoBehaviour
     public Canvas visulaizationCanvas;
     public GameObject Camera1;
     public GameObject Camera2;
-    public Transform paralelPos;
+    public Transform paralelPos1, paralelPos2;
     public GraphGenerator graphGenerator;
     public InputAndParsedData inputAndParsedData;
+    public bool isParalelCameraActive = false;
 
     CameraBehaviour cameraBehaviour1;
     CameraBehaviour cameraBehaviour2;
@@ -28,7 +29,6 @@ public class Manager : MonoBehaviour
     int current_year1;
     int current_year2;
     bool isVisualizationActive = true;
-    bool isParalelCameraActive = false;
     Vector3 lastPosCamera1Position;
     Quaternion lastPosCamera1Rotation;
     Vector3 lastPosCamera2Position;
@@ -104,8 +104,8 @@ public class Manager : MonoBehaviour
                     cameraBehaviour1.DisableRotation();
                     cam1.orthographic = true;
                     cam1.orthographicSize = 70;
-                    Camera1.transform.position = paralelPos.position;
-                    Camera1.transform.rotation = paralelPos.rotation;
+                    Camera1.transform.position = paralelPos1.position;
+                    Camera1.transform.rotation = paralelPos1.rotation;
 
                     if (outputSoloTreesData.Count > 1)
                     {
@@ -114,8 +114,8 @@ public class Manager : MonoBehaviour
                         cameraBehaviour2.DisableRotation();
                         cam2.orthographic = true;
                         cam2.orthographicSize = 70;
-                        Camera2.transform.position = paralelPos.position;
-                        Camera2.transform.rotation = paralelPos.rotation;
+                        Camera2.transform.position = paralelPos2.position;
+                        Camera2.transform.rotation = paralelPos2.rotation;
                     }
                 }
                 else

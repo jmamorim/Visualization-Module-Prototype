@@ -141,7 +141,6 @@ public class GraphGenerator : MonoBehaviour
         for (int standIndex = 0; standIndex < tableData.Count; standIndex++)
         {
             var chart = barCharts[standIndex];
-            var gb = chart.GetComponent<GraphBehaviour>();
             prepareBarChart(chart, years);
 
             var plotData = tableData[standIndex];
@@ -185,24 +184,21 @@ public class GraphGenerator : MonoBehaviour
             }
 
             chart.RefreshChart();
-            gb.SaveOriginalData();
         }
 
-        string[] BiomassComponents = { "Wr", "Ww", "Wb", "Wbr", "Wl", "Wa" };
+        string[] BiomassComponents = { "Wr", "Ww", "Wb", "Wbr", "Wl"};
         Color[] biomassColors = {
             new Color(0.36f, 0.20f, 0.09f), // roots 
             new Color(0.76f, 0.60f, 0.42f), // wood 
             new Color(0.55f, 0.27f, 0.07f), // bark 
             new Color(0.65f, 0.45f, 0.25f), // branches 
             new Color(0.3f, 0.7f, 0.3f),    // leaves 
-            new Color(0.6f, 0.6f, 0.6f)     // aboveground total 
         };
 
 
         for (int standIndex = 0; standIndex < tableData.Count; standIndex++)
         {
             var chart = barCharts[2 + standIndex];
-            var gb = chart.GetComponent<GraphBehaviour>();
             prepareBarChart(chart, years);
 
             var plotData = tableData[standIndex];
@@ -217,6 +213,7 @@ public class GraphGenerator : MonoBehaviour
                 var serie = chart.AddSerie<Bar>($"{standId} {comp}");
                 serie.stack = $"biomass_{standId}";
                 serie.itemStyle.color = biomassColors[c];
+
 
                 for (int j = 0; j < years.Count; j++)
                 {
@@ -235,7 +232,6 @@ public class GraphGenerator : MonoBehaviour
                         "Wb" => entry.Wb,
                         "Wbr" => entry.Wbr,
                         "Wl" => entry.Wl,
-                        "Wa" => entry.Wa,
                         "Wr" => entry.Wr,
                         _ => 0f
                     };
@@ -246,7 +242,6 @@ public class GraphGenerator : MonoBehaviour
             }
 
             chart.RefreshChart();
-            gb.SaveOriginalData();
         }
     }
 

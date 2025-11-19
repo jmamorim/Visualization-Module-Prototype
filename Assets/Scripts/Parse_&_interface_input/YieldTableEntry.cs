@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class YieldTableEntry
 {
-    public string id_stand;
+    public string id_stand, id_presc;
     public int year, Nst, N, Ndead, S;
     public float hdom, G, dg, Vu_st, V, Vu_as1, Vu_as2, Vu_as3, Vu_as4, Vu_as5, maiV, iV, Ww, Wb, Wbr, Wl, Wa, Wr, NPVsum, EEA;
 
     public YieldTableEntry(
         string id_stand,
+        string id_presc,
         int year,
         int Nst,
         int N,
@@ -37,6 +38,7 @@ public class YieldTableEntry
         float EEA)
     {
         this.id_stand = id_stand;
+        this.id_presc = id_presc;
         this.year = year;
         this.Nst = Nst;
         this.N = N;

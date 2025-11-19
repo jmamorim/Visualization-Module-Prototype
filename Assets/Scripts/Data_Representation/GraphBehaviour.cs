@@ -19,8 +19,6 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     bool isResizing = false;
     Vector2 originalSize;
     Vector2 originalMousePos;
-    bool showingPercentage = false;
-    List<List<double>> originalData = new List<List<double>>();
     const float minSize = 100f;
 
     private void Start()
@@ -68,47 +66,13 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         Debug.Log($"Clicked on serie {clickedSerieIndex}, data index {clickedDataIndex}");
         manager.changeSimYearOnGraphClick(clickedSerieIndex, clickedDataIndex, isMultiLine, isBar);
     }
-
-    public void SaveOriginalData()
-    {
-        originalData.Clear();
-
-        foreach (var serie in chart.series)
-        {
-            var serieValues = new List<double>();
-            for (int i = 0; i < serie.dataCount; i++)
-            {
-                serieValues.Add(serie.GetYData(i));
-            }
-            originalData.Add(serieValues);
-        }
-    }
-
     public void TogglePercentageView()
     {
-        showingPercentage = !showingPercentage;
-
-        int dataCount = chart.series[0].dataCount;
-
-        for (int i = 0; i < dataCount; i++)
+        var series = chart.series;
+        foreach (var serie in series)
         {
-            double total = 0;
-            Debug.Log($"series count:{chart.series.Count} data count:{dataCount}");
-            for (int s = 0; s < chart.series.Count; s++)
-            {
-                total += originalData[s][i];
-            }
-
-            for (int s = 0; s < chart.series.Count; s++)
-            {
-                double newValue = showingPercentage
-                    ? (total > 0 ? (originalData[s][i] / total) * 100.0 : 0.0)
-                    : originalData[s][i];
-
-                chart.series[s].GetSerieData(i).data[1] = newValue;
-            }
+            serie.barPercentStack = !serie.barPercentStack;
         }
-        chart.RefreshChart();
     }
 
 

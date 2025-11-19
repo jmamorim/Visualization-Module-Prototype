@@ -3,8 +3,9 @@ using UnityEngine;
 
 public class Tree : MonoBehaviour
 {
-    public int id_presc, ciclo, Year, id_arv, estado;
-    public float t, Xarv, Yarv, d, h, cw, rotation;
+    public int ciclo, Year, id_arv, estado;
+    public float t, Xarv, Yarv, d, h, cw, rotation, hbc;
+    public string id_stand, id_presc, specie;
     public bool wasAlive;
 
     private Manager manager;
@@ -16,6 +17,7 @@ public class Tree : MonoBehaviour
 
     public void initTree(TreeData tree)
     {
+        this.id_stand = tree.id_stand;
         this.id_presc = tree.id_presc;
         this.ciclo = tree.ciclo;
         this.Year = tree.Year;
@@ -23,9 +25,11 @@ public class Tree : MonoBehaviour
         this.id_arv = tree.id_arv;
         this.Xarv = tree.Xarv;
         this.Yarv = tree.Yarv;
+        this.specie = tree.specie;
         this.d = tree.d;
         this.h = tree.h;
         this.cw = tree.cw;
+        this.hbc = tree.hbc;
         this.estado = tree.estado;
         this.rotation = tree.rotation;
         this.wasAlive = tree.wasAlive;
