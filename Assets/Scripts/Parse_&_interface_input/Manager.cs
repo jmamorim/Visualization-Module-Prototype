@@ -24,8 +24,8 @@ public class Manager : MonoBehaviour
     CameraBehaviour cameraBehaviour2;
     Camera cam1;
     Camera cam2;
-    List<List<SortedDictionary<int, TreeData>>> outputSoloTreesData;
-    List<List<YieldTableEntry>> YieldTableData;
+    SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData;
+    SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> YieldTableData;
     int current_year1;
     int current_year2;
     bool isVisualizationActive = true;
@@ -33,6 +33,7 @@ public class Manager : MonoBehaviour
     Quaternion lastPosCamera1Rotation;
     Vector3 lastPosCamera2Position;
     Quaternion lastPosCamera2Rotation;
+    string selectedId_stand1, selectedId_stand2, selectedId_presc1, selectedId_presc2, selectedId_presc1YT, selectedId_presc2YT;
 
     private void Start()
     {
@@ -43,6 +44,17 @@ public class Manager : MonoBehaviour
 
         outputSoloTreesData = inputAndParsedData.outputSoloTreesData;
         YieldTableData = inputAndParsedData.outputYieldTable;
+
+        selectedId_stand1 = outputSoloTreesData.First().Key;
+        selectedId_presc1 = outputSoloTreesData[selectedId_stand1].First().Key;
+        selectedId_presc1YT = YieldTableData[selectedId_stand1].First().Key;
+
+        if (outputSoloTreesData.Count() > 1)
+        {
+            selectedId_stand2 = outputSoloTreesData.ElementAt(1).Key;
+            selectedId_presc2 = outputSoloTreesData[selectedId_stand2].First().Key;
+            selectedId_presc2YT = YieldTableData[selectedId_stand2].First().Key;
+        }
 
         receiveSoloTreesData(outputSoloTreesData);
         receiveYieldTableData(YieldTableData);
@@ -151,11 +163,11 @@ public class Manager : MonoBehaviour
 
     private void advancePlot1()
     {
-        if (current_year1 < outputSoloTreesData[0].Count - 1)
+        if (current_year1 < outputSoloTreesData[selectedId_stand1][selectedId_presc1].Count - 1)
         {
             current_year1++;
             treeInfoText.text = "";
-            visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
+            visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
         }
     }
 
@@ -165,17 +177,17 @@ public class Manager : MonoBehaviour
         {
             current_year1--;
             treeInfoText.text = "";
-            visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
+            visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
         }
     }
 
     private void advancePlot2()
     {
-        if (current_year2 < outputSoloTreesData[1].Count - 1)
+        if (current_year2 < outputSoloTreesData[selectedId_stand1][selectedId_presc1].Count - 1)
         {
             current_year2++;
             treeInfoText.text = "";
-            visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
+            visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
         }
     }
 
@@ -185,7 +197,7 @@ public class Manager : MonoBehaviour
         {
             current_year2--;
             treeInfoText.text = "";
-            visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
+            visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
         }
     }
 
@@ -227,7 +239,7 @@ public class Manager : MonoBehaviour
 
     private void changePlot1(int year)
     {
-        var outputPlot1 = outputSoloTreesData[0];
+        var outputPlot1 = outputSoloTreesData[selectedId_stand1][selectedId_presc1];
 
         current_year1 = year;
 
@@ -235,8 +247,8 @@ public class Manager : MonoBehaviour
         {
             treeInfoText.text = "";
             visualizer.receiveTreeDataPlot1(
-                outputSoloTreesData[0][current_year1],
-                outputSoloTreesData[0][current_year1].Values.First().Year
+                outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1],
+                outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year
             );
             changeHightlight();
         }
@@ -244,7 +256,7 @@ public class Manager : MonoBehaviour
 
     private void changePlot2(int year)
     {
-        var outputPlot2 = outputSoloTreesData[1];
+        var outputPlot2 = outputSoloTreesData[selectedId_stand2][selectedId_presc2];
 
         current_year2 = year;
 
@@ -252,22 +264,22 @@ public class Manager : MonoBehaviour
         {
             treeInfoText.text = "";
             visualizer.receiveTreeDataPlot2(
-                outputSoloTreesData[1][current_year2],
-                outputSoloTreesData[1][current_year2].Values.First().Year
+                outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2],
+                outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year
             );
             changeHightlight();
         }
     }
 
-    public void receiveSoloTreesData(List<List<SortedDictionary<int, TreeData>>> data)
+    public void receiveSoloTreesData(SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> data)
     {
         outputSoloTreesData = data;
         current_year1 = 0;
         current_year2 = 0;
 
-        visualizer.receiveTreeDataPlot1(outputSoloTreesData[0][current_year1], outputSoloTreesData[0][current_year1].Values.First().Year);
+        visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
         if (outputSoloTreesData.Count > 1)
-            visualizer.receiveTreeDataPlot2(outputSoloTreesData[1][current_year2], outputSoloTreesData[1][current_year2].Values.First().Year);
+            visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
 
         //setup cameras viewport
         if (data.Count > 1)
@@ -286,10 +298,10 @@ public class Manager : MonoBehaviour
         }
     }
 
-    public void receiveYieldTableData(List<List<YieldTableEntry>> data)
+    public void receiveYieldTableData(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> data)
     {
         YieldTableData = data;
-        graphGenerator.receiveData(data, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1);
+        graphGenerator.receiveData(data, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, selectedId_stand1, selectedId_stand2, selectedId_presc1YT, selectedId_presc2YT);
     }
     public void ShowTreeInfo(Tree t)
     {

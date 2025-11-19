@@ -13,7 +13,6 @@ public class GraphGenerator : MonoBehaviour
     public List<LineChart> lineCharts;
     public List<LineChart> MultiLineCharts;
     public List<BarChart> barCharts;
-    //text and buttons to enable/disable graphs if needed
     public List<GameObject> textAndButtons;
 
     int highlightedIndex1, highlightedIndex2;
@@ -21,34 +20,36 @@ public class GraphGenerator : MonoBehaviour
     string[] volumeComponents = { "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5" };
     string[] biomassComponents = { "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr" };
 
-    public void receiveData(List<List<YieldTableEntry>> tableData, int current_year1, int current_year2)
+    public void receiveData(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> tableData, int current_year1, int current_year2, string selectedId_stand1, string selectedId_stand2, string selectedId_presc1, string selectedId_presc2)
     {
 
         List<int> allYears = new List<int>();
-        foreach (var seriesData in tableData)
-        {
-            foreach (var entry in seriesData)
+        foreach (var entry in tableData[selectedId_stand1][selectedId_presc1])
+            allYears.Add(entry.year);
+        if (tableData.Count > 1) {
+            foreach (var entry in tableData[selectedId_stand2][selectedId_presc2])
                 allYears.Add(entry.year);
         }
-
+        
         sortedYears = allYears;
         sortedYears.Sort();
 
         foreach (LineChart chart in lineCharts)
             prepareChart(chart);
+        string[] id_stands = { selectedId_stand1, selectedId_stand2 };
+        string[] id_prescs = { selectedId_presc1, selectedId_presc2 };
+        populateLineChart(lineCharts[0], tableData, e => e.N, id_stands, id_prescs);
+        populateLineChart(lineCharts[1], tableData, e => e.Nst, id_stands, id_prescs);
+        populateLineChart(lineCharts[2], tableData, e => e.Ndead, id_stands, id_prescs);
+        populateLineChart(lineCharts[3], tableData, e => e.hdom, id_stands, id_prescs);
+        populateLineChart(lineCharts[4], tableData, e => e.dg, id_stands, id_prescs);
+        populateLineChart(lineCharts[5], tableData, e => e.G, id_stands, id_prescs);
+        populateLineChart(lineCharts[6], tableData, e => e.V, id_stands, id_prescs);
+        populateLineChart(lineCharts[7], tableData, e => e.Vu_st, id_stands, id_prescs);
 
-        populateLineChart(lineCharts[0], tableData, e => e.N);
-        populateLineChart(lineCharts[1], tableData, e => e.Nst);
-        populateLineChart(lineCharts[2], tableData, e => e.Ndead);
-        populateLineChart(lineCharts[3], tableData, e => e.hdom);
-        populateLineChart(lineCharts[4], tableData, e => e.dg);
-        populateLineChart(lineCharts[5], tableData, e => e.G);
-        populateLineChart(lineCharts[6], tableData, e => e.V);
-        populateLineChart(lineCharts[7], tableData, e => e.Vu_st);
+        populateBarCharts(sortedYears, tableData, id_stands, id_prescs);
 
-        populateBarCharts(sortedYears, tableData);
-
-        populateMultiLineChart(tableData);
+        populateMultiLineChart(tableData, id_stands, id_prescs);
 
         foreach (LineChart chart in lineCharts)
             highlightPoint(chart, current_year1, current_year2);
@@ -58,8 +59,10 @@ public class GraphGenerator : MonoBehaviour
 
     private void populateLineChart(
         LineChart chart,
-        List<List<YieldTableEntry>> tableData,
-        Func<YieldTableEntry, float> valueSelector)
+        SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> tableData,
+        Func<YieldTableEntry, float> valueSelector,
+        string[] id_stands,
+        string[] id_prescs)
     {
 
         highlightedIndex1 = -1;
@@ -67,7 +70,7 @@ public class GraphGenerator : MonoBehaviour
 
         for (int i = 0; i < tableData.Count; i++)
         {
-            var entries = tableData[i];
+            var entries = tableData[id_stands[i]][id_prescs[i]];
             if (entries == null || entries.Count == 0) continue;
 
             string standId = entries.First().id_stand;
@@ -124,18 +127,20 @@ public class GraphGenerator : MonoBehaviour
     }
 
 
-    private void populateBarCharts(List<int> years, List<List<YieldTableEntry>> tableData)
+    private void populateBarCharts(List<int> years, SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> tableData,
+        string[] id_stands,
+        string[] id_prescs)
     {
         foreach (var go in textAndButtons)
             go.SetActive(tableData.Count > 1);
 
         string[] VolumeComponents = { "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5" };
         Color[] volumeColors = {
-            new Color(0.36f, 0.20f, 0.09f), 
-            new Color(0.0f, 0.4f, 0.0f),    
-            new Color(0.2f, 0.6f, 0.2f),    
-            new Color(0.8f, 0.5f, 0.2f),    
-            new Color(0.6f, 0.9f, 0.5f) 
+            new Color(0.36f, 0.20f, 0.09f),
+            new Color(0.0f, 0.4f, 0.0f),
+            new Color(0.2f, 0.6f, 0.2f),
+            new Color(0.8f, 0.5f, 0.2f),
+            new Color(0.6f, 0.9f, 0.5f)
         };
 
         for (int standIndex = 0; standIndex < tableData.Count; standIndex++)
@@ -143,7 +148,7 @@ public class GraphGenerator : MonoBehaviour
             var chart = barCharts[standIndex];
             prepareBarChart(chart, years);
 
-            var plotData = tableData[standIndex];
+            var plotData = tableData[id_stands[standIndex]][id_prescs[standIndex]];
             if (plotData == null || plotData.Count == 0) continue;
 
             string standId = plotData[0].id_stand;
@@ -186,7 +191,7 @@ public class GraphGenerator : MonoBehaviour
             chart.RefreshChart();
         }
 
-        string[] BiomassComponents = { "Wr", "Ww", "Wb", "Wbr", "Wl"};
+        string[] BiomassComponents = { "Wr", "Ww", "Wb", "Wbr", "Wl" };
         Color[] biomassColors = {
             new Color(0.36f, 0.20f, 0.09f), // roots 
             new Color(0.76f, 0.60f, 0.42f), // wood 
@@ -201,7 +206,7 @@ public class GraphGenerator : MonoBehaviour
             var chart = barCharts[2 + standIndex];
             prepareBarChart(chart, years);
 
-            var plotData = tableData[standIndex];
+            var plotData = tableData[id_stands[standIndex]][id_prescs[standIndex]];
             if (plotData == null || plotData.Count == 0) continue;
 
             string standId = plotData[0].id_stand;
@@ -245,7 +250,9 @@ public class GraphGenerator : MonoBehaviour
         }
     }
 
-    private void populateMultiLineChart(List<List<YieldTableEntry>> tableData)
+    private void populateMultiLineChart(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> tableData,
+        string[] id_stands,
+        string[] id_prescs)
     {
         for (int chartIndex = 0; chartIndex < MultiLineCharts.Count; chartIndex++)
         {
@@ -259,7 +266,7 @@ public class GraphGenerator : MonoBehaviour
 
             for (int plotIndex = 0; plotIndex < tableData.Count; plotIndex++)
             {
-                var plotData = tableData[plotIndex];
+                var plotData = tableData[id_stands[plotIndex]][id_prescs[plotIndex]];
                 if (plotData == null || plotData.Count == 0)
                     continue;
 

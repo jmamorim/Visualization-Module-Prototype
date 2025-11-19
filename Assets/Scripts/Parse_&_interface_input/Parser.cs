@@ -36,10 +36,9 @@ public class Parser : MonoBehaviour
             ShowMessage("Interval is not a number\n");
             return;
         }
-
-        List<List<SortedDictionary<int, TreeData>>> outputSoloTreesData = new List<List<SortedDictionary<int, TreeData>>>();
-        List<List<YieldTableEntry>> outputYieldTableData = new List<List<YieldTableEntry>>();
-
+        SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData = new SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>();
+        SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> outputYieldTableData = new SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>>();
+         
         foreach (string s in soloTreePaths)
                 parseSoloTrees(outputSoloTreesData, s);
         foreach (string s in yieldTablePaths)
@@ -72,7 +71,7 @@ public class Parser : MonoBehaviour
         Debug.Log("Parsing completed.");
     }
 
-    private void parseSoloTrees(List<List<SortedDictionary<int, TreeData>>> output, string soloTreePath)
+    private void parseSoloTrees(SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> output, string soloTreePath)
     {
         Debug.Log($"Parsing solo trees from: {soloTreePath}");
         if (string.IsNullOrEmpty(soloTreePath))
@@ -97,9 +96,8 @@ public class Parser : MonoBehaviour
             throw new ArgumentException("Incorrect headers");
         }
 
-        int starting_year = 0, ending_year = 0, numberOfTrees = 0;
-        starting_year = int.Parse(lines[1].Trim().Split(',')[3].Trim());
-        ending_year = int.Parse(lines[lines.Length - 1].Trim().Split(',')[3].Trim());
+        int starting_year = int.Parse(lines[1].Trim().Split(',')[3].Trim());
+        int ending_year = int.Parse(lines[lines.Length - 1].Trim().Split(',')[3].Trim());
 
         if (interval > (ending_year - starting_year))
         {
@@ -107,135 +105,194 @@ public class Parser : MonoBehaviour
             throw new ArgumentException("Interval is greater than the planing horizon");
         }
 
+        var standPrescGroups = new Dictionary<string, Dictionary<string, List<string[]>>>();
 
-        for (int i = 1; i == int.Parse(lines[i].Trim().Split(',')[6].Trim()); i++)
+        for (int i = 1; i < lines.Length; i++)
         {
-            numberOfTrees++;
-        }
+            string[] treeInfo = lines[i].Trim().Split(',');
+            string id_stand = treeInfo[idStand].Trim();
+            string id_presc = treeInfo[idPresc].Trim();
 
-        List<SortedDictionary<int, TreeData>> treesInfoPerYear = new List<SortedDictionary<int, TreeData>>();
-        int index = 0;
-        int treeCount = 0;
-
-        if (interval == 0)
-        {
-            for (int i = 1; i < lines.Length; i++)
+            if (!standPrescGroups.ContainsKey(id_stand))
             {
-                string[] treeInfo = lines[i].Trim().Split(',');
-                if (int.Parse(treeInfo[6].Trim()) <= treeCount)
-                {
-                    index++;
-                    treeCount = 0;
-                }
-                try
-                {
-                    if (index >= treesInfoPerYear.Count)
-                    {
-                        treesInfoPerYear.Add(new SortedDictionary<int, TreeData>());
-                    }
-
-                    int id_arv = int.Parse(treeInfo[6].Trim());
-                    bool wasAlive = true;
-                    float rotation = UnityEngine.Random.Range(0f, 360f);
-                    if (index != 0 && treesInfoPerYear[index - 1].ContainsKey(id_arv))
-                    {
-                        rotation = treesInfoPerYear[index - 1][id_arv].rotation;
-                    }
-
-                    if (index != 0 && treesInfoPerYear[index - 1].ContainsKey(id_arv))
-                    {
-                        wasAlive = treesInfoPerYear[index - 1][id_arv].estado == 0;
-                    }
-                    TreeData tree = new TreeData(
-                        treeInfo[idStand].Trim(),  //id_stand
-                        treeInfo[idPresc].Trim(),  //id_presc
-                        int.Parse(treeInfo[cicloIndex].Trim()),  //ciclo
-                        int.Parse(treeInfo[yearIndex].Trim()),  //Year
-                        float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture), //t
-                        id_arv,  //id_arv
-                        float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),  //Xarv
-                        float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),  //Yarv
-                        treeInfo[speciesIndex].Trim(), //specie
-                        float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),  //d
-                        float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture), //h
-                        float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture), //cw
-                        float.Parse(treeInfo[hbcIndex].Trim(), CultureInfo.InvariantCulture), //hbc
-                        int.Parse(treeInfo[estadoIndex].Trim()), //estado
-                        rotation,    //rotation
-                        wasAlive   //arvore estava viva na ultima instancia
-                    );
-                    treesInfoPerYear[index][tree.id_arv] = tree;
-                    treeCount++;
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"Error parsing line {i}: {ex.Message}");
-                }
+                standPrescGroups[id_stand] = new Dictionary<string, List<string[]>>();
+            }
+            if (!standPrescGroups[id_stand].ContainsKey(id_presc))
+            {
+                standPrescGroups[id_stand][id_presc] = new List<string[]>();
             }
 
-            output.Add(treesInfoPerYear);
+            standPrescGroups[id_stand][id_presc].Add(treeInfo);
         }
-        else
-        {
-            int year = starting_year;
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] treeInfo = lines[i].Trim().Split(',');
-                if (int.Parse(treeInfo[6].Trim()) < treeCount)
-                {
-                    index++;
-                    year += interval;
-                    treeCount = 0;
-                    if (year > ending_year)
-                        year = ending_year;
-                }
-                try
-                {
-                    if (index >= treesInfoPerYear.Count)
-                    {
-                        treesInfoPerYear.Add(new SortedDictionary<int, TreeData>());
-                    }
-                    if (int.Parse(treeInfo[3].Trim()) == year)
-                    {
-                        int id_arv = int.Parse(treeInfo[6].Trim());
-                        float rotation = UnityEngine.Random.Range(0f, 360f);
-                        if (index != 0 && treesInfoPerYear[index - 1].ContainsKey(id_arv))
-                        {
-                            rotation = treesInfoPerYear[index - 1][id_arv].rotation;
-                        }
-                        TreeData tree = new TreeData(
-                        treeInfo[idStand].Trim(),  //id_stand
-                        treeInfo[idPresc].Trim(),  //id_presc
-                        int.Parse(treeInfo[cicloIndex].Trim()),  //ciclo
-                        int.Parse(treeInfo[yearIndex].Trim()),  //Year
-                        float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture), //t
-                        id_arv,  //id_arv
-                        float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),  //Xarv
-                        float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),  //Yarv
-                        treeInfo[speciesIndex].Trim(), //specie
-                        float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),  //d
-                        float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture), //h
-                        float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture), //cw
-                        float.Parse(treeInfo[hbcIndex].Trim(), CultureInfo.InvariantCulture), //hbc
-                        int.Parse(treeInfo[estadoIndex].Trim()), //estado
-                        rotation,    //rotation
-                        false   //arvore estava viva na ultima instancia
-                    );
 
-                        treesInfoPerYear[index][tree.id_arv] = tree;
-                        treeCount++;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"Error parsing line {i}: {ex.Message}");
-                }
+        foreach (var standKvp in standPrescGroups)
+        {
+            string id_stand = standKvp.Key;
+
+            if (!output.ContainsKey(id_stand))
+            {
+                output[id_stand] = new SortedDictionary<string, List<SortedDictionary<int, TreeData>>>();
             }
-            output.Add(treesInfoPerYear);
+
+            foreach (var prescKvp in standKvp.Value)
+            {
+                string id_presc = prescKvp.Key;
+                List<string[]> treeLines = prescKvp.Value;
+
+                List<SortedDictionary<int, TreeData>> treesInfoPerYear = ProcessTreeLines(treeLines, starting_year, ending_year);
+
+                output[id_stand][id_presc] = treesInfoPerYear;
+            }
         }
     }
 
-    private void parseYieldTable(List<List<YieldTableEntry>> output, string yieldTablePath)
+    private List<SortedDictionary<int, TreeData>> ProcessTreeLines(List<string[]> treeLines, int starting_year, int ending_year)
+    {
+        List<SortedDictionary<int, TreeData>> treesInfoPerYear = new List<SortedDictionary<int, TreeData>>();
+
+        if (interval == 0)
+        {
+            int currentYearIndex = -1;
+            int lastTreeId = -1;
+            SortedDictionary<int, TreeData> currentYearTrees = null;
+            Dictionary<int, float> treeRotations = new Dictionary<int, float>();
+            Dictionary<int, bool> treeWasAlive = new Dictionary<int, bool>();
+
+            foreach (string[] treeInfo in treeLines)
+            {
+                int id_arv = int.Parse(treeInfo[6].Trim());
+
+                if (id_arv <= lastTreeId)
+                {
+                    currentYearIndex++;
+                    currentYearTrees = new SortedDictionary<int, TreeData>();
+                    treesInfoPerYear.Add(currentYearTrees);
+                }
+                else if (currentYearIndex == -1)
+                {
+                    currentYearIndex = 0;
+                    currentYearTrees = new SortedDictionary<int, TreeData>();
+                    treesInfoPerYear.Add(currentYearTrees);
+                }
+
+                lastTreeId = id_arv;
+
+                float rotation;
+                if (treeRotations.ContainsKey(id_arv))
+                {
+                    rotation = treeRotations[id_arv];
+                }
+                else
+                {
+                    rotation = UnityEngine.Random.Range(0f, 360f);
+                    treeRotations[id_arv] = rotation;
+                }
+
+                bool wasAlive = treeWasAlive.ContainsKey(id_arv) ? treeWasAlive[id_arv] : true;
+
+                int estado = int.Parse(treeInfo[estadoIndex].Trim());
+                treeWasAlive[id_arv] = (estado == 0);
+
+                TreeData tree = new TreeData(
+                    treeInfo[idStand].Trim(),
+                    treeInfo[idPresc].Trim(),
+                    int.Parse(treeInfo[cicloIndex].Trim()),
+                    int.Parse(treeInfo[yearIndex].Trim()),
+                    float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture),
+                    id_arv,
+                    float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),
+                    treeInfo[speciesIndex].Trim(),
+                    float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture),
+                    float.Parse(treeInfo[hbcIndex].Trim(), CultureInfo.InvariantCulture),
+                    estado,
+                    rotation,
+                    wasAlive
+                );
+
+                currentYearTrees[id_arv] = tree;
+            }
+        }
+        else
+        {
+            var yearGroups = new SortedDictionary<int, SortedDictionary<int, TreeData>>();
+            Dictionary<int, float> treeRotations = new Dictionary<int, float>();
+
+            int year = starting_year;
+            while (year <= ending_year)
+            {
+                yearGroups[year] = new SortedDictionary<int, TreeData>();
+                year += interval;
+            }
+            if (!yearGroups.ContainsKey(ending_year))
+            {
+                yearGroups[ending_year] = new SortedDictionary<int, TreeData>();
+            }
+
+            foreach (string[] treeInfo in treeLines)
+            {
+                int treeYear = int.Parse(treeInfo[yearIndex].Trim());
+
+                int targetYear = starting_year;
+                foreach (int y in yearGroups.Keys)
+                {
+                    if (treeYear == y)
+                    {
+                        targetYear = y;
+                        break;
+                    }
+                }
+
+                if (yearGroups.ContainsKey(targetYear))
+                {
+                    int id_arv = int.Parse(treeInfo[6].Trim());
+
+                    float rotation;
+                    if (treeRotations.ContainsKey(id_arv))
+                    {
+                        rotation = treeRotations[id_arv];
+                    }
+                    else
+                    {
+                        rotation = UnityEngine.Random.Range(0f, 360f);
+                        treeRotations[id_arv] = rotation;
+                    }
+
+                    TreeData tree = new TreeData(
+                        treeInfo[idStand].Trim(),
+                        treeInfo[idPresc].Trim(),
+                        int.Parse(treeInfo[cicloIndex].Trim()),
+                        int.Parse(treeInfo[yearIndex].Trim()),
+                        float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture),
+                        id_arv,
+                        float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),
+                        treeInfo[speciesIndex].Trim(),
+                        float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(treeInfo[hbcIndex].Trim(), CultureInfo.InvariantCulture),
+                        int.Parse(treeInfo[estadoIndex].Trim()),
+                        rotation,
+                        false
+                    );
+
+                    yearGroups[targetYear][id_arv] = tree;
+                }
+            }
+
+            foreach (var yearDict in yearGroups.Values)
+            {
+                treesInfoPerYear.Add(yearDict);
+            }
+        }
+
+        return treesInfoPerYear;
+    }
+
+    private void parseYieldTable(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> output, string yieldTablePath)
     {
         if (string.IsNullOrEmpty(yieldTablePath))
         {
@@ -259,13 +316,13 @@ public class Parser : MonoBehaviour
             throw new ArgumentException("Incorrect headers");
         }
 
-        List<YieldTableEntry> yieldTable = new List<YieldTableEntry>();
+        var standPrescGroups = new Dictionary<string, Dictionary<string, List<YieldTableEntry>>>();
 
         for (int i = 1; i < lines.Length; i++)
         {
             string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
 
-            //fixes weird inaccuracies in the csv file like ending with a dot or empty fields
+            // Fixes weird inaccuracies in the csv file like ending with a dot or empty fields
             for (int j = 0; j < entryInfo.Length; j++)
             {
                 string s = entryInfo[j];
@@ -281,14 +338,17 @@ public class Parser : MonoBehaviour
 
             try
             {
+                string id_stand = entryInfo[tableId_stand].Trim();
+                string id_presc = entryInfo[tableId_presc].Trim();
+
                 YieldTableEntry entry = new YieldTableEntry(
-                    entryInfo[tableId_stand].Trim(), // id_stand
-                    entryInfo[tableId_presc].Trim(), // id_presc
+                    id_stand, // id_stand
+                    id_presc, // id_presc
                     int.Parse(entryInfo[tableYearIndex].Trim()), // year
                     Mathf.RoundToInt(float.Parse(entryInfo[tablenstIndex].Trim(), CultureInfo.InvariantCulture)), // Nst
                     Mathf.RoundToInt(float.Parse(entryInfo[tablenIndex].Trim(), CultureInfo.InvariantCulture)), // N
                     Mathf.RoundToInt(float.Parse(entryInfo[tablendeadIndex].Trim(), CultureInfo.InvariantCulture)), // Ndead
-                    Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)), //S
+                    Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)), // S
                     float.Parse(entryInfo[tablehdomIndex].Trim(), CultureInfo.InvariantCulture), // hdom
                     float.Parse(entryInfo[tablegIndex].Trim(), CultureInfo.InvariantCulture), // G
                     float.Parse(entryInfo[tabledgIndex].Trim(), CultureInfo.InvariantCulture), // dg 
@@ -310,7 +370,17 @@ public class Parser : MonoBehaviour
                     float.Parse(entryInfo[tablenpvsumIndex].Trim(), CultureInfo.InvariantCulture), // NPVsum 
                     float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)  // EEA 
                 );
-                yieldTable.Add(entry);
+
+                if (!standPrescGroups.ContainsKey(id_stand))
+                {
+                    standPrescGroups[id_stand] = new Dictionary<string, List<YieldTableEntry>>();
+                }
+                if (!standPrescGroups[id_stand].ContainsKey(id_presc))
+                {
+                    standPrescGroups[id_stand][id_presc] = new List<YieldTableEntry>();
+                }
+
+                standPrescGroups[id_stand][id_presc].Add(entry);
             }
             catch (FormatException fe)
             {
@@ -325,7 +395,22 @@ public class Parser : MonoBehaviour
                 Debug.LogError($"Unexpected error parsing line {i}: {ex.Message}");
             }
         }
-        output.Add(yieldTable);
+
+        foreach (var standKvp in standPrescGroups)
+        {
+            string id_stand = standKvp.Key;
+
+            if (!output.ContainsKey(id_stand))
+            {
+                output[id_stand] = new SortedDictionary<string, List<YieldTableEntry>>();
+            }
+
+            foreach (var prescKvp in standKvp.Value)
+            {
+                string id_presc = prescKvp.Key;
+                output[id_stand][id_presc] = prescKvp.Value;
+            }
+        }
     }
 
     bool VerifyHeaders(string[] headers, string[] expectedHeaders)
