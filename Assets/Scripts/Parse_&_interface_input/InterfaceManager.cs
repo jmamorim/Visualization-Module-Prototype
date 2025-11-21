@@ -2,12 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public class InterfaceManager : MonoBehaviour
 {
-    public List<GameObject> plotButtons;
-    public List<GameObject> addRemoveButtons;
-    public List<GameObject> dimensionsGameObjects;
+    public List<GameObject> plotButtons, addRemoveButtons, dimensionsGameObjects, idStandsDropdowns;
     public Parser parser;
 
     [SerializeField] int activePlotIndex = 0;
@@ -40,16 +39,24 @@ public class InterfaceManager : MonoBehaviour
             dimensionsGameObjects[firstIndex].SetActive(true);
         if (secondIndex >= 0 && secondIndex < dimensionsGameObjects.Count)
             dimensionsGameObjects[secondIndex].SetActive(true);
+        
+        DeactivateGameObjects(idStandsDropdowns);
+        idStandsDropdowns[activePlotIndex].SetActive(true);
     }
 
+    //removed a plot
     public void ToggleAddButton()
     {
         DeactivateGameObjects(addRemoveButtons);
         addRemoveButtons[0].SetActive(true);
         plotButtons[plotButtons.Count - 1].SetActive(false);
+        idStandsDropdowns[idStandsDropdowns.Count - 1].GetComponent<TMP_Dropdown>().ClearOptions();
+        idStandsDropdowns[idStandsDropdowns.Count - 1].SetActive(false);
+        idStandsDropdowns.First().SetActive(true);
         parser.removeEntryList();
     }
 
+    //added a plot
     public void ToggleRemoveButton()
     {
         DeactivateGameObjects(addRemoveButtons);

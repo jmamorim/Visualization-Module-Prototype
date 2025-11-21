@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.IMGUI.Controls;
@@ -13,21 +14,19 @@ public class Manager : MonoBehaviour
     public TMP_Text treeInfoText;
     public Visualizer visualizer;
     public Canvas visulaizationCanvas;
-    public GameObject Camera1;
-    public GameObject Camera2;
+    public GameObject Camera1, Camera2;
     public Transform paralelPos1, paralelPos2;
     public GraphGenerator graphGenerator;
     public InputAndParsedData inputAndParsedData;
     public bool isParalelCameraActive = false;
+    public GameObject prescDropdown1, prescDropdown2;
 
-    CameraBehaviour cameraBehaviour1;
-    CameraBehaviour cameraBehaviour2;
-    Camera cam1;
-    Camera cam2;
+    CameraBehaviour cameraBehaviour1, cameraBehaviour2;
+    PrescsDropdown pDropdown1, pDropdown2;
+    Camera cam1, cam2;
     SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData;
     SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> YieldTableData;
-    int current_year1;
-    int current_year2;
+    int current_year1, current_year2;
     bool isVisualizationActive = true;
     Vector3 lastPosCamera1Position;
     Quaternion lastPosCamera1Rotation;
@@ -41,16 +40,27 @@ public class Manager : MonoBehaviour
         cameraBehaviour2 = Camera2.GetComponent<CameraBehaviour>();
         cam1 = Camera1.GetComponent<Camera>();
         cam2 = Camera2.GetComponent<Camera>();
+        pDropdown1 = prescDropdown1.GetComponent<PrescsDropdown>();
+        pDropdown2 = prescDropdown2.GetComponent<PrescsDropdown>();
 
         outputSoloTreesData = inputAndParsedData.outputSoloTreesData;
         YieldTableData = inputAndParsedData.outputYieldTable;
 
+        pDropdown1.initDropdown(
+            outputSoloTreesData.First().Value.Keys.ToList(),
+            YieldTableData.First().Value.Keys.ToList()
+        );
         selectedId_stand1 = outputSoloTreesData.First().Key;
         selectedId_presc1 = outputSoloTreesData[selectedId_stand1].First().Key;
         selectedId_presc1YT = YieldTableData[selectedId_stand1].First().Key;
 
         if (outputSoloTreesData.Count() > 1)
         {
+            prescDropdown2.SetActive(true);
+            pDropdown2.initDropdown(
+                outputSoloTreesData.ElementAt(1).Value.Keys.ToList(),
+                YieldTableData.ElementAt(1).Value.Keys.ToList()
+            );
             selectedId_stand2 = outputSoloTreesData.ElementAt(1).Key;
             selectedId_presc2 = outputSoloTreesData[selectedId_stand2].First().Key;
             selectedId_presc2YT = YieldTableData[selectedId_stand2].First().Key;
@@ -303,6 +313,31 @@ public class Manager : MonoBehaviour
         YieldTableData = data;
         graphGenerator.receiveData(data, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, selectedId_stand1, selectedId_stand2, selectedId_presc1YT, selectedId_presc2YT);
     }
+
+    public void updateSelectedPrescriptions(string id_presc, bool isMainPlot)
+    {
+        if (isMainPlot)
+        {
+            string[] prescIds = id_presc.Split('-');
+            selectedId_presc1 = prescIds[0];
+            selectedId_presc1YT = prescIds[1];
+            current_year1 = 0;
+        }
+        else
+        {
+            string[] prescIds2 = id_presc.Split('-');
+            selectedId_presc2 = prescIds2[0];
+            selectedId_presc2YT = prescIds2[1];
+            current_year2 = 0;
+        }
+        
+        visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
+        if (outputSoloTreesData.Count > 1)
+            visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
+        
+        graphGenerator.receiveData(YieldTableData, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, selectedId_stand1, selectedId_stand2, selectedId_presc1YT, selectedId_presc2YT);
+    }
+
     public void ShowTreeInfo(Tree t)
     {
         if (treeInfoText != null)

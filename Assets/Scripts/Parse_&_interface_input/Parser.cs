@@ -13,8 +13,8 @@ public class Parser : MonoBehaviour
     public TMP_Text feedbackText;
     public TMP_InputField intervalInputField;
     public InputAndParsedData so;
-    public ShapeInputController si1;
-    public ShapeInputController si2;
+    public ShapeInputController si1, si2;
+    public IdStandsDropdown idStandsDropdown1, IdStandsDropdown2;
 
     readonly string[] expectedSoloTreesHeaders = { "id_stand", "id_presc", "ciclo", "Year", "t", "id_arv", "Xarv", "Yarv", "Species", "d", "h", "cw", " hbc", "status" };
     readonly string[] expectedYieldTableHeaders = { "year", "hdom", "Nst", "N", "Ndead", "G", "dg", "Vu_st", "Vst", "Vu_as1", "Vu_as2",
@@ -28,6 +28,8 @@ public class Parser : MonoBehaviour
         tablegIndex = 19, tabledgIndex = 20, tablevu_stIndex = 21, tablevIndex = 24, tablevu_as1Index = 30, tablevu_as2Index = 31, tablevu_as3Index = 32, tablevu_as4Index = 33, 
         tablevu_as5Index = 34, tablemaiVIndex = 38, tableiVIndex = 39, tablewwIndex = 40, tablewbIndex = 41, tablewbrIndex = 42, tablewlIndex = 43, tablewaIndex = 44, 
         tablewrIndex = 45, tablenpvsumIndex = 66, tableeeaIndex = 67;
+    //max size 2 for now
+    List<string> selectedIdStands = new List<string> { null, null };
 
     public void parse()
     {
@@ -39,17 +41,18 @@ public class Parser : MonoBehaviour
         SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData = new SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>();
         SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> outputYieldTableData = new SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>>();
          
-        foreach (string s in soloTreePaths)
-                parseSoloTrees(outputSoloTreesData, s);
-        foreach (string s in yieldTablePaths)
-                parseYieldTable(outputYieldTableData, s);
+        for (int i = 0; i < soloTreePaths.Count; i++)
+        {
+            parseSoloTrees(outputSoloTreesData, soloTreePaths[i], selectedIdStands[i]);
+            parseYieldTable(outputYieldTableData, yieldTablePaths[i], selectedIdStands[i]);
+        }
 
         so.outputSoloTreesData = outputSoloTreesData;
         so.outputYieldTable = outputYieldTableData;
         List<(int, List<float>)> shapeData = new List<(int, List<float>)>();
         var format1 = si1.GetSelectedShapeFormat();
         //check the data inputed too
-        if (format1.Item1 == 0)
+        if (format1.Item1 == 0 || format1.Item2 == null || format1.Item2.Count == 0 || format1.Item2.Any(x => float.IsNaN(x)))
         {
             ShowMessage("Missing plot 1 shape data\n");
             throw new ArgumentException("Missing plot 1 shape data");
@@ -59,7 +62,7 @@ public class Parser : MonoBehaviour
         {
             var format2 = si2.GetSelectedShapeFormat();
             //check the data inputed too
-            if (format2.Item1 == 0)
+            if (format2.Item1 == 0 || format2.Item2 == null || format2.Item2.Count == 0 || format2.Item2.Any(x => float.IsNaN(x)))
             {
                 ShowMessage("Missing plot 2 shape data\n");
                 throw new ArgumentException("Missing plot 2 shape data");
@@ -71,7 +74,7 @@ public class Parser : MonoBehaviour
         Debug.Log("Parsing completed.");
     }
 
-    private void parseSoloTrees(SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> output, string soloTreePath)
+    private void parseSoloTrees(SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> output, string soloTreePath, string selectedIdStand)
     {
         Debug.Log($"Parsing solo trees from: {soloTreePath}");
         if (string.IsNullOrEmpty(soloTreePath))
@@ -112,17 +115,19 @@ public class Parser : MonoBehaviour
             string[] treeInfo = lines[i].Trim().Split(',');
             string id_stand = treeInfo[idStand].Trim();
             string id_presc = treeInfo[idPresc].Trim();
+            if (id_stand == selectedIdStand) {
 
-            if (!standPrescGroups.ContainsKey(id_stand))
-            {
-                standPrescGroups[id_stand] = new Dictionary<string, List<string[]>>();
-            }
-            if (!standPrescGroups[id_stand].ContainsKey(id_presc))
-            {
-                standPrescGroups[id_stand][id_presc] = new List<string[]>();
-            }
+                if (!standPrescGroups.ContainsKey(id_stand))
+                {
+                    standPrescGroups[id_stand] = new Dictionary<string, List<string[]>>();
+                }
+                if (!standPrescGroups[id_stand].ContainsKey(id_presc))
+                {
+                    standPrescGroups[id_stand][id_presc] = new List<string[]>();
+                }
 
-            standPrescGroups[id_stand][id_presc].Add(treeInfo);
+                standPrescGroups[id_stand][id_presc].Add(treeInfo);
+            }
         }
 
         foreach (var standKvp in standPrescGroups)
@@ -292,7 +297,7 @@ public class Parser : MonoBehaviour
         return treesInfoPerYear;
     }
 
-    private void parseYieldTable(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> output, string yieldTablePath)
+    private void parseYieldTable(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> output, string yieldTablePath, string selectedIdStand)
     {
         if (string.IsNullOrEmpty(yieldTablePath))
         {
@@ -340,36 +345,37 @@ public class Parser : MonoBehaviour
             {
                 string id_stand = entryInfo[tableId_stand].Trim();
                 string id_presc = entryInfo[tableId_presc].Trim();
-
+                if (id_stand == selectedIdStand)
+                {
                 YieldTableEntry entry = new YieldTableEntry(
-                    id_stand, // id_stand
-                    id_presc, // id_presc
-                    int.Parse(entryInfo[tableYearIndex].Trim()), // year
-                    Mathf.RoundToInt(float.Parse(entryInfo[tablenstIndex].Trim(), CultureInfo.InvariantCulture)), // Nst
-                    Mathf.RoundToInt(float.Parse(entryInfo[tablenIndex].Trim(), CultureInfo.InvariantCulture)), // N
-                    Mathf.RoundToInt(float.Parse(entryInfo[tablendeadIndex].Trim(), CultureInfo.InvariantCulture)), // Ndead
-                    Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)), // S
-                    float.Parse(entryInfo[tablehdomIndex].Trim(), CultureInfo.InvariantCulture), // hdom
-                    float.Parse(entryInfo[tablegIndex].Trim(), CultureInfo.InvariantCulture), // G
-                    float.Parse(entryInfo[tabledgIndex].Trim(), CultureInfo.InvariantCulture), // dg 
-                    float.Parse(entryInfo[tablevu_stIndex].Trim(), CultureInfo.InvariantCulture), // Vu_st
-                    float.Parse(entryInfo[tablevIndex].Trim(), CultureInfo.InvariantCulture), // Vst 
-                    float.Parse(entryInfo[tablevu_as1Index].Trim(), CultureInfo.InvariantCulture), // Vu_as1 
-                    float.Parse(entryInfo[tablevu_as2Index].Trim(), CultureInfo.InvariantCulture), // Vu_as2 
-                    float.Parse(entryInfo[tablevu_as3Index].Trim(), CultureInfo.InvariantCulture), // Vu_as3 
-                    float.Parse(entryInfo[tablevu_as4Index].Trim(), CultureInfo.InvariantCulture), // Vu_as4 
-                    float.Parse(entryInfo[tablevu_as5Index].Trim(), CultureInfo.InvariantCulture), // Vu_as5 
-                    float.Parse(entryInfo[tablemaiVIndex].Trim(), CultureInfo.InvariantCulture), // maiV 
-                    float.Parse(entryInfo[tableiVIndex].Trim(), CultureInfo.InvariantCulture), // iV 
-                    float.Parse(entryInfo[tablewwIndex].Trim(), CultureInfo.InvariantCulture), // Ww 
-                    float.Parse(entryInfo[tablewbIndex].Trim(), CultureInfo.InvariantCulture), // Wb 
-                    float.Parse(entryInfo[tablewbrIndex].Trim(), CultureInfo.InvariantCulture), // Wbr 
-                    float.Parse(entryInfo[tablewlIndex].Trim(), CultureInfo.InvariantCulture), // Wl 
-                    float.Parse(entryInfo[tablewaIndex].Trim(), CultureInfo.InvariantCulture), // Wa 
-                    float.Parse(entryInfo[tablewrIndex].Trim(), CultureInfo.InvariantCulture), // Wr 
-                    float.Parse(entryInfo[tablenpvsumIndex].Trim(), CultureInfo.InvariantCulture), // NPVsum 
-                    float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)  // EEA 
-                );
+                            id_stand, // id_stand
+                            id_presc, // id_presc
+                            int.Parse(entryInfo[tableYearIndex].Trim()), // year
+                            Mathf.RoundToInt(float.Parse(entryInfo[tablenstIndex].Trim(), CultureInfo.InvariantCulture)), // Nst
+                            Mathf.RoundToInt(float.Parse(entryInfo[tablenIndex].Trim(), CultureInfo.InvariantCulture)), // N
+                            Mathf.RoundToInt(float.Parse(entryInfo[tablendeadIndex].Trim(), CultureInfo.InvariantCulture)), // Ndead
+                            Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)), // S
+                            float.Parse(entryInfo[tablehdomIndex].Trim(), CultureInfo.InvariantCulture), // hdom
+                            float.Parse(entryInfo[tablegIndex].Trim(), CultureInfo.InvariantCulture), // G
+                            float.Parse(entryInfo[tabledgIndex].Trim(), CultureInfo.InvariantCulture), // dg 
+                            float.Parse(entryInfo[tablevu_stIndex].Trim(), CultureInfo.InvariantCulture), // Vu_st
+                            float.Parse(entryInfo[tablevIndex].Trim(), CultureInfo.InvariantCulture), // Vst 
+                            float.Parse(entryInfo[tablevu_as1Index].Trim(), CultureInfo.InvariantCulture), // Vu_as1 
+                            float.Parse(entryInfo[tablevu_as2Index].Trim(), CultureInfo.InvariantCulture), // Vu_as2 
+                            float.Parse(entryInfo[tablevu_as3Index].Trim(), CultureInfo.InvariantCulture), // Vu_as3 
+                            float.Parse(entryInfo[tablevu_as4Index].Trim(), CultureInfo.InvariantCulture), // Vu_as4 
+                            float.Parse(entryInfo[tablevu_as5Index].Trim(), CultureInfo.InvariantCulture), // Vu_as5 
+                            float.Parse(entryInfo[tablemaiVIndex].Trim(), CultureInfo.InvariantCulture), // maiV 
+                            float.Parse(entryInfo[tableiVIndex].Trim(), CultureInfo.InvariantCulture), // iV 
+                            float.Parse(entryInfo[tablewwIndex].Trim(), CultureInfo.InvariantCulture), // Ww 
+                            float.Parse(entryInfo[tablewbIndex].Trim(), CultureInfo.InvariantCulture), // Wb 
+                            float.Parse(entryInfo[tablewbrIndex].Trim(), CultureInfo.InvariantCulture), // Wbr 
+                            float.Parse(entryInfo[tablewlIndex].Trim(), CultureInfo.InvariantCulture), // Wl 
+                            float.Parse(entryInfo[tablewaIndex].Trim(), CultureInfo.InvariantCulture), // Wa 
+                            float.Parse(entryInfo[tablewrIndex].Trim(), CultureInfo.InvariantCulture), // Wr 
+                            float.Parse(entryInfo[tablenpvsumIndex].Trim(), CultureInfo.InvariantCulture), // NPVsum 
+                            float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)  // EEA 
+                        );
 
                 if (!standPrescGroups.ContainsKey(id_stand))
                 {
@@ -381,6 +387,7 @@ public class Parser : MonoBehaviour
                 }
 
                 standPrescGroups[id_stand][id_presc].Add(entry);
+            }
             }
             catch (FormatException fe)
             {
@@ -442,6 +449,34 @@ public class Parser : MonoBehaviour
     public void receiveYieldTablePath(int index, string path)
     {
         insertPath(yieldTablePaths, path, index, true);
+
+        if(index == 0)
+        {
+            idStandsDropdown1.initDropdown(getIdsInFile(path));
+        }
+        else
+        {
+            IdStandsDropdown2.initDropdown(getIdsInFile(path));
+        }
+    }
+
+    public List<string> getIdsInFile(string path)
+    {
+        List<string> ids = new List<string>();
+        var lines = File.ReadAllLines(path);
+        if (lines != null && lines.Length > 1)
+        {
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
+                string id_stand = entryInfo[tableId_stand].Trim();
+                if (!ids.Contains(id_stand))
+                {
+                    ids.Add(id_stand);
+                }
+            }
+        }
+        return ids;
     }
 
     public void addEntryList()
@@ -463,5 +498,10 @@ public class Parser : MonoBehaviour
         string text = isYieldTable ? "Yield table" : "Solo trees";
         if (feedbackText != null)
             feedbackText.text += $"{text} selected for plot {index + 1}: {Path.GetFileName(path)}\n";
+    }
+
+    public void updateSelectedIdStand(string selectedIdStand, bool isMainPlot)
+    {
+        selectedIdStands[isMainPlot ? 0 : 1] = selectedIdStand;
     }
 }
