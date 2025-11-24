@@ -217,8 +217,8 @@ public class Visualizer : MonoBehaviour
         {
             if (tree.estado == 0)
             {
-                float worldX = tree.Xarv * 3f;
-                float worldZ = tree.Yarv * 3f;
+                float worldX = tree.Xarv;
+                float worldZ = tree.Yarv;
 
                 float normX, normZ;
 
@@ -386,8 +386,8 @@ public class Visualizer : MonoBehaviour
         {
             if (tree.estado == 4 || tree.estado == 6) continue;
 
-            float worldX = tree.Xarv * 3f;
-            float worldZ = tree.Yarv * 3f;
+            float worldX = tree.Xarv;
+            float worldZ = tree.Yarv;
 
             float treeHeight = terrain.transform.position.y;
             Vector3 position;

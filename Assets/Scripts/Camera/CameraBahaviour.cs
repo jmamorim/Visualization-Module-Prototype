@@ -57,7 +57,8 @@ public class CameraBehaviour : MonoBehaviour
             }
         }
 
-        if (canRotate && (IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization)
+        if (!manager.isParalelCameraActive & canRotate & ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
+
         {
             if (Input.GetMouseButtonDown(0))
             {
