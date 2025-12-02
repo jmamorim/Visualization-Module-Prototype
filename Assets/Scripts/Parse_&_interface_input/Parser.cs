@@ -11,25 +11,39 @@ using UnityEngine.UI;
 public class Parser : MonoBehaviour
 {
     public TMP_Text feedbackText;
+    public TMP_Text selectedSim1, selectedSim2;
     public TMP_InputField intervalInputField;
+    public SimMetadata simMetadata;
     public InputAndParsedData so;
-    public ShapeInputController si1, si2;
-    public IdStandsDropdown idStandsDropdown1, IdStandsDropdown2;
+    public GameObject dp1, dp2;
+
+    IdStandsDropdown idStandsDropdown1, IdStandsDropdown2;
 
     readonly string[] expectedSoloTreesHeaders = { "id_stand", "id_presc", "ciclo", "Year", "t", "id_arv", "Xarv", "Yarv", "Species", "d", "h", "cw", " hbc", "status" };
     readonly string[] expectedYieldTableHeaders = { "year", "hdom", "Nst", "N", "Ndead", "G", "dg", "Vu_st", "Vst", "Vu_as1", "Vu_as2",
         "Vu_as3", "Vu_as4", "Vu_as5", "maiV", "iV", "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr", "NPVsum", "EAA" };
+    readonly string[] expectedDDTableHeaders = { "id_stand", "id_presc", "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80",
+        "85", "90", "95", "100",">102.5" };
     string[] lines;
-    List<string> soloTreePaths = new List<string> { null };
-    List<string> yieldTablePaths = new List<string> { null };
+    List<string> soloTreePaths = new List<string>();
+    List<string> yieldTablePaths = new List<string>();
+    List<string> DDTablePaths = new List<string>();
     int interval = 0;
     const int idStand = 0, idPresc = 1, cicloIndex = 2, yearIndex = 3, tIndex = 4, XarvIndex = 7, YarvIndex = 8, speciesIndex = 9, dIndex = 10, hIndex = 11, cwIndex = 12, hbcIndex = 13, 
         estadoIndex = 15, tableId_stand = 0, tableSIndex = 1, tableId_presc = 3, tableYearIndex = 6, tablenstIndex = 14, tablenIndex = 15, tablendeadIndex = 16, tablehdomIndex = 13, 
         tablegIndex = 19, tabledgIndex = 20, tablevu_stIndex = 21, tablevIndex = 24, tablevu_as1Index = 30, tablevu_as2Index = 31, tablevu_as3Index = 32, tablevu_as4Index = 33, 
         tablevu_as5Index = 34, tablemaiVIndex = 38, tableiVIndex = 39, tablewwIndex = 40, tablewbIndex = 41, tablewbrIndex = 42, tablewlIndex = 43, tablewaIndex = 44, 
-        tablewrIndex = 45, tablenpvsumIndex = 66, tableeeaIndex = 67;
+        tablewrIndex = 45, tablenpvsumIndex = 66, tableeeaIndex = 67, ddId_standIndex = 0, ddId_prescIndex = 1, ddYearIndex = 2, dd0Index = 6, dd5Index = 7, dd10Index = 8,
+        dd15index = 9, dd20Index = 10, dd25Index = 11, dd30Index = 12, dd35Index = 13, dd40Index = 14, dd45Index = 15, dd50Index = 16, dd55Index = 17, dd60Index = 18, dd65Index = 19,
+        dd70Index = 20, dd75Index = 21, dd80Index = 22, dd85Index = 23, dd90Index = 24, dd95Index = 25, dd100Index = 26, dd102Index = 27;
     //max size 2 for now
-    List<string> selectedIdStands = new List<string> { null, null };
+    List<string> selectedIdStands = new List<string>();
+
+    private void Start()
+    {
+        idStandsDropdown1 = dp1.GetComponent<IdStandsDropdown>();
+        IdStandsDropdown2 = dp2.GetComponent<IdStandsDropdown>();
+    }
 
     public void parse()
     {
@@ -40,43 +54,61 @@ public class Parser : MonoBehaviour
         }
         SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData = new SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>();
         SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> outputYieldTableData = new SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>>();
+        SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> outputDDTableData = new SortedDictionary<string, SortedDictionary<string, List<DDEntry>>>();
+        List<(int, List<float>)> shapeData = new List<(int, List<float>)>();
          
+        var dropdown1 = idStandsDropdown1.GetComponent<TMP_Dropdown>();
+        string selectedIdStand1 = dropdown1.options[dropdown1.value].text;
+
+        var siminfo1 = simMetadata.simulations[selectedSim1.text];
+
+        var simPlotDimensions1 = siminfo1.plotDataByIdPar[selectedIdStand1];
+
+        selectedIdStands.Add(selectedIdStand1);
+
+        var plotData1 = (simPlotDimensions1.plotShape, simPlotDimensions1.plotShape == 0 ? new List<float> { simPlotDimensions1.area } : new List<float> { simPlotDimensions1.length1, simPlotDimensions1.length2 });
+
+        soloTreePaths.Add(siminfo1.soloTreesPath);
+        yieldTablePaths.Add(siminfo1.yieldTablePath);
+        DDTablePaths.Add(siminfo1.ddTablePath);
+
+        shapeData.Add(plotData1);
+
+        var dropdown2 = IdStandsDropdown2.GetComponent<TMP_Dropdown>();
+        if (dropdown2.options.Count() > 0)
+        {
+            string selectedIdStand2 = dropdown2.options[dropdown2.value].text;
+            var siminfo2 = simMetadata.simulations[selectedSim2.text];
+
+            var simPlotDimensions2 = siminfo2.plotDataByIdPar[selectedIdStand2];
+
+            selectedIdStands.Add(selectedIdStand2);
+
+            var plotData2 = (simPlotDimensions2.plotShape, simPlotDimensions2.plotShape == 0 ? new List<float> { simPlotDimensions2.area } : new List<float> { simPlotDimensions2.length1, simPlotDimensions2.length2 });
+
+            soloTreePaths.Add(siminfo2.soloTreesPath);
+            yieldTablePaths.Add(siminfo2.yieldTablePath);
+            DDTablePaths.Add(siminfo2.ddTablePath);
+
+            shapeData.Add(plotData2);
+        }
+
         for (int i = 0; i < soloTreePaths.Count; i++)
         {
             parseSoloTrees(outputSoloTreesData, soloTreePaths[i], selectedIdStands[i]);
             parseYieldTable(outputYieldTableData, yieldTablePaths[i], selectedIdStands[i]);
+            parseDDTable(outputDDTableData, DDTablePaths[i], selectedIdStands[i]);
         }
 
         so.outputSoloTreesData = outputSoloTreesData;
         so.outputYieldTable = outputYieldTableData;
-        List<(int, List<float>)> shapeData = new List<(int, List<float>)>();
-        var format1 = si1.GetSelectedShapeFormat();
-        //check the data inputed too
-        if (format1.Item1 == 0 || format1.Item2 == null || format1.Item2.Count == 0 || format1.Item2.Any(x => float.IsNaN(x)))
-        {
-            ShowMessage("Missing plot 1 shape data\n");
-            throw new ArgumentException("Missing plot 1 shape data");
-        }
-        shapeData.Add(format1);
-        if (outputSoloTreesData.Count > 1)
-        {
-            var format2 = si2.GetSelectedShapeFormat();
-            //check the data inputed too
-            if (format2.Item1 == 0 || format2.Item2 == null || format2.Item2.Count == 0 || format2.Item2.Any(x => float.IsNaN(x)))
-            {
-                ShowMessage("Missing plot 2 shape data\n");
-                throw new ArgumentException("Missing plot 2 shape data");
-            }
-            shapeData.Add(format2);
-        }
+        so.outputDDTable = outputDDTableData;
         so.plotShapeAndDimensions = shapeData;
         SceneManager.LoadScene(1);//GOTO VISUALIZATION SCENE
-        Debug.Log("Parsing completed.");
     }
 
     private void parseSoloTrees(SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> output, string soloTreePath, string selectedIdStand)
     {
-        Debug.Log($"Parsing solo trees from: {soloTreePath}");
         if (string.IsNullOrEmpty(soloTreePath))
         {
             ShowMessage("No solo trees file selected\n");
@@ -420,6 +452,128 @@ public class Parser : MonoBehaviour
         }
     }
 
+    private void parseDDTable(SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> output, string DDTablePath, string selectedIdStand)
+    {
+        if (string.IsNullOrEmpty(DDTablePath))
+        {
+            ShowMessage($"No diamater distribution table file selected\n");
+            throw new ArgumentException("No DD table file selected");
+        }
+
+        lines = File.ReadAllLines(DDTablePath);
+
+        if (lines.Length == 0)
+        {
+            ShowMessage($"File is empty on {DDTablePath}\n");
+            throw new ArgumentException("File is empty");
+        }
+
+        var headers = File.ReadLines(DDTablePath).First().Trim().Split(',')
+                    .Select(h => h.Trim())
+                    .ToArray();
+
+        if (!VerifyHeaders(headers, expectedDDTableHeaders))
+        {
+            ShowMessage($"Incorrect headers on {DDTablePath}\n");
+            throw new ArgumentException("Incorrect headers");
+        }
+
+        var standPrescGroups = new Dictionary<string, Dictionary<string, List<DDEntry>>>();
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
+
+            // Fixes weird inaccuracies in the csv file like ending with a dot or empty fields
+            for (int j = 0; j < entryInfo.Length; j++)
+            {
+                string s = entryInfo[j];
+                if (string.IsNullOrWhiteSpace(s))
+                {
+                    entryInfo[j] = "0";
+                }
+                else if (s.EndsWith("."))
+                {
+                    entryInfo[j] = s + "0";
+                }
+            }
+
+            try
+            {
+                string id_stand = entryInfo[ddId_standIndex].Trim();
+                string id_presc = entryInfo[ddId_prescIndex].Trim();
+                if (id_stand == selectedIdStand)
+                {
+                    DDEntry entry = new DDEntry(
+                        id_stand, // id_stand
+                        id_presc, // id_presc
+                        float.Parse(entryInfo[dd0Index].Trim(), CultureInfo.InvariantCulture), // dd0
+                        float.Parse(entryInfo[dd5Index].Trim(), CultureInfo.InvariantCulture), // dd5
+                        float.Parse(entryInfo[dd10Index].Trim(), CultureInfo.InvariantCulture), // dd10
+                        float.Parse(entryInfo[dd15index].Trim(), CultureInfo.InvariantCulture), // dd15
+                        float.Parse(entryInfo[dd20Index].Trim(), CultureInfo.InvariantCulture), // dd20
+                        float.Parse(entryInfo[dd25Index].Trim(), CultureInfo.InvariantCulture), // dd25
+                        float.Parse(entryInfo[dd30Index].Trim(), CultureInfo.InvariantCulture), // dd30
+                        float.Parse(entryInfo[dd35Index].Trim(), CultureInfo.InvariantCulture), // dd35
+                        float.Parse(entryInfo[dd40Index].Trim(), CultureInfo.InvariantCulture), // dd40
+                        float.Parse(entryInfo[dd45Index].Trim(), CultureInfo.InvariantCulture), // dd45
+                        float.Parse(entryInfo[dd50Index].Trim(), CultureInfo.InvariantCulture), // dd50
+                        float.Parse(entryInfo[dd55Index].Trim(), CultureInfo.InvariantCulture), // dd55
+                        float.Parse(entryInfo[dd60Index].Trim(), CultureInfo.InvariantCulture), // dd60
+                        float.Parse(entryInfo[dd65Index].Trim(), CultureInfo.InvariantCulture), // dd65
+                        float.Parse(entryInfo[dd70Index].Trim(), CultureInfo.InvariantCulture), // dd70
+                        float.Parse(entryInfo[dd75Index].Trim(), CultureInfo.InvariantCulture), // dd75
+                        float.Parse(entryInfo[dd80Index].Trim(), CultureInfo.InvariantCulture), // dd80
+                        float.Parse(entryInfo[dd85Index].Trim(), CultureInfo.InvariantCulture), // dd85
+                        float.Parse(entryInfo[dd90Index].Trim(), CultureInfo.InvariantCulture), // dd90
+                        float.Parse(entryInfo[dd95Index].Trim(), CultureInfo.InvariantCulture), // dd95
+                        float.Parse(entryInfo[dd100Index].Trim(), CultureInfo.InvariantCulture), // dd100
+                        float.Parse(entryInfo[dd102Index].Trim(), CultureInfo.InvariantCulture)  // dd102
+                        );
+
+                    if (!standPrescGroups.ContainsKey(id_stand))
+                    {
+                        standPrescGroups[id_stand] = new Dictionary<string, List<DDEntry>>();
+                    }
+                    if (!standPrescGroups[id_stand].ContainsKey(id_presc))
+                    {
+                        standPrescGroups[id_stand][id_presc] = new List<DDEntry>();
+                    }
+
+                    standPrescGroups[id_stand][id_presc].Add(entry);
+                }
+            }
+            catch (FormatException fe)
+            {
+                Debug.LogError($"Format error parsing line {i}: {fe.Message}\nOffending data: {string.Join(" | ", entryInfo)}");
+            }
+            catch (IndexOutOfRangeException ioe)
+            {
+                Debug.LogError($"Index out of range on line {i}: {ioe.Message}\nLine has {entryInfo.Length} columns.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Unexpected error parsing line {i}: {ex.Message}");
+            }
+        }
+
+        foreach (var standKvp in standPrescGroups)
+        {
+            string id_stand = standKvp.Key;
+
+            if (!output.ContainsKey(id_stand))
+            {
+                output[id_stand] = new SortedDictionary<string, List<DDEntry>>();
+            }
+
+            foreach (var prescKvp in standKvp.Value)
+            {
+                string id_presc = prescKvp.Key;
+                output[id_stand][id_presc] = prescKvp.Value;
+            }
+        }
+    }
+
     bool VerifyHeaders(string[] headers, string[] expectedHeaders)
     {
         foreach (string h in expectedHeaders)
@@ -433,7 +587,7 @@ public class Parser : MonoBehaviour
         return true;
     }
 
-    void ShowMessage(string msg)
+    public void ShowMessage(string msg)
     {
         if (feedbackText != null)
         {
@@ -479,12 +633,6 @@ public class Parser : MonoBehaviour
         return ids;
     }
 
-    public void addEntryList()
-    {
-        soloTreePaths.Add(null);
-        yieldTablePaths.Add(null);
-    }
-
     public void removeEntryList() {
         if (soloTreePaths.Count > 1)
             soloTreePaths.RemoveAt(soloTreePaths.Count - 1);
@@ -500,8 +648,4 @@ public class Parser : MonoBehaviour
             feedbackText.text += $"{text} selected for plot {index + 1}: {Path.GetFileName(path)}\n";
     }
 
-    public void updateSelectedIdStand(string selectedIdStand, bool isMainPlot)
-    {
-        selectedIdStands[isMainPlot ? 0 : 1] = selectedIdStand;
-    }
 }

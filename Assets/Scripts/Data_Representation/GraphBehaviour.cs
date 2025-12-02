@@ -11,6 +11,7 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     [SerializeField] bool isMultiLine = false;
     [SerializeField] bool isBar = false;
+    [SerializeField] bool isDD = false;
     [SerializeField] BaseChart chart;
     RectTransform rectTransform;
     Canvas canvas;
@@ -29,7 +30,7 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (isDragging || isResizing || chart == null)
+        if (isDragging || isResizing || chart == null || isDD)
             return;
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -71,7 +72,16 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         var series = chart.series;
         foreach (var serie in series)
         {
-            serie.barPercentStack = !serie.barPercentStack;
+            serie.barPercentStack = true;
+        }
+    }
+
+    public void ToggleAbsoluteView()
+    {
+        var series = chart.series;
+        foreach (var serie in series)
+        {
+            serie.barPercentStack = false;
         }
     }
 

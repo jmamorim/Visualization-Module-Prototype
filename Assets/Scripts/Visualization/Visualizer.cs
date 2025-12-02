@@ -4,6 +4,7 @@ using TMPro;
 using TreeEditor;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Visualizer : MonoBehaviour
 {
@@ -25,6 +26,7 @@ public class Visualizer : MonoBehaviour
     public TMP_Text yearText1, yearText2;
     public Terrain terrain1;
     public Terrain terrain2;
+    public Manager manager;
 
     [Header("Pinheiro-bravo Parameters"), Tooltip("Ages at which Pinheiro-bravo transitions between stages")]
     [SerializeField] float pbAdultStartingAge;
@@ -72,10 +74,12 @@ public class Visualizer : MonoBehaviour
 
     int currentYear;
     List<(int, List<float>)> plotShapeAndDimensions;
-    readonly List<string> species = new List<string> { "Pb", "Pm", "Eg", "Cas" };
+    readonly List<string> species = new List<string> { "Pb", "Pm", "Ec", "Ct" };
     int offsetToPbCa = 5, offsetToPmCa = 4, offsetToEgCa = 3, offsetToCasCa = 3;
     bool isCircularPlot1 = false;
     bool isCircularPlot2 = false;
+    //used when plotshape is 0 (area specific)
+    float terrainOffset = 10f;
 
     private void Start()
     {
@@ -113,7 +117,7 @@ public class Visualizer : MonoBehaviour
         {
             for (int y = 0; y < terrain1.terrainData.heightmapResolution; y++)
             {
-                heights1[x, y] = Mathf.PerlinNoise((float)x / terrain1.terrainData.heightmapResolution * 5f, (float)y / terrain1.terrainData.heightmapResolution * 5f) * 0.01f;
+                heights1[x, y] = Mathf.PerlinNoise((float)x / terrain1.terrainData.heightmapResolution * 2f, (float)y / terrain1.terrainData.heightmapResolution * 2f) * 0.01f;
             }
         }
         terrain1.terrainData.SetHeights(0, 0, heights1);
@@ -123,7 +127,7 @@ public class Visualizer : MonoBehaviour
         {
             for (int y = 0; y < terrain2.terrainData.heightmapResolution; y++)
             {
-                heights2[x, y] = Mathf.PerlinNoise((float)x / terrain2.terrainData.heightmapResolution * 5f, (float)y / terrain2.terrainData.heightmapResolution * 5f) * 0.01f;
+                heights2[x, y] = Mathf.PerlinNoise((float)x / terrain2.terrainData.heightmapResolution * 2f, (float)y / terrain2.terrainData.heightmapResolution * 2f) * 0.01f;
             }
         }
         terrain2.terrainData.SetHeights(0, 0, heights2);
@@ -137,14 +141,23 @@ public class Visualizer : MonoBehaviour
 
         isCircular = false;
 
-        if (shapeType == 1 && dims.Count >= 1) // Quadrado
+        if(shapeType == 0) //Area specific, because of no specific shape its translated to a square terrain, the files will change so it is alway required shape
+        {
+            var area = dims[0];
+            var sideLength = Mathf.Sqrt(area) + terrainOffset;
+            newPosition = new Vector3(0, terrain.transform.position.y, 0);
+            newSize = new Vector3(sideLength, currentSize.y, sideLength);
+            plotReference.transform.position = new Vector3(sideLength / 2, terrain.transform.position.y, sideLength / 2);
+            paralelPos.transform.position = new Vector3(sideLength / 2, paralelPos.transform.position.y, sideLength / 2);
+        }
+        else if (shapeType == 1 && dims.Count >= 1) // Square
         {
             newPosition = new Vector3(0, terrain.transform.position.y, 0);
             newSize = new Vector3(dims[0], currentSize.y, dims[0]);
             plotReference.transform.position = new Vector3(dims[0] / 2, terrain.transform.position.y, dims[0] / 2);
             paralelPos.transform.position = new Vector3(dims[0] / 2, paralelPos.transform.position.y, dims[0] / 2);
         }
-        else if (shapeType == 2 && dims.Count >= 2) // Retangular
+        else if (shapeType == 2 || shapeType == 4 && dims.Count >= 2) // Retangular or Custom Polygon (approximated as rectangle because of terrain limitations)
         {
             newPosition = new Vector3(0, terrain.transform.position.y, 0);
             newSize = new Vector3(dims[0], currentSize.y, dims[1]);
@@ -160,6 +173,7 @@ public class Visualizer : MonoBehaviour
             paralelPos.transform.position = new Vector3(dims[0], paralelPos.transform.position.y, dims[0]);
             isCircular = true;
         }
+        manager.setPlotRefPos(plotReference.transform.position);
         cam.transform.LookAt(plotReference.transform.position);
         terrain.terrainData.size = newSize;
     }
@@ -379,41 +393,108 @@ public class Visualizer : MonoBehaviour
     public void createObjects(List<TreeData> trees, Terrain terrain, bool isPlot2, bool isCircular)
     {
         if (trees == null || trees.Count == 0) return;
-
         Vector3 terrainCenter = terrain.transform.position + terrain.terrainData.size / 2f;
-
         foreach (TreeData tree in trees)
         {
             if (tree.estado == 4 || tree.estado == 6) continue;
-
             float worldX = tree.Xarv;
             float worldZ = tree.Yarv;
 
-            float treeHeight = terrain.transform.position.y;
-            Vector3 position;
-
+            float normX, normZ;
             if (isCircular)
             {
-                position = new Vector3(terrainCenter.x + worldX, treeHeight, terrainCenter.z + worldZ);
+                normX = (worldX + terrain.terrainData.size.x / 2f) / terrain.terrainData.size.x;
+                normZ = (worldZ + terrain.terrainData.size.z / 2f) / terrain.terrainData.size.z;
             }
             else
             {
-                position = new Vector3(worldX, treeHeight, worldZ);
+                normX = (worldX - terrain.transform.position.x) / terrain.terrainData.size.x;
+                normZ = (worldZ - terrain.transform.position.z) / terrain.terrainData.size.z;
             }
+            float terrainHeight = terrain.terrainData.GetInterpolatedHeight(normX, normZ);
+
+            Vector3 position;
+            if (isCircular)
+                position = new Vector3(terrainCenter.x + worldX, terrainHeight, terrainCenter.z + worldZ);
+            else
+                position = new Vector3(worldX, terrainHeight, worldZ);
 
             GameObject marker = new GameObject($"TreeMarker_{tree.id_arv}");
             marker.transform.position = position;
             marker.transform.rotation = Quaternion.Euler(0, tree.rotation, 0);
             marker.transform.SetParent(plot.transform);
 
+            float finalHeight = tree.h;
+            float finalWidth = tree.cw;
+
             BoxCollider col = marker.AddComponent<BoxCollider>();
             col.isTrigger = true;
-            col.size = new Vector3(tree.cw * 2, tree.h, tree.cw * 2);
-            col.center = new Vector3(0, treeHeight, 0);
+            //calculations were weird so i did some experimenting
+            col.size = new Vector3(finalWidth, finalHeight / 3, finalWidth);
+            col.center = new Vector3(0, finalHeight / 6, 0);
 
             marker.AddComponent<Tree>().initTree(tree);
             marker.layer = isPlot2 ? LayerMask.NameToLayer("Plot2") : LayerMask.NameToLayer("Plot1");
+            CreateOutline(marker);
         }
+    }
+
+    private void CreateOutline(GameObject marker)
+    {
+        // Create a child object to hold the wireframe
+        GameObject wireframe = new GameObject("OutlineMesh");
+        wireframe.layer = marker.layer;
+        wireframe.transform.SetParent(marker.transform, false);
+        wireframe.transform.localPosition = Vector3.zero;
+        wireframe.transform.localRotation = Quaternion.identity;
+        MeshFilter mf = wireframe.AddComponent<MeshFilter>();
+        MeshRenderer mr = wireframe.AddComponent<MeshRenderer>();
+        mr.material = new Material(Shader.Find("Sprites/Default"));
+        mr.material.color = Color.green;
+
+        BoxCollider col = marker.GetComponent<BoxCollider>();
+        if (col == null) return;
+
+        mf.mesh = GenerateWireCubeMesh(col);
+        wireframe.SetActive(false);
+    }
+
+    private Mesh GenerateWireCubeMesh(BoxCollider col)
+    {
+        Bounds b = col.bounds;
+        Vector3 center = col.center;
+        Vector3 size = col.size;
+
+        Vector3 half = size / 2f;
+
+        // 8 corners in local space
+        Vector3 v0 = new Vector3(-half.x, -half.y, -half.z) + center;
+        Vector3 v1 = new Vector3(half.x, -half.y, -half.z) + center;
+        Vector3 v2 = new Vector3(half.x, -half.y, half.z) + center;
+        Vector3 v3 = new Vector3(-half.x, -half.y, half.z) + center;
+        Vector3 v4 = new Vector3(-half.x, half.y, -half.z) + center;
+        Vector3 v5 = new Vector3(half.x, half.y, -half.z) + center;
+        Vector3 v6 = new Vector3(half.x, half.y, half.z) + center;
+        Vector3 v7 = new Vector3(-half.x, half.y, half.z) + center;
+
+        // Edges: 12 lines (24 vertices)
+        Vector3[] vertices = new Vector3[]
+        {
+        v0, v1, v1, v2, v2, v3, v3, v0, // bottom
+        v4, v5, v5, v6, v6, v7, v7, v4, // top
+        v0, v4, v1, v5, v2, v6, v3, v7  // verticals
+        };
+
+        // Lines topology
+        int[] indices = new int[vertices.Length];
+        for (int i = 0; i < vertices.Length; i++) indices[i] = i;
+
+        Mesh mesh = new Mesh();
+        mesh.vertices = vertices;
+        mesh.SetIndices(indices, MeshTopology.Lines, 0);
+        mesh.RecalculateBounds();
+
+        return mesh;
     }
 
     private void clear(string layerName = null)

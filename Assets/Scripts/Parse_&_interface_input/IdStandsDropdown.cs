@@ -47,7 +47,6 @@ public class IdStandsDropdown : MonoBehaviour
     {
         if (dropdown == null || dropdown.options.Count == 0) return;
         string selectedText = dropdown.options[value].text;
-        parser.updateSelectedIdStand(selectedText, isMainPlot);
     }
 
 }

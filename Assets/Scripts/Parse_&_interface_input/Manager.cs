@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using TMPro;
 using Unity.VisualScripting;
@@ -26,6 +27,7 @@ public class Manager : MonoBehaviour
     Camera cam1, cam2;
     SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData;
     SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> YieldTableData;
+    SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> DDTableData;
     int current_year1, current_year2;
     bool isVisualizationActive = true;
     Vector3 lastPosCamera1Position;
@@ -33,6 +35,8 @@ public class Manager : MonoBehaviour
     Vector3 lastPosCamera2Position;
     Quaternion lastPosCamera2Rotation;
     string selectedId_stand1, selectedId_stand2, selectedId_presc1, selectedId_presc2, selectedId_presc1YT, selectedId_presc2YT;
+    GameObject lastSelectedTree;
+    Vector3 initialPlotRefPosition;
 
     private void Start()
     {
@@ -45,6 +49,7 @@ public class Manager : MonoBehaviour
 
         outputSoloTreesData = inputAndParsedData.outputSoloTreesData;
         YieldTableData = inputAndParsedData.outputYieldTable;
+        DDTableData = inputAndParsedData.outputDDTable;
 
         pDropdown1.initDropdown(
             outputSoloTreesData.First().Value.Keys.ToList(),
@@ -67,7 +72,7 @@ public class Manager : MonoBehaviour
         }
 
         receiveSoloTreesData(outputSoloTreesData);
-        receiveYieldTableData(YieldTableData);
+        receiveYieldTableData(YieldTableData, DDTableData);
     }
 
     void Update()
@@ -178,6 +183,12 @@ public class Manager : MonoBehaviour
             current_year1++;
             treeInfoText.text = "";
             visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
+            graphGenerator.populateDDBarCharts(
+                DDTableData,
+                new string[] { selectedId_stand1, selectedId_stand2 },
+                new string[] { selectedId_presc1YT, selectedId_presc2YT },
+                new int[] { current_year1, current_year2 }
+            );
         }
     }
 
@@ -188,6 +199,12 @@ public class Manager : MonoBehaviour
             current_year1--;
             treeInfoText.text = "";
             visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
+            graphGenerator.populateDDBarCharts(
+    DDTableData,
+    new string[] { selectedId_stand1, selectedId_stand2 },
+    new string[] { selectedId_presc1YT, selectedId_presc2YT },
+    new int[] { current_year1, current_year2 }
+);
         }
     }
 
@@ -198,6 +215,12 @@ public class Manager : MonoBehaviour
             current_year2++;
             treeInfoText.text = "";
             visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
+            graphGenerator.populateDDBarCharts(
+    DDTableData,
+    new string[] { selectedId_stand1, selectedId_stand2 },
+    new string[] { selectedId_presc1YT, selectedId_presc2YT },
+    new int[] { current_year1, current_year2 }
+);
         }
     }
 
@@ -208,6 +231,12 @@ public class Manager : MonoBehaviour
             current_year2--;
             treeInfoText.text = "";
             visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
+            graphGenerator.populateDDBarCharts(
+    DDTableData,
+    new string[] { selectedId_stand1, selectedId_stand2 },
+    new string[] { selectedId_presc1YT, selectedId_presc2YT },
+    new int[] { current_year1, current_year2 }
+);
         }
     }
 
@@ -260,6 +289,12 @@ public class Manager : MonoBehaviour
                 outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1],
                 outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year
             );
+            graphGenerator.populateDDBarCharts(
+    DDTableData,
+    new string[] { selectedId_stand1, selectedId_stand2 },
+    new string[] { selectedId_presc1YT, selectedId_presc2YT },
+    new int[] { current_year1, current_year2 }
+);
             changeHightlight();
         }
     }
@@ -277,6 +312,12 @@ public class Manager : MonoBehaviour
                 outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2],
                 outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year
             );
+            graphGenerator.populateDDBarCharts(
+    DDTableData,
+    new string[] { selectedId_stand1, selectedId_stand2 },
+    new string[] { selectedId_presc1YT, selectedId_presc2YT },
+    new int[] { current_year1, current_year2 }
+);
             changeHightlight();
         }
     }
@@ -308,10 +349,11 @@ public class Manager : MonoBehaviour
         }
     }
 
-    public void receiveYieldTableData(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> data)
+    public void receiveYieldTableData(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> dataYT, SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> dataDD)
     {
-        YieldTableData = data;
-        graphGenerator.receiveData(data, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, selectedId_stand1, selectedId_stand2, selectedId_presc1YT, selectedId_presc2YT);
+        YieldTableData = dataYT;
+        DDTableData = dataDD;
+        graphGenerator.receiveData(dataYT, dataDD, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, selectedId_stand1, selectedId_stand2, selectedId_presc1YT, selectedId_presc2YT);
     }
 
     public void updateSelectedPrescriptions(string id_presc, bool isMainPlot)
@@ -330,27 +372,57 @@ public class Manager : MonoBehaviour
             selectedId_presc2YT = prescIds2[1];
             current_year2 = 0;
         }
-        
+
         visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
         if (outputSoloTreesData.Count > 1)
             visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
-        
-        graphGenerator.receiveData(YieldTableData, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, selectedId_stand1, selectedId_stand2, selectedId_presc1YT, selectedId_presc2YT);
+
+        graphGenerator.receiveData(YieldTableData, DDTableData, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, selectedId_stand1, selectedId_stand2, selectedId_presc1YT, selectedId_presc2YT);
+    }
+
+    public bool isMultiVisualizationActive()
+    {
+        return outputSoloTreesData.Count() > 1;
+    }
+
+    public void SelectTree(GameObject tree)
+    {
+        lastSelectedTree = tree;
+    }
+
+    public GameObject GetSelectedTree()
+    {
+        return lastSelectedTree;
+    }
+
+    public void ResetSelected()
+    {
+        lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
+        lastSelectedTree = null;
+    }
+
+    public void setPlotRefPos(Vector3 pos)
+    {
+        initialPlotRefPosition = pos;
+    }
+
+    public Vector3 getPlotRef()
+    {
+        return initialPlotRefPosition;
     }
 
     public void ShowTreeInfo(Tree t)
     {
         if (treeInfoText != null)
         {
-            treeInfoText.text = $"Informação da árvore:\n" +
-                                $"Id árvore: {t.id_arv}\n" +
-                                $"Id Prescrição: {t.id_presc}\n" +
-                                $"Ciclo: {t.ciclo}\n" +
-                                $"Ano: {t.Year}\n" +
-                                $"Idade: {t.t}\n" +
-                                $"Diâmetro: {t.d}\n" +
-                                $"Altura: {t.h}\n" +
-                                $"Largura da copa: {t.cw}";
+            treeInfoText.text = $"Tree information:\n" +
+                                $"Cicle: {t.ciclo}\n" +
+                                $"Year: {t.Year}\n" +
+                                $"Age: {t.t} anos\n" +
+                                $"Heigth: {t.h} m\n" +
+                                $"Diameter: {t.d} cm\n" +
+                                $"Heigth of crown base: {t.ciclo} m\n" +
+                                $"Crown Width: {t.cw} cm";
         }
     }
 }

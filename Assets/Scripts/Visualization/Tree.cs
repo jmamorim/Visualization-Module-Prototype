@@ -48,6 +48,18 @@ public class Tree : MonoBehaviour
                 if ((cam.cullingMask & (1 << gameObject.layer)) != 0)
                 {
                     manager.ShowTreeInfo(this);
+                    CameraBehaviour behaviour = cam.GetComponent<CameraBehaviour>();
+                    if (behaviour != null)
+                    {
+                        behaviour.ChangeLookAt(this.transform);
+                    }
+                    var lastSelectedTree = manager.GetSelectedTree();
+                    if(lastSelectedTree != null)
+                        lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
+
+                    manager.SelectTree(gameObject);
+                    gameObject.transform.Find("OutlineMesh").gameObject.SetActive(true);
+
                     return;
                 }
             }

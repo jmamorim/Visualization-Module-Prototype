@@ -14,18 +14,30 @@ public class CameraBehaviour : MonoBehaviour
 
     Camera cam;
     Vector3 lastMousePosition;
+    private Vector3 initialPosition;
+    private Quaternion initialRotation;
     [SerializeField] bool canRotate = true;
 
     private void Start()
     {
         cam = gameObject.gameObject.GetComponent<Camera>();
+        initialPosition = transform.position;
+        initialRotation = transform.rotation;
     }
 
     void Update()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
 
-        if (scroll != 0)
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            transform.position = initialPosition;
+            transform.rotation = initialRotation;
+            target.position = manager.getPlotRef();
+            manager.ResetSelected();
+        }
+
+        if (scroll != 0 && IsMouseOverViewport())
         {
             float distance = Vector3.Distance(transform.position, target.position);
 
@@ -75,6 +87,13 @@ public class CameraBehaviour : MonoBehaviour
             }
         }
     }
+
+    public void ChangeLookAt(Transform newPoint)
+    {
+        target = newPoint;
+        transform.LookAt(target.position);
+    }
+
 
     private bool IsMouseOverViewport()
     {

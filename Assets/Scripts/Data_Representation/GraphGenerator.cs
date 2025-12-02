@@ -13,24 +13,32 @@ public class GraphGenerator : MonoBehaviour
     public List<LineChart> lineCharts;
     public List<LineChart> MultiLineCharts;
     public List<BarChart> barCharts;
+    public List<BarChart> ddBarCharts;
     public List<GameObject> textAndButtons;
 
     int highlightedIndex1, highlightedIndex2;
     List<int> sortedYears;
-    string[] volumeComponents = { "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5" };
-    string[] biomassComponents = { "Ww", "Wb", "Wbr", "Wl", "Wa", "Wr" };
+    // Inside GraphGenerator class
+    readonly string[] DDCategories = {
+    "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
+    "55", "60", "65", "70", "75", "80", "85", "90", "95", "100", ">102.5"
+};
 
-    public void receiveData(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> tableData, int current_year1, int current_year2, string selectedId_stand1, string selectedId_stand2, string selectedId_presc1, string selectedId_presc2)
+    public void receiveData(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> tableData,
+        SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> DDtableData,
+        int current_year1, int current_year2, string selectedId_stand1,
+        string selectedId_stand2, string selectedId_presc1, string selectedId_presc2)
     {
 
         List<int> allYears = new List<int>();
         foreach (var entry in tableData[selectedId_stand1][selectedId_presc1])
             allYears.Add(entry.year);
-        if (tableData.Count > 1) {
+        if (tableData.Count > 1)
+        {
             foreach (var entry in tableData[selectedId_stand2][selectedId_presc2])
                 allYears.Add(entry.year);
         }
-        
+
         sortedYears = allYears;
         sortedYears.Sort();
 
@@ -48,6 +56,12 @@ public class GraphGenerator : MonoBehaviour
         populateLineChart(lineCharts[7], tableData, e => e.Vu_st, id_stands, id_prescs);
 
         populateBarCharts(sortedYears, tableData, id_stands, id_prescs);
+
+        populateDDBarCharts(DDtableData, id_stands, id_prescs,
+            new int[] {
+                current_year1,
+                current_year2
+            });
 
         populateMultiLineChart(tableData, id_stands, id_prescs);
 
@@ -110,6 +124,23 @@ public class GraphGenerator : MonoBehaviour
         }
     }
 
+    private void prepareDDBarChart(BaseChart chart)
+    {
+        chart.ClearData();
+        chart.RemoveAllSerie();
+        chart.RemoveData();
+        chart.RefreshChart();
+
+        var xAxis = chart.GetChartComponent<XAxis>();
+        xAxis.data.Clear();
+        xAxis.type = Axis.AxisType.Category;
+
+        foreach (var cat in DDCategories)
+        {
+            chart.AddXAxisData(cat);
+        }
+    }
+
     private void prepareBarChart(BaseChart chart, List<int> years)
     {
         chart.ClearData();
@@ -117,9 +148,10 @@ public class GraphGenerator : MonoBehaviour
         chart.RemoveData();
         chart.RefreshChart();
 
-        chart.GetChartComponent<XAxis>().data.Clear();
         var xAxis = chart.GetChartComponent<XAxis>();
+        xAxis.data.Clear();
         xAxis.type = Axis.AxisType.Category;
+
         foreach (var y in years)
         {
             chart.AddXAxisData(y.ToString());
@@ -247,6 +279,67 @@ public class GraphGenerator : MonoBehaviour
             }
 
             chart.RefreshChart();
+        }
+    }
+
+    public void populateDDBarCharts(
+    SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> DDtableData,
+    string[] id_stands,
+    string[] id_prescs,
+    int[] currentYears)
+    {
+        for (int standIndex = 0; standIndex < DDtableData.Count; standIndex++)
+        {
+            var chart = ddBarCharts[standIndex];
+            prepareDDBarChart(chart);
+
+            var plotData = DDtableData[id_stands[standIndex]][id_prescs[standIndex]];
+            if (plotData == null || plotData.Count == 0) continue;
+
+            var entry = DDtableData[id_stands[standIndex]][id_prescs[standIndex]][currentYears[standIndex]];
+
+            var serie = chart.AddSerie<Bar>(id_stands[standIndex]);
+            serie.stack = $"DD_stand_{id_stands[standIndex]}";
+
+            for (int c = 0; c < DDCategories.Length; c++)
+            {
+                float v = GetDDValueByIndex(entry, c);
+
+                chart.AddData(serie.index, v);
+            }
+
+            chart.RefreshChart();
+        }
+    }
+
+    // Add this helper function inside GraphGenerator
+    private float GetDDValueByIndex(DDEntry entry, int index)
+    {
+        switch (index)
+        {
+            case 0: return entry.dd0;
+            case 1: return entry.dd5;
+            case 2: return entry.dd10;
+            case 3: return entry.dd15;
+            case 4: return entry.dd20;
+            case 5: return entry.dd25;
+            case 6: return entry.dd30;
+            case 7: return entry.dd35;
+            case 8: return entry.dd40;
+            case 9: return entry.dd45;
+            case 10: return entry.dd50;
+            case 11: return entry.dd55;
+            case 12: return entry.dd60;
+            case 13: return entry.dd65;
+            case 14: return entry.dd70;
+            case 15: return entry.dd75;
+            case 16: return entry.dd80;
+            case 17: return entry.dd85;
+            case 18: return entry.dd90;
+            case 19: return entry.dd95;
+            case 20: return entry.dd100;
+            case 21: return entry.dd102;
+            default: return 0f;
         }
     }
 

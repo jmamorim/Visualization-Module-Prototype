@@ -6,7 +6,7 @@ using System.Linq;
 
 public class InterfaceManager : MonoBehaviour
 {
-    public List<GameObject> plotButtons, addRemoveButtons, dimensionsGameObjects, idStandsDropdowns;
+    public List<GameObject> plotButtons, addRemoveButtons, idStandsDropdowns, currentSim;
     public Parser parser;
 
     [SerializeField] int activePlotIndex = 0;
@@ -30,18 +30,10 @@ public class InterfaceManager : MonoBehaviour
             activePlottext.fontStyle = TMPro.FontStyles.Bold;
         }
 
-        DeactivateGameObjects(dimensionsGameObjects);
-
-        int firstIndex = activePlotIndex % 2 == 0 ? activePlotIndex : activePlotIndex + 1;
-        int secondIndex = firstIndex + 1;
-
-        if (firstIndex >= 0 && firstIndex < dimensionsGameObjects.Count)
-            dimensionsGameObjects[firstIndex].SetActive(true);
-        if (secondIndex >= 0 && secondIndex < dimensionsGameObjects.Count)
-            dimensionsGameObjects[secondIndex].SetActive(true);
-        
         DeactivateGameObjects(idStandsDropdowns);
         idStandsDropdowns[activePlotIndex].SetActive(true);
+        DeactivateGameObjects(currentSim);
+        currentSim[activePlotIndex].SetActive(true);
     }
 
     //removed a plot
@@ -53,7 +45,8 @@ public class InterfaceManager : MonoBehaviour
         idStandsDropdowns[idStandsDropdowns.Count - 1].GetComponent<TMP_Dropdown>().ClearOptions();
         idStandsDropdowns[idStandsDropdowns.Count - 1].SetActive(false);
         idStandsDropdowns.First().SetActive(true);
-        parser.removeEntryList();
+        currentSim[currentSim.Count - 1].GetComponentInChildren<TMP_Text>().text = "";
+        SetActivePlotIndex(0);
     }
 
     //added a plot
@@ -62,7 +55,18 @@ public class InterfaceManager : MonoBehaviour
         DeactivateGameObjects(addRemoveButtons);
         addRemoveButtons[1].SetActive(true);
         plotButtons[plotButtons.Count - 1].SetActive(true);
-        parser.addEntryList();
+    }
+
+    public void selectSim(string name, SimulationInfo info)
+    {
+        //update the dropdowns to contain info related to the simulation
+        if (!currentSim[activePlotIndex].activeSelf)
+        {
+            currentSim[activePlotIndex].SetActive(true);
+        }
+        currentSim[activePlotIndex].GetComponentInChildren<TMP_Text>().text = name;
+
+        idStandsDropdowns[activePlotIndex].GetComponent<IdStandsDropdown>().initDropdown(info.plotDataByIdPar.Keys.ToList());
     }
 
     public int getActivePlotIndex()
