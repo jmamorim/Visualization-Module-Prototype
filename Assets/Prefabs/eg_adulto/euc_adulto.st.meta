@@ -1,7 +1,17 @@
 fileFormatVersion: 2
 guid: d1400d5675861df499881219c000ed47
 SpeedTreeImporter:
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_adulto
+    second: {fileID: 2100000, guid: dd296490b912d5843bbd37e649a1a3f6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_adulto_Billboard_LOD3
+    second: {fileID: 2100000, guid: 722e4e80648e9aa4891af15b238d2d31, type: 2}
   serializedVersion: 7
   mainColor: {r: 1, g: 1, b: 1, a: 1}
   hueVariation: {r: 1, g: 0.5, b: 0, a: 0.1}

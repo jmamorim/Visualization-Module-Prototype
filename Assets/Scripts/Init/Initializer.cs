@@ -55,7 +55,18 @@ public class SimulationScanner : MonoBehaviour
             Debug.LogError("Simulations folder missing in build: " + simsRoot);
             return;
         }
+
         string[] simFolders = Directory.GetDirectories(simsRoot);
+        HashSet<string> existingFolders = new HashSet<string>(
+            simFolders.Select(f => Path.GetFileName(f))
+        );
+
+        var toRemove = simulations.Keys.Where(k => !existingFolders.Contains(k)).ToList();
+        foreach (var key in toRemove)
+        {
+            simulations.Remove(key);
+            Debug.Log("Removed missing simulation: " + key);
+        }
 
         foreach (string folder in simFolders)
         {

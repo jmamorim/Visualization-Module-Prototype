@@ -14,8 +14,10 @@ public class CameraBehaviour : MonoBehaviour
 
     Camera cam;
     Vector3 lastMousePosition;
-    private Vector3 initialPosition;
-    private Quaternion initialRotation;
+    Vector3 initialPosition;
+    Transform initialLookAt;
+    Quaternion initialRotation;
+    
     [SerializeField] bool canRotate = true;
 
     private void Start()
@@ -23,6 +25,7 @@ public class CameraBehaviour : MonoBehaviour
         cam = gameObject.gameObject.GetComponent<Camera>();
         initialPosition = transform.position;
         initialRotation = transform.rotation;
+        initialLookAt = target;
     }
 
     void Update()
@@ -94,8 +97,14 @@ public class CameraBehaviour : MonoBehaviour
         transform.LookAt(target.position);
     }
 
+    public void ResetLookAt()
+    {
+        target = initialLookAt;
+        transform.rotation = initialRotation;
+        transform.LookAt(target);
+    }
 
-    private bool IsMouseOverViewport()
+    public bool IsMouseOverViewport()
     {
         Vector3 mouse = Input.mousePosition;
         float normalizedX = mouse.x / Screen.width;

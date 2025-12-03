@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using XCharts.Runtime;
@@ -22,10 +24,32 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     Vector2 originalMousePos;
     const float minSize = 100f;
 
+    List<float> originalDDValues = new List<float>();
+    bool ddPercentageMode = false;
+
+
     private void Start()
     {
         rectTransform = GetComponent<RectTransform>();
         canvas = GetComponentInParent<Canvas>();
+    }
+
+    public void SaveDDOriginalValues(List<float> values)
+    {
+        if (!isDD || chart == null) return;
+
+        originalDDValues.Clear();
+
+        originalDDValues = values;
+
+        if (ddPercentageMode)
+        {
+            ToggleDDPercentageView();
+        }
+        else
+        {
+            ToggleDDAbsoluteView();
+        }
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -145,6 +169,54 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             }
         }
     }
+
+    public void ToggleDDPercentageView()
+    {
+        ddPercentageMode = true;
+        Debug.Log("Toggling DD Percentage View");
+
+        var serie = chart.series.First();
+
+        float total = 0f;
+        foreach (float v in originalDDValues)
+            total += v;
+
+        serie.ClearData();
+
+        foreach (float v in originalDDValues)
+        {
+            float percentage = (v / total) * 100f;
+            serie.AddData(percentage);
+        }
+
+        var yaxis = chart.GetChartComponent<YAxis>();
+
+        yaxis.min = 0;
+        yaxis.max = 100;
+
+        chart.RefreshChart();
+    }
+
+    public void ToggleDDAbsoluteView()
+    {
+        Debug.Log("Toggling DD Absolute View");
+
+        ddPercentageMode = false;
+
+        var serie = chart.series.First();
+        serie.ClearData();
+
+        foreach (float v in originalDDValues)
+            serie.AddData(v);
+
+        var yaxis = chart.GetChartComponent<YAxis>();
+
+        yaxis.min = double.NaN;
+        yaxis.max = double.NaN;
+
+        chart.RefreshChart();
+    }
+
 
     public void OnEndDrag(PointerEventData eventData)
     {

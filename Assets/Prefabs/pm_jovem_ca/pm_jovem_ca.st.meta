@@ -1,7 +1,17 @@
 fileFormatVersion: 2
 guid: e2590697571754b4a8485d4fc4b008bd
 SpeedTreeImporter:
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pm_jovem_ca
+    second: {fileID: 2100000, guid: 92d3b4bfed1e4874a8490792b3ed975e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pm_jovem_ca_Billboard_LOD3
+    second: {fileID: 2100000, guid: 824fd43041b709646bf93b54c9db19a4, type: 2}
   serializedVersion: 7
   mainColor: {r: 1, g: 1, b: 1, a: 1}
   hueVariation: {r: 1, g: 0.5, b: 0, a: 0.1}

@@ -1,12 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Threading;
 using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 // Manages the overall application state, including data reception, user input handling, and UI updates.
 // needs to change so it can adapt visualization and data representation for yield table data and multi visualization 
@@ -397,14 +392,25 @@ public class Manager : MonoBehaviour
 
     public void ResetSelected()
     {
-        lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
-        lastSelectedTree = null;
+        if (lastSelectedTree != null)
+        {
+            lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
+            lastSelectedTree = null;
+        }
     }
 
     public void setPlotRefPos(Vector3 pos)
     {
         initialPlotRefPosition = pos;
     }
+
+    public void DeselectTree()
+    {
+        ResetSelected();
+        HideTreeInfo();
+        
+    }
+
 
     public Vector3 getPlotRef()
     {
@@ -423,6 +429,14 @@ public class Manager : MonoBehaviour
                                 $"Diameter: {t.d} cm\n" +
                                 $"Heigth of crown base: {t.ciclo} m\n" +
                                 $"Crown Width: {t.cw} cm";
+        }
+    }
+
+    public void HideTreeInfo()
+    {
+        if (treeInfoText != null)
+        {
+            treeInfoText.text = "";
         }
     }
 }

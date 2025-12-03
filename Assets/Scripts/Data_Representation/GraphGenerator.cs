@@ -291,6 +291,7 @@ public class GraphGenerator : MonoBehaviour
         for (int standIndex = 0; standIndex < DDtableData.Count; standIndex++)
         {
             var chart = ddBarCharts[standIndex];
+            var behaviour = chart.GetComponent<GraphBehaviour>();
             prepareDDBarChart(chart);
 
             var plotData = DDtableData[id_stands[standIndex]][id_prescs[standIndex]];
@@ -300,15 +301,18 @@ public class GraphGenerator : MonoBehaviour
 
             var serie = chart.AddSerie<Bar>(id_stands[standIndex]);
             serie.stack = $"DD_stand_{id_stands[standIndex]}";
+            
+            List<float> values = new List<float>();
 
             for (int c = 0; c < DDCategories.Length; c++)
             {
                 float v = GetDDValueByIndex(entry, c);
 
-                chart.AddData(serie.index, v);
+                values.Add(v);
             }
 
             chart.RefreshChart();
+            behaviour.SaveDDOriginalValues(values);
         }
     }
 

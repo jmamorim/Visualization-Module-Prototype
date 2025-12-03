@@ -1,7 +1,17 @@
 fileFormatVersion: 2
 guid: cdeb8b72c80855f43baf94f6cd83924b
 SpeedTreeImporter:
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_pm
+    second: {fileID: 2100000, guid: 258f5b16769946b4fb21e46d2b149b40, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_pm_Billboard_LOD3
+    second: {fileID: 2100000, guid: bffbccc19f234124ebdf304823e19471, type: 2}
   serializedVersion: 7
   mainColor: {r: 1, g: 1, b: 1, a: 1}
   hueVariation: {r: 1, g: 0.5, b: 0, a: 0.1}

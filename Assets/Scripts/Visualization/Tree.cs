@@ -51,7 +51,7 @@ public class Tree : MonoBehaviour
                     CameraBehaviour behaviour = cam.GetComponent<CameraBehaviour>();
                     if (behaviour != null)
                     {
-                        behaviour.ChangeLookAt(this.transform);
+                        behaviour.ChangeLookAt(transform);
                     }
                     var lastSelectedTree = manager.GetSelectedTree();
                     if(lastSelectedTree != null)
