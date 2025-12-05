@@ -75,6 +75,7 @@ public class SimulationScanner : MonoBehaviour
             if (simulations.ContainsKey(folderName))
             {
                 Debug.Log("Simulation already registered: " + folderName);
+                parser.ShowMessage("Simulation already saved: " + folderName + "\n");
                 continue;
             }
 
@@ -93,18 +94,22 @@ public class SimulationScanner : MonoBehaviour
                 if (headers.SequenceEqual(inputHeaders))
                 {
                     currentInputPath = file;
+                    parser.ShowMessage("Input file found for simulation: " + folderName + "\n");
                 }
                 else if (headers.SequenceEqual(soloTreesHeaders))
                 {
                     currentSoloTreesPath = file;
+                    parser.ShowMessage("Solo trees file found for simulation: " + folderName + "\n");
                 }
                 else if (headers.SequenceEqual(yieldTableHeaders))
                 {
                     currentYieldTablePath = file;
+                    parser.ShowMessage("Yield table file found for simulation: " + folderName + "\n");
                 }
                 else if (headers.SequenceEqual(ddTableHeaders))
                 {
                     currentDDPath = file;
+                    parser.ShowMessage("Diameter distribution file found for simulation: " + folderName + "\n");
                 }
             }
             var simInfo = new SimulationInfo()
@@ -123,6 +128,7 @@ public class SimulationScanner : MonoBehaviour
 
             simulations.Add(folderName, simInfo);
             Debug.Log("Registered new simulation: " + folderName);
+            parser.ShowMessage("New simulation saved: " + folderName + "\n");
         }
         simMetadata.simulations = simulations;
         CreateSimulationButtons(simulations);

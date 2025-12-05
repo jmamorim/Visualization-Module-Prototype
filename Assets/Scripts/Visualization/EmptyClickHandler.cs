@@ -23,36 +23,32 @@ public class EmptyClickHandler : MonoBehaviour
 
                 if (!Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    manager.DeselectTree();
-                    var cameras = Camera.allCameras;
-                    foreach (var cam in cameras)
-                    {
-                        var behaviour = cam.GetComponent<CameraBehaviour>();
-                        if (behaviour != null)
-                        {
-                            behaviour.ResetLookAt();
-                            break;
-                        }
-                    }
+                    OnDisable();
                 }
                 else
                 {
                     if (hit.collider.GetComponent<Tree>() == null)
                     {
-                        manager.DeselectTree();
-                        var cameras = Camera.allCameras;
-                        foreach (var cam in cameras)
-                        {
-                            var behaviour = cam.GetComponent<CameraBehaviour>();
-                            if (behaviour != null)
-                            {
-                                behaviour.ResetLookAt();
-                                break;
-                            }
-                        }
+                        OnDisable();
                     }
                 }
             }
         }
     }
+
+    void OnDisable()
+    {
+        manager.DeselectTree();
+        var cameras = Camera.allCameras;
+        foreach (var cam in cameras)
+        {
+            var behaviour = cam.GetComponent<CameraBehaviour>();
+            if (behaviour != null && behaviour.IsMouseOverViewport() && behaviour.CanRotate())
+            {
+                behaviour.ResetLookAt();
+                break;
+            }
+        }
+    }
+
 }

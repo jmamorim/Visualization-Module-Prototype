@@ -11,7 +11,6 @@ public class Manager : MonoBehaviour
     public Visualizer visualizer;
     public Canvas visulaizationCanvas;
     public GameObject Camera1, Camera2;
-    public Transform paralelPos1, paralelPos2;
     public GraphGenerator graphGenerator;
     public InputAndParsedData inputAndParsedData;
     public bool isParalelCameraActive = false;
@@ -25,10 +24,6 @@ public class Manager : MonoBehaviour
     SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> DDTableData;
     int current_year1, current_year2;
     bool isVisualizationActive = true;
-    Vector3 lastPosCamera1Position;
-    Quaternion lastPosCamera1Rotation;
-    Vector3 lastPosCamera2Position;
-    Quaternion lastPosCamera2Rotation;
     string selectedId_stand1, selectedId_stand2, selectedId_presc1, selectedId_presc2, selectedId_presc1YT, selectedId_presc2YT;
     GameObject lastSelectedTree;
     Vector3 initialPlotRefPosition;
@@ -120,24 +115,21 @@ public class Manager : MonoBehaviour
                 if (!isParalelCameraActive)
                 {
                     isParalelCameraActive = true;
+                    ResetSelected();
 
-                    lastPosCamera1Position = Camera1.transform.position;
-                    lastPosCamera1Rotation = Camera1.transform.rotation;
                     cameraBehaviour1.DisableRotation();
                     cam1.orthographic = true;
-                    cam1.orthographicSize = 70;
-                    Camera1.transform.position = paralelPos1.position;
-                    Camera1.transform.rotation = paralelPos1.rotation;
+                    cam1.orthographicSize = cameraBehaviour1.GetOrthographicSize();
+                    Camera1.transform.position = cameraBehaviour1.paralelPos.position;
+                    Camera1.transform.rotation = cameraBehaviour1.paralelPos.rotation;
 
                     if (outputSoloTreesData.Count > 1)
                     {
-                        lastPosCamera2Position = Camera2.transform.position;
-                        lastPosCamera2Rotation = Camera2.transform.rotation;
                         cameraBehaviour2.DisableRotation();
                         cam2.orthographic = true;
-                        cam2.orthographicSize = 70;
-                        Camera2.transform.position = paralelPos2.position;
-                        Camera2.transform.rotation = paralelPos2.rotation;
+                        cam2.orthographicSize = cameraBehaviour2.GetOrthographicSize();
+                        Camera2.transform.position = cameraBehaviour2.paralelPos.position;
+                        Camera2.transform.rotation = cameraBehaviour2.paralelPos.rotation;
                     }
                 }
                 else
@@ -146,15 +138,13 @@ public class Manager : MonoBehaviour
 
                     cameraBehaviour1.EnableRotation();
                     cam1.orthographic = false;
-                    Camera1.transform.position = lastPosCamera1Position;
-                    Camera1.transform.rotation = lastPosCamera1Rotation;
+                    cameraBehaviour1.ResetCamera();
 
                     if (outputSoloTreesData.Count > 1)
                     {
                         cameraBehaviour2.EnableRotation();
                         cam2.orthographic = false;
-                        Camera2.transform.position = lastPosCamera2Position;
-                        Camera2.transform.rotation = lastPosCamera2Rotation;
+                        cameraBehaviour2.ResetCamera();
                     }
                 }
             }
@@ -322,11 +312,7 @@ public class Manager : MonoBehaviour
         outputSoloTreesData = data;
         current_year1 = 0;
         current_year2 = 0;
-
-        visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
-        if (outputSoloTreesData.Count > 1)
-            visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
-
+        
         //setup cameras viewport
         if (data.Count > 1)
         {
@@ -342,6 +328,13 @@ public class Manager : MonoBehaviour
             cameraBehaviour2.isMultiVisualization = false;
             Camera1.GetComponent<Camera>().rect = new Rect(0, 0, 1, 1);
         }
+
+        visualizer.ConfigureTerrains();
+
+        visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
+        if (outputSoloTreesData.Count > 1)
+            visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
+
     }
 
     public void receiveYieldTableData(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> dataYT, SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> dataDD)
@@ -427,7 +420,7 @@ public class Manager : MonoBehaviour
                                 $"Age: {t.t} anos\n" +
                                 $"Heigth: {t.h} m\n" +
                                 $"Diameter: {t.d} cm\n" +
-                                $"Heigth of crown base: {t.ciclo} m\n" +
+                                $"Heigth of crown base: {t.hbc} m\n" +
                                 $"Crown Width: {t.cw} cm";
         }
     }

@@ -7,4 +7,9 @@ public class Reset : MonoBehaviour
     {
         SceneManager.LoadScene(0);
     }
+
+    public void QuitToDesktop()
+    {
+        Application.Quit();
+    }
 }

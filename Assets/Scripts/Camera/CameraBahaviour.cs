@@ -1,79 +1,83 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class CameraBehaviour : MonoBehaviour
 {
     public Transform target;
-    public float rotationSpeed = 5.0f;
-    public float zoomSpeed = 50.0f;
-    public float minZoomDistance = 50f;
-    public float maxZoomDistance = 100000.0f;
-    public bool isMultiVisualization = false;
     public Manager manager;
+    public bool isMultiVisualization = false;
+    public Transform paralelPos;
 
     Camera cam;
     Vector3 lastMousePosition;
     Vector3 initialPosition;
     Transform initialLookAt;
     Quaternion initialRotation;
-    
+    float zoomSpeed = 5.0f;
+    float rotationSpeed = 30.0f;
+    float minZoomFOV = 20f;
+    float maxZoomFOV = 120f;
+    float minZoomOrtho = 10f;
+    float maxZoomOrtho = 100f;
+    float orthographicSize;
+
     [SerializeField] bool canRotate = true;
 
     private void Start()
     {
         cam = gameObject.gameObject.GetComponent<Camera>();
-        initialPosition = transform.position;
-        initialRotation = transform.rotation;
-        initialLookAt = target;
+    }
+
+    public void SetOrthographicSize(float size)
+    {
+        orthographicSize = size;
+    }
+
+    public float GetOrthographicSize()
+    {
+        return orthographicSize;
+    }
+
+    public void InitializeCamera(Vector3 initPos, Quaternion initRot, Transform lookAt, Vector3 paralelPos, Quaternion paralelRot)
+    {
+        initialPosition = initPos;
+        initialLookAt = lookAt;
+        initialRotation = initRot;
+        this.paralelPos.position = paralelPos;
+        this.paralelPos.rotation = paralelRot;
+        target = lookAt;
+        transform.LookAt(target.position);
+    }
+
+    public void ResetCamera()
+    {
+        transform.position = initialPosition;
+        transform.rotation = initialRotation;
+        target.position = initialLookAt.position;
+        manager.ResetSelected();
     }
 
     void Update()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-
         if (Input.GetKeyDown(KeyCode.R))
         {
-            transform.position = initialPosition;
-            transform.rotation = initialRotation;
-            target.position = manager.getPlotRef();
-            manager.ResetSelected();
+            ResetCamera();
         }
-
         if (scroll != 0 && IsMouseOverViewport())
         {
-            float distance = Vector3.Distance(transform.position, target.position);
-
-            // Zoom In (scroll up)
-            if (scroll > 0)
+            if (!manager.isParalelCameraActive)
             {
-                if (distance > minZoomDistance && !manager.isParalelCameraActive)
-                {
-                    Vector3 direction = (target.position - transform.position).normalized;
-                    transform.position += direction * zoomSpeed * Time.deltaTime * scroll * 10f;
-                }
-                else if (cam.orthographic && cam.orthographicSize > 30)
-                {
-                    cam.orthographicSize -= scroll * 10f;
-                }
+                cam.fieldOfView = Mathf.Clamp(cam.fieldOfView - scroll * zoomSpeed, minZoomFOV, maxZoomFOV);
             }
-            // Zoom Out (scroll down)
-            else if (scroll < 0)
+            else if (cam.orthographic)
             {
-                if (distance < maxZoomDistance && !manager.isParalelCameraActive)
-                {
-                    Vector3 direction = (transform.position - target.position).normalized;
-                    transform.position += direction * zoomSpeed * Time.deltaTime * Mathf.Abs(scroll) * 10f;
-                }
-                else if (cam.orthographic)
-                {
-                    cam.orthographicSize += Mathf.Abs(scroll) * 10f;
-                }
+                cam.orthographicSize = Mathf.Clamp(cam.orthographicSize - scroll * zoomSpeed, minZoomOrtho, maxZoomOrtho);
             }
         }
-
         if (!manager.isParalelCameraActive & canRotate & ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
-
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -93,15 +97,21 @@ public class CameraBehaviour : MonoBehaviour
 
     public void ChangeLookAt(Transform newPoint)
     {
-        target = newPoint;
-        transform.LookAt(target.position);
+        if (!manager.isParalelCameraActive)
+        {
+            target = newPoint;
+            transform.LookAt(target.position);
+        }
     }
 
     public void ResetLookAt()
     {
-        target = initialLookAt;
-        transform.rotation = initialRotation;
-        transform.LookAt(target);
+        if (!manager.isParalelCameraActive)
+        {
+            target = initialLookAt;
+            transform.rotation = initialRotation;
+            transform.LookAt(target);
+        }
     }
 
     public bool IsMouseOverViewport()
@@ -121,5 +131,10 @@ public class CameraBehaviour : MonoBehaviour
     public void DisableRotation()
     {
         canRotate = false;
+    }
+
+    public bool CanRotate()
+    {
+        return canRotate;
     }
 }

@@ -592,6 +592,7 @@ public class Parser : MonoBehaviour
         if (feedbackText != null)
         {
             feedbackText.text += msg;
+            feedbackText.GetComponentInParent<ScrollControler>().ScrollDown();
         }
     }
 

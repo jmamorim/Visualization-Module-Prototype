@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class Visualizer : MonoBehaviour
 {
-    //Pinheiro-bravo models yongest to seniour
     [Header("Pinheiro-bravo Prefabs")]
     public List<GameObject> pbPrefabs;
     [Header("Pinheiro-manso Prefabs")]
@@ -20,7 +19,7 @@ public class Visualizer : MonoBehaviour
     
     public Camera cam1, cam2;
     public GameObject plot, plotReference1, plotReference2, paralelPos1, paralelPos2, box1, box2;
-    public TMP_Text yearText1, yearText2;
+    public TMP_Text yearText1, yearText2, idStand1, idStand2;
     public Terrain terrain1;
     public Terrain terrain2;
     public Manager manager;
@@ -49,7 +48,7 @@ public class Visualizer : MonoBehaviour
     [SerializeField] float thresholdPmAdultHeight;
     [SerializeField] float thresholdPmSeniourHeight;
 
-    [Header("Eucalipto Parameters"), Tooltip("Ages at which Pinheiro-bravo transitions between stages")]
+    [Header("Eucalipto Parameters"), Tooltip("Ages at which Eucalipto transitions between stages")]
     [SerializeField] float egAdultStartingAge;
     [SerializeField] float egSeniourStartingAge;
 
@@ -59,7 +58,7 @@ public class Visualizer : MonoBehaviour
     [SerializeField] float thresholdEgAdultHeight;
     [SerializeField] float thresholdEgSeniourHeight;
 
-    [Header("Castanheiro Parameters"), Tooltip("Ages at which Pinheiro-bravo transitions between stages")]
+    [Header("Castanheiro Parameters"), Tooltip("Ages at which Castanheiro transitions between stages")]
     [SerializeField] float casAdultStartingAge;
     [SerializeField] float casSeniourStartingAge;
 
@@ -78,6 +77,10 @@ public class Visualizer : MonoBehaviour
     //used when plotshape is 0 (area specific)
     float terrainOffset = 10f;
 
+    [SerializeField] float distanceScalingFactor = 0.6f;
+    const float perspectiveAngleFactor = 0.7f;
+
+
     private void Start()
     {
         plotShapeAndDimensions = inputAndParsedData.plotShapeAndDimensions;
@@ -85,13 +88,16 @@ public class Visualizer : MonoBehaviour
         // Reset terrains to avoid modifying original terrain data so unity doesnt serialize changes
         terrain1.terrainData = Instantiate(terrain1.terrainData);
         terrain2.terrainData = Instantiate(terrain2.terrainData);
+    }
 
+    public void ConfigureTerrains()
+    {
         var plot1Shape = plotShapeAndDimensions[0];
         int shapeType1 = plot1Shape.Item1;
         List<float> dims1 = plot1Shape.Item2;
         if (dims1 != null && dims1.Count > 0)
         {
-            ConfigureTerrainOrigin(terrain1, shapeType1, dims1, out isCircularPlot1, plotReference1, paralelPos1, cam1);
+            ConfigureTerrainOrigin(terrain1, shapeType1, dims1, out isCircularPlot1, plotReference1, cam1);
         }
 
         if (plotShapeAndDimensions.Count > 1)
@@ -101,12 +107,11 @@ public class Visualizer : MonoBehaviour
             List<float> dims2 = plot2Shape.Item2;
             if (dims2 != null && dims2.Count > 0)
             {
-                ConfigureTerrainOrigin(terrain2, shapeType2, dims2, out isCircularPlot2, plotReference2, paralelPos2, cam2);
+                ConfigureTerrainOrigin(terrain2, shapeType2, dims2, out isCircularPlot2, plotReference2, cam2);
             }
         }
         GenerateNoise();
     }
-
     private void GenerateNoise()
     {
         float[,] heights1 = terrain1.terrainData.GetHeights(0, 0, terrain1.terrainData.heightmapResolution, terrain1.terrainData.heightmapResolution);
@@ -130,15 +135,15 @@ public class Visualizer : MonoBehaviour
         terrain2.terrainData.SetHeights(0, 0, heights2);
     }
 
-    private void ConfigureTerrainOrigin(Terrain terrain, int shapeType, List<float> dims, out bool isCircular, GameObject plotReference, GameObject paralelPos, Camera cam)
+    private void ConfigureTerrainOrigin(Terrain terrain, int shapeType, List<float> dims, out bool isCircular, GameObject plotReference, Camera cam)
     {
         Vector3 currentSize = terrain.terrainData.size;
         Vector3 newPosition = terrain.transform.position;
         Vector3 newSize = currentSize;
-
         isCircular = false;
+        var paralelPos = cam.GetComponent<CameraBehaviour>().paralelPos;
 
-        if(shapeType == 0) //Area specific, because of no specific shape its translated to a square terrain, the files will change so it is alway required shape
+        if (shapeType == 0) //Area specific its here just for safety but should not be used because plot shape should be defined always
         {
             var area = dims[0];
             var sideLength = Mathf.Sqrt(area) + terrainOffset;
@@ -154,7 +159,7 @@ public class Visualizer : MonoBehaviour
             plotReference.transform.position = new Vector3(dims[0] / 2, terrain.transform.position.y, dims[0] / 2);
             paralelPos.transform.position = new Vector3(dims[0] / 2, paralelPos.transform.position.y, dims[0] / 2);
         }
-        else if (shapeType == 2 || shapeType == 4 && dims.Count >= 2) // Retangular or Custom Polygon (approximated as rectangle because of terrain limitations)
+        else if (shapeType == 2 || shapeType == 4 && dims.Count >= 2) // Rectangular or Custom Polygon
         {
             newPosition = new Vector3(0, terrain.transform.position.y, 0);
             newSize = new Vector3(dims[0], currentSize.y, dims[1]);
@@ -163,25 +168,66 @@ public class Visualizer : MonoBehaviour
         }
         else if (shapeType == 3 && dims.Count >= 1) // Circular
         {
-            float diamater = dims[0] * 2f;
+            float diameter = dims[0] * 2f;
             newPosition = new Vector3(0, terrain.transform.position.y, 0);
-            newSize = new Vector3(diamater, currentSize.y, diamater);
+            newSize = new Vector3(diameter, currentSize.y, diameter);
             plotReference.transform.position = new Vector3(dims[0], terrain.transform.position.y, dims[0]);
             paralelPos.transform.position = new Vector3(dims[0], paralelPos.transform.position.y, dims[0]);
             isCircular = true;
         }
+
         manager.setPlotRefPos(plotReference.transform.position);
-        cam.transform.LookAt(plotReference.transform.position);
+
+        PositionCamera(cam, plotReference.transform.position, newSize);
+
         terrain.terrainData.size = newSize;
     }
 
-    //refactor this to a single method with plot identifier
+    private void PositionCamera(Camera cam, Vector3 targetPosition, Vector3 terrainSize)
+    {
+        float diagonalSize = Mathf.Sqrt(terrainSize.x * terrainSize.x + terrainSize.z * terrainSize.z);
+        var behaviour = cam.GetComponent<CameraBehaviour>();
+
+        Vector3 perspectivePos;
+        Quaternion perspectiveRot;
+        Vector3 orthographicPos;
+        Quaternion orthographicRot;
+
+        float fov = cam.fieldOfView * Mathf.Deg2Rad;
+        float distance = (diagonalSize * distanceScalingFactor) / Mathf.Tan(fov / 2f);
+        float height = distance * perspectiveAngleFactor;
+        float horizontalDistance = distance * perspectiveAngleFactor;
+        Vector3 cameraOffset = new Vector3(0, height, -horizontalDistance);
+        perspectivePos = targetPosition + cameraOffset;
+        perspectiveRot = Quaternion.LookRotation(targetPosition - perspectivePos);
+
+        float orthographicHeight = terrainSize.y + diagonalSize;
+        orthographicPos = new Vector3(targetPosition.x, orthographicHeight, targetPosition.z);
+        orthographicRot = Quaternion.Euler(90f, 0f, 0f);
+
+        float maxDimension = Mathf.Max(terrainSize.x, terrainSize.z);
+        behaviour.SetOrthographicSize(maxDimension / cam.aspect);
+
+        cam.transform.position = perspectivePos;
+        cam.transform.rotation = perspectiveRot;
+
+        behaviour.InitializeCamera(
+            perspectivePos,
+            perspectiveRot,
+            plotReference1.transform,
+            orthographicPos,
+            orthographicRot
+        );
+    }
+
     public void receiveTreeDataPlot1(SortedDictionary<int, TreeData> data, int currentYear)
     {
         clear("Plot1");
         var trees = data.Values.ToList();
         createObjects(trees, terrain1, false, isCircularPlot1);
         yearText1.text = "Year: " + currentYear.ToString();
+        idStand1.text = trees[0].id_stand;
+        box1.SetActive(true);
         displayTrees(trees, terrain1, isCircularPlot1);
     }
 
@@ -191,6 +237,7 @@ public class Visualizer : MonoBehaviour
         var trees = data.Values.ToList();
         createObjects(trees, terrain2, true, isCircularPlot2);
         yearText2.text = "Year: " + currentYear.ToString();
+        idStand2.text = trees[0].id_stand;
         box2.SetActive(true);
         displayTrees(trees, terrain2, isCircularPlot2);
     }
@@ -199,7 +246,6 @@ public class Visualizer : MonoBehaviour
     {
         if (trees == null || trees.Count == 0) return;
 
-        //terrain handling
         terrain.terrainData.treeInstances = new TreeInstance[0];
         TreePrototype[] prototypes = new TreePrototype[pbPrefabs.Count + pmPrefabs.Count + egPrefabs.Count + casPrefabs.Count];
         for (int i = 0; i < pbPrefabs.Count; i++)
@@ -241,7 +287,7 @@ public class Visualizer : MonoBehaviour
                 }
                 else
                 {
-                    // Origin is the corner of the terrain
+                    // Origin is the bottom rigth corner of the terrain
                     normX = (worldX - terrain.transform.position.x) / terrain.terrainData.size.x;
                     normZ = (worldZ - terrain.transform.position.z) / terrain.terrainData.size.z;
                 }
