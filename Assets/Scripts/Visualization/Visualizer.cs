@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class Visualizer : MonoBehaviour
@@ -16,7 +18,7 @@ public class Visualizer : MonoBehaviour
     public InputAndParsedData inputAndParsedData;
 
     [Header("Scene References")]
-    
+
     public Camera cam1, cam2;
     public GameObject plot, plotReference1, plotReference2, paralelPos1, paralelPos2, box1, box2;
     public TMP_Text yearText1, yearText2, idStand1, idStand2;
@@ -79,16 +81,76 @@ public class Visualizer : MonoBehaviour
 
     [SerializeField] float distanceScalingFactor = 0.6f;
     const float perspectiveAngleFactor = 0.7f;
-
+    CameraBehaviour behaviour1, behaviour2;
 
     private void Start()
     {
+        behaviour1 = cam1.GetComponent<CameraBehaviour>();
+        behaviour2 = cam2.GetComponent<CameraBehaviour>();
+
         plotShapeAndDimensions = inputAndParsedData.plotShapeAndDimensions;
 
         // Reset terrains to avoid modifying original terrain data so unity doesnt serialize changes
         terrain1.terrainData = Instantiate(terrain1.terrainData);
         terrain2.terrainData = Instantiate(terrain2.terrainData);
     }
+
+    //Lidar flyover simulation------------
+    public void StartLidarFlyover(int plotNumber)
+    {
+        LidarFlyover lidar1 = cam1.gameObject.GetComponent<LidarFlyover>();
+        LidarFlyover lidar2 = cam2.gameObject.GetComponent<LidarFlyover>();
+        if (lidar1.isCurrentlyFlying())
+        {
+            lidar1.StopFlyover();
+            return;
+        }
+        else if (lidar2.isCurrentlyFlying())
+        {
+            lidar2.StopFlyover();
+            return;
+        }
+
+        Terrain targetTerrain = plotNumber == 1 ? terrain1 : terrain2;
+        LidarFlyover lidarFlyover = plotNumber == 1 ? lidar1 : lidar2;
+        Camera lidarCamera = plotNumber == 1 ? cam1 : cam2;
+
+        Vector3 terrainPos = targetTerrain.transform.position;
+        Vector3 terrainSize = targetTerrain.terrainData.size;
+
+        lidarCamera.transform.position = new Vector3(
+            terrainPos.x,
+            terrainPos.y + 50f,
+            terrainPos.z
+        );
+
+        lidarFlyover.StartFlyover(targetTerrain);
+    }
+
+    //Orbital flyover
+    public void StartOrbitalLidarFlyover(int plotNumber, float duration = 30f)
+    {
+        LidarFlyover lidar1 = cam1.gameObject.GetComponent<LidarFlyover>();
+        LidarFlyover lidar2 = cam2.gameObject.GetComponent<LidarFlyover>();
+        if (lidar1.isCurrentlyFlying())
+        {
+            lidar1.StopFlyover();
+            return;
+        }
+        else if (lidar2.isCurrentlyFlying())
+        {
+            lidar2.StopFlyover();
+            return;
+        }
+
+        Terrain targetTerrain = plotNumber == 1 ? terrain1 : terrain2;
+        LidarFlyover lidarFlyover = plotNumber == 1 ? lidar1 : lidar2;
+        Vector3 terrainSize = targetTerrain.terrainData.size;
+        float radius = Mathf.Max(terrainSize.x, terrainSize.z) * 0.6f;
+
+        lidarFlyover.StartOrbitalFlyover(targetTerrain, radius, duration);
+    }
+    //-----------------------------------
 
     public void ConfigureTerrains()
     {
@@ -143,7 +205,7 @@ public class Visualizer : MonoBehaviour
         isCircular = false;
         var paralelPos = cam.GetComponent<CameraBehaviour>().paralelPos;
 
-        if (shapeType == 0) //Area specific its here just for safety but should not be used because plot shape should be defined always
+        if (shapeType == 0) //Area specific its here just for safety but should not be used because plot shape should be always defined
         {
             var area = dims[0];
             var sideLength = Mathf.Sqrt(area) + terrainOffset;
@@ -159,7 +221,7 @@ public class Visualizer : MonoBehaviour
             plotReference.transform.position = new Vector3(dims[0] / 2, terrain.transform.position.y, dims[0] / 2);
             paralelPos.transform.position = new Vector3(dims[0] / 2, paralelPos.transform.position.y, dims[0] / 2);
         }
-        else if (shapeType == 2 || shapeType == 4 && dims.Count >= 2) // Rectangular or Custom Polygon
+        else if (shapeType == 2) // Rectangular
         {
             newPosition = new Vector3(0, terrain.transform.position.y, 0);
             newSize = new Vector3(dims[0], currentSize.y, dims[1]);
@@ -175,15 +237,33 @@ public class Visualizer : MonoBehaviour
             paralelPos.transform.position = new Vector3(dims[0], paralelPos.transform.position.y, dims[0]);
             isCircular = true;
         }
+        else if (shapeType == 4 && dims.Count >= 2)// Custom
+        {
+            var minX = dims[0];
+            var maxX = dims[1];
+            var minY = dims[2];
+            var maxY = dims[3];
+
+            var lengthX = maxX - minX;
+            var lengthY = maxY - minY;
+
+            var centerX = (minX + maxX) / 2f;
+            var centerY = (minY + maxY) / 2f;
+
+            newPosition = new Vector3(0, terrain.transform.position.y, 0);
+            newSize = new Vector3(lengthX, currentSize.y, lengthY);
+
+            plotReference.transform.position = new Vector3(centerX, terrain.transform.position.y, centerY);
+            paralelPos.transform.position = new Vector3(centerX, paralelPos.transform.position.y, centerY);
+            terrain.transform.position = new Vector3(minX, terrain.transform.position.y, minY);
+        }
 
         manager.setPlotRefPos(plotReference.transform.position);
-
-        PositionCamera(cam, plotReference.transform.position, newSize);
-
+        PositionCamera(cam, plotReference.transform, newSize);
         terrain.terrainData.size = newSize;
     }
 
-    private void PositionCamera(Camera cam, Vector3 targetPosition, Vector3 terrainSize)
+    private void PositionCamera(Camera cam, Transform targetPosition, Vector3 terrainSize)
     {
         float diagonalSize = Mathf.Sqrt(terrainSize.x * terrainSize.x + terrainSize.z * terrainSize.z);
         var behaviour = cam.GetComponent<CameraBehaviour>();
@@ -198,11 +278,11 @@ public class Visualizer : MonoBehaviour
         float height = distance * perspectiveAngleFactor;
         float horizontalDistance = distance * perspectiveAngleFactor;
         Vector3 cameraOffset = new Vector3(0, height, -horizontalDistance);
-        perspectivePos = targetPosition + cameraOffset;
-        perspectiveRot = Quaternion.LookRotation(targetPosition - perspectivePos);
+        perspectivePos = targetPosition.position + cameraOffset;
+        perspectiveRot = Quaternion.LookRotation(targetPosition.position - perspectivePos);
 
         float orthographicHeight = terrainSize.y + diagonalSize;
-        orthographicPos = new Vector3(targetPosition.x, orthographicHeight, targetPosition.z);
+        orthographicPos = new Vector3(targetPosition.position.x, orthographicHeight, targetPosition.position.z);
         orthographicRot = Quaternion.Euler(90f, 0f, 0f);
 
         float maxDimension = Mathf.Max(terrainSize.x, terrainSize.z);
@@ -214,7 +294,7 @@ public class Visualizer : MonoBehaviour
         behaviour.InitializeCamera(
             perspectivePos,
             perspectiveRot,
-            plotReference1.transform,
+            targetPosition,
             orthographicPos,
             orthographicRot
         );

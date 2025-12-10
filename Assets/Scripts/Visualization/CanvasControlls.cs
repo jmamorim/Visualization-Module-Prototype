@@ -3,12 +3,15 @@ using UnityEngine;
 
 public class CanvasControlls : MonoBehaviour
 {
+    public bool isIntroScene = false;
     public List<GameObject> canvases;
+
     int activeCanvasIndex = 0;
 
     public void EnableControls()
     {
-        DissableRotationAllCameras();
+        if(!isIntroScene)
+            DissableRotationAllCameras();
         canvases[activeCanvasIndex].SetActive(false);
         activeCanvasIndex = 1;
         canvases[activeCanvasIndex].SetActive(true);
@@ -16,7 +19,8 @@ public class CanvasControlls : MonoBehaviour
 
     public void EnableGlossary()
     {
-        DissableRotationAllCameras();
+        if (!isIntroScene)
+            DissableRotationAllCameras();
         canvases[activeCanvasIndex].SetActive(false);
         activeCanvasIndex = 2;
         canvases[activeCanvasIndex].SetActive(true);
@@ -24,7 +28,8 @@ public class CanvasControlls : MonoBehaviour
 
     public void EnableVisCanvas()
     {
-        EnableRotationAllCameras();
+        if (!isIntroScene)
+            EnableRotationAllCameras();
         canvases[activeCanvasIndex].SetActive(false);
         activeCanvasIndex = 0;
         canvases[activeCanvasIndex].SetActive(true);
@@ -36,7 +41,7 @@ public class CanvasControlls : MonoBehaviour
         foreach (Camera cam in cameras)
         {
             var cameraBehaviour = cam.GetComponent<CameraBehaviour>();
-            cameraBehaviour.DisableRotation();
+            cameraBehaviour.DisableCameraMovement();
         }
     }
 
@@ -46,7 +51,7 @@ public class CanvasControlls : MonoBehaviour
         foreach (Camera cam in cameras)
         {
             var cameraBehaviour = cam.GetComponent<CameraBehaviour>();
-            cameraBehaviour.EnableRotation();
+            cameraBehaviour.EnableCameraMovement();
         }
     }
 }

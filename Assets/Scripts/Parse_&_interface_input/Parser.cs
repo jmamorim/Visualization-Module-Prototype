@@ -47,17 +47,23 @@ public class Parser : MonoBehaviour
 
     public void parse()
     {
-        if (!string.IsNullOrEmpty(intervalInputField.text) && !int.TryParse(intervalInputField.text, out interval))
+        if (!string.IsNullOrEmpty(intervalInputField.text) && !int.TryParse(intervalInputField.text, out interval) && interval < 0)
         {
-            ShowMessage("Interval is not a number\n");
+            ShowMessage("Interval is not valid\n");
             return;
         }
+
         SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData = new SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>();
         SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> outputYieldTableData = new SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>>();
         SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> outputDDTableData = new SortedDictionary<string, SortedDictionary<string, List<DDEntry>>>();
         List<(int, List<float>)> shapeData = new List<(int, List<float>)>();
          
         var dropdown1 = idStandsDropdown1.GetComponent<TMP_Dropdown>();
+        if(dropdown1.options.Count() == 0)
+        {
+            ShowMessage("Please pick a simulation for Plot 1\n");
+            return;
+        }
         string selectedIdStand1 = dropdown1.options[dropdown1.value].text;
 
         var siminfo1 = simMetadata.simulations[selectedSim1.text];
@@ -66,7 +72,24 @@ public class Parser : MonoBehaviour
 
         selectedIdStands.Add(selectedIdStand1);
 
-        var plotData1 = (simPlotDimensions1.plotShape, simPlotDimensions1.plotShape == 0 ? new List<float> { simPlotDimensions1.area } : new List<float> { simPlotDimensions1.length1, simPlotDimensions1.length2 });
+        var plotDimensionsData1 = new List<float>();
+
+        if (simPlotDimensions1.plotShape == 0)
+            plotDimensionsData1.Add(simPlotDimensions1.area);
+        else if(simPlotDimensions1.plotShape == 4)
+        {
+            plotDimensionsData1.Add(simPlotDimensions1.minX);
+            plotDimensionsData1.Add(simPlotDimensions1.maxX);
+            plotDimensionsData1.Add(simPlotDimensions1.minY);
+            plotDimensionsData1.Add(simPlotDimensions1.maxY);
+        }
+        else
+        {
+            plotDimensionsData1.Add(simPlotDimensions1.length1);
+            plotDimensionsData1.Add(simPlotDimensions1.length2); 
+        }
+
+        var plotData1 = (simPlotDimensions1.plotShape, plotDimensionsData1);
 
         soloTreePaths.Add(siminfo1.soloTreesPath);
         yieldTablePaths.Add(siminfo1.yieldTablePath);
@@ -75,6 +98,7 @@ public class Parser : MonoBehaviour
         shapeData.Add(plotData1);
 
         var dropdown2 = IdStandsDropdown2.GetComponent<TMP_Dropdown>();
+
         if (dropdown2.options.Count() > 0)
         {
             string selectedIdStand2 = dropdown2.options[dropdown2.value].text;
@@ -84,7 +108,24 @@ public class Parser : MonoBehaviour
 
             selectedIdStands.Add(selectedIdStand2);
 
-            var plotData2 = (simPlotDimensions2.plotShape, simPlotDimensions2.plotShape == 0 ? new List<float> { simPlotDimensions2.area } : new List<float> { simPlotDimensions2.length1, simPlotDimensions2.length2 });
+            var plotDimensionsData2 = new List<float>();
+
+            if (simPlotDimensions2.plotShape == 0)
+                plotDimensionsData2.Add(simPlotDimensions2.area);
+            else if (simPlotDimensions2.plotShape == 4)
+            {
+                plotDimensionsData2.Add(simPlotDimensions2.minX);
+                plotDimensionsData2.Add(simPlotDimensions2.maxX);
+                plotDimensionsData2.Add(simPlotDimensions2.minY);
+                plotDimensionsData2.Add(simPlotDimensions2.maxY);
+            }
+            else
+            {
+                plotDimensionsData2.Add(simPlotDimensions2.length1);
+                plotDimensionsData2.Add(simPlotDimensions2.length2);
+            }
+
+            var plotData2 = (simPlotDimensions2.plotShape, plotDimensionsData2);
 
             soloTreePaths.Add(siminfo2.soloTreesPath);
             yieldTablePaths.Add(siminfo2.yieldTablePath);

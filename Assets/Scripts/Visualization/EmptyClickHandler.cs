@@ -8,28 +8,30 @@ public class EmptyClickHandler : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            mouseDownPosition = Input.mousePosition;
-        }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            float dragDistance = Vector3.Distance(mouseDownPosition, Input.mousePosition);
-
-            if (dragDistance < dragThreshold)
+        if (manager.canInteract) {
+            if (Input.GetMouseButtonDown(0))
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                mouseDownPosition = Input.mousePosition;
+            }
 
-                if (!Physics.Raycast(ray, out RaycastHit hit))
+            if (Input.GetMouseButtonUp(0))
+            {
+                float dragDistance = Vector3.Distance(mouseDownPosition, Input.mousePosition);
+
+                if (dragDistance < dragThreshold)
                 {
-                    OnDisable();
-                }
-                else
-                {
-                    if (hit.collider.GetComponent<Tree>() == null)
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                    if (!Physics.Raycast(ray, out RaycastHit hit))
                     {
                         OnDisable();
+                    }
+                    else
+                    {
+                        if (hit.collider.GetComponent<Tree>() == null)
+                        {
+                            OnDisable();
+                        }
                     }
                 }
             }
@@ -43,7 +45,7 @@ public class EmptyClickHandler : MonoBehaviour
         foreach (var cam in cameras)
         {
             var behaviour = cam.GetComponent<CameraBehaviour>();
-            if (behaviour != null && behaviour.IsMouseOverViewport() && behaviour.CanRotate())
+            if (behaviour != null && behaviour.IsMouseOverViewport() && behaviour.CanMoveCamera())
             {
                 behaviour.ResetLookAt();
                 break;

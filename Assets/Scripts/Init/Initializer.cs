@@ -16,6 +16,8 @@ public class SimulationScanner : MonoBehaviour
     public InterfaceManager interfaceManager;
     public Parser parser;
 
+    readonly List<string> species = new List<string> { "Pb", "Pm", "Ec", "Ct" };
+
     string[] inputHeaders = new string[] {
         "id_par", "AreaUG", "id_presc", "tlag", "CoordX", "CoordY", "id_meteo", "Altitude",
         "year", "month", "composition", "PlotType", "Sp1", "Sp2", "Structure", "S", "rot",
@@ -121,6 +123,12 @@ public class SimulationScanner : MonoBehaviour
                 ddTablePath = currentDDPath
             };
 
+            if (!SimulationContainsOnlySupportedSpecies(currentInputPath))
+            {
+                parser.ShowMessage("Simulation ignored due to unsupported species: " + folderName + "\n");
+                continue;
+            }
+
             if (!string.IsNullOrEmpty(currentInputPath))
             {
                 ParseInputFile(currentInputPath, simInfo);
@@ -134,6 +142,33 @@ public class SimulationScanner : MonoBehaviour
         CreateSimulationButtons(simulations);
         simMetadata.Save();
     }
+
+    bool SimulationContainsOnlySupportedSpecies(string inputPath)
+    {
+        if (string.IsNullOrEmpty(inputPath)) return false;
+
+        var lines = File.ReadAllLines(inputPath);
+        if (lines.Length < 2) return false;
+
+        string[] headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
+
+        int sp1Index = Array.IndexOf(headers, "Sp1");
+        int sp2Index = Array.IndexOf(headers, "Sp2");
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string[] values = lines[i].Split(',');
+
+            string sp1 = values[sp1Index].Trim();
+            string sp2 = values[sp2Index].Trim();
+
+            if (!species.Contains(sp1) || !species.Contains(sp2))
+                return false;
+        }
+
+        return true;
+    }
+
 
     void CreateSimulationButtons(Dictionary<string, SimulationInfo> simulations)
     {
@@ -254,21 +289,20 @@ public class SimulationScanner : MonoBehaviour
                     float.Parse(values[ycoord4Index].Trim())
                 };
 
-                var xLength = Mathf.Max(coordX.ToArray());
-                var yLength = Mathf.Max(coordY.ToArray());
-
                 simInfo.plotDataByIdPar[idPar] = new PlotData
                 {
                     plotShape = plotShape,
-                    length1 = xLength,
-                    length2 = yLength
+                    minX = coordX.Min(),
+                    maxX = coordX.Max(),
+                    minY = coordY.Min(),
+                    maxY = coordY.Max()
                 };
             }
 
         }
     }
 
-    public void ReloaadSims()
+    public void ReloadSims()
     {
         simMetadata.simulations.Clear();
         simMetadata.Save();
@@ -288,4 +322,8 @@ public class PlotData
     public float area;
     public float length1;
     public float length2;
+    public float minX;
+    public float maxX;
+    public float minY;
+    public float maxY;
 }

@@ -17,13 +17,14 @@ public class CameraBehaviour : MonoBehaviour
     Quaternion initialRotation;
     float zoomSpeed = 5.0f;
     float rotationSpeed = 30.0f;
+    float panSpeed = 0.5f;
     float minZoomFOV = 20f;
     float maxZoomFOV = 120f;
     float minZoomOrtho = 10f;
     float maxZoomOrtho = 100f;
     float orthographicSize;
 
-    [SerializeField] bool canRotate = true;
+    [SerializeField] bool canUseCameraMovement = true;
 
     private void Start()
     {
@@ -61,36 +62,49 @@ public class CameraBehaviour : MonoBehaviour
 
     void Update()
     {
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            ResetCamera();
-        }
-        if (scroll != 0 && IsMouseOverViewport())
-        {
-            if (!manager.isParalelCameraActive)
+        if (manager.canInteract) {
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (Input.GetKeyDown(KeyCode.R))
             {
-                cam.fieldOfView = Mathf.Clamp(cam.fieldOfView - scroll * zoomSpeed, minZoomFOV, maxZoomFOV);
+                ResetCamera();
             }
-            else if (cam.orthographic)
+            if (scroll != 0 && IsMouseOverViewport())
             {
-                cam.orthographicSize = Mathf.Clamp(cam.orthographicSize - scroll * zoomSpeed, minZoomOrtho, maxZoomOrtho);
+                if (!manager.isParalelCameraActive)
+                {
+                    cam.fieldOfView = Mathf.Clamp(cam.fieldOfView - scroll * zoomSpeed, minZoomFOV, maxZoomFOV);
+                }
+                else if (cam.orthographic)
+                {
+                    cam.orthographicSize = Mathf.Clamp(cam.orthographicSize - scroll * zoomSpeed, minZoomOrtho, maxZoomOrtho);
+                }
             }
-        }
-        if (!manager.isParalelCameraActive & canRotate & ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
-        {
-            if (Input.GetMouseButtonDown(0))
+            if (canUseCameraMovement && ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
             {
-                lastMousePosition = Input.mousePosition;
-            }
-            if (Input.GetMouseButton(0))
-            {
-                Vector3 delta = Input.mousePosition - lastMousePosition;
-                float angleX = delta.x * rotationSpeed * Time.deltaTime;
-                float angleY = -delta.y * rotationSpeed * Time.deltaTime;
-                transform.RotateAround(target.position, Vector3.up, angleX);
-                transform.RotateAround(target.position, transform.right, angleY);
-                lastMousePosition = Input.mousePosition;
+                if (Input.GetMouseButtonDown(0))
+                {
+                    lastMousePosition = Input.mousePosition;
+                }
+
+                if (Input.GetMouseButton(0))
+                {
+                    Vector3 delta = Input.mousePosition - lastMousePosition;
+                    if (!manager.isParalelCameraActive)
+                    {
+                        float angleX = delta.x * rotationSpeed * Time.deltaTime;
+                        float angleY = -delta.y * rotationSpeed * Time.deltaTime;
+                        transform.RotateAround(target.position, Vector3.up, angleX);
+                        transform.RotateAround(target.position, transform.right, angleY);
+                    }
+                    else
+                    {
+                        Vector3 move = (transform.right * -delta.x + transform.up * -delta.y) * panSpeed;
+                        move.y = 0;
+                        transform.position += move;
+                        target.position += move;
+                    }
+                    lastMousePosition = Input.mousePosition;
+                }
             }
         }
     }
@@ -123,18 +137,18 @@ public class CameraBehaviour : MonoBehaviour
         return GetComponent<Camera>().rect.Contains(new Vector2(normalizedX, normalizedY));
     }
 
-    public void EnableRotation()
+    public void EnableCameraMovement()
     {
-        canRotate = true;
+        canUseCameraMovement = true;
     }
 
-    public void DisableRotation()
+    public void DisableCameraMovement()
     {
-        canRotate = false;
+        canUseCameraMovement = false;
     }
 
-    public bool CanRotate()
+    public bool CanMoveCamera()
     {
-        return canRotate;
+        return canUseCameraMovement;
     }
 }

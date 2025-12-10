@@ -37,30 +37,33 @@ public class Tree : MonoBehaviour
 
     private void OnMouseDown()
     {
-        Vector3 mousePos = Input.mousePosition;
-
-        foreach (Camera cam in Camera.allCameras)
+        if (manager.canInteract)
         {
-            Vector2 normalizedMouse = new Vector2(mousePos.x / Screen.width, mousePos.y / Screen.height);
+            Vector3 mousePos = Input.mousePosition;
 
-            if (cam.rect.Contains(normalizedMouse))
+            foreach (Camera cam in Camera.allCameras)
             {
-                if ((cam.cullingMask & (1 << gameObject.layer)) != 0)
+                Vector2 normalizedMouse = new Vector2(mousePos.x / Screen.width, mousePos.y / Screen.height);
+
+                if (cam.rect.Contains(normalizedMouse))
                 {
-                    CameraBehaviour behaviour = cam.GetComponent<CameraBehaviour>();
-                    if (behaviour != null && behaviour.CanRotate())
+                    if ((cam.cullingMask & (1 << gameObject.layer)) != 0)
                     {
-                        manager.ShowTreeInfo(this);
-                        behaviour.ChangeLookAt(transform);
+                        CameraBehaviour behaviour = cam.GetComponent<CameraBehaviour>();
+                        if (behaviour != null && behaviour.CanMoveCamera())
+                        {
+                            manager.ShowTreeInfo(this);
+                            behaviour.ChangeLookAt(transform);
 
-                        var lastSelectedTree = manager.GetSelectedTree();
-                        if (lastSelectedTree != null)
-                            lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
+                            var lastSelectedTree = manager.GetSelectedTree();
+                            if (lastSelectedTree != null)
+                                lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
 
-                        manager.SelectTree(gameObject);
-                        gameObject.transform.Find("OutlineMesh").gameObject.SetActive(true);
+                            manager.SelectTree(gameObject);
+                            gameObject.transform.Find("OutlineMesh").gameObject.SetActive(true);
+                        }
+                        return;
                     }
-                    return;
                 }
             }
         }

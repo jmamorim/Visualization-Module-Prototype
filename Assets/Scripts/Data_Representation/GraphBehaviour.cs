@@ -115,16 +115,16 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         {
             isResizing = true;
-            cam1.DisableRotation();
-            cam2.DisableRotation();
+            cam1.DisableCameraMovement();
+            cam2.DisableCameraMovement();
             originalSize = rectTransform.sizeDelta;
             originalMousePos = eventData.position;
         }
         else
         {
             isDragging = true;
-            cam1.DisableRotation();
-            cam2.DisableRotation();
+            cam1.DisableCameraMovement();
+            cam2.DisableCameraMovement();
             rectTransform.SetAsLastSibling();
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -223,8 +223,8 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         if (isResizing)
         {
             isResizing = false;
-            cam1.EnableRotation();
-            cam2.EnableRotation();
+            cam1.EnableCameraMovement();
+            cam2.EnableCameraMovement();
             return;
         }
 
@@ -233,8 +233,8 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             isDragging = false;
             if (!manager.isParalelCameraActiveFunc())
             {
-                cam1.EnableRotation();
-                cam2.EnableRotation();
+                cam1.EnableCameraMovement();
+                cam2.EnableCameraMovement();
             }
         }
     }

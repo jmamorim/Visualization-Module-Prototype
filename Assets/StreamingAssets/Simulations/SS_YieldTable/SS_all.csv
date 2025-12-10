@@ -1,5 +1,5 @@
 id_par,AreaUG,id_presc,tlag,CoordX,CoordY,id_meteo,Altitude,year,month,composition,PlotType,Sp1,Sp2,Structure,S,rot,t,tst,tsd,Narvp,Aplot,Plot_shape,lenght1,lenght2,CoordX1,CoordY1,CoordX2,CoordY2,CoordX3,CoordY3,CoordX4,CoordY4
-SSB101,1,all,0,0,0,23,500,1990,5,Pure,povoamento,Pb,Pb,R,0,1,28,9999,9999,229,1000,0,0,0,0,0,0,0,0,0,0,0
+SSB101,1,all,0,0,0,23,500,1990,5,Pure,povoamento,Pb,Pb,R,0,1,28,9999,9999,229,1000,4,0,0,10,20,20,30,20,3,50,80
 SSB102,1,all,0,0,0,23,510,1990,5,Pure,povoamento,Pb,Pb,R,0,1,28,9999,9999,192,1000,0,0,0,0,0,0,0,0,0,0,0
 SSB103,1,all,0,0,0,23,525,1990,5,Pure,povoamento,Pb,Pb,R,0,1,28,9999,9999,159,1000,0,0,0,0,0,0,0,0,0,0,0
 SSB104,1,all,0,0,0,23,620,1990,5,Pure,povoamento,Pb,Pb,R,0,1,28,9999,9999,78,1000,0,0,0,0,0,0,0,0,0,0,0
