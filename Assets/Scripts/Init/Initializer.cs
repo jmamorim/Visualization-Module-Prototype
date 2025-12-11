@@ -95,33 +95,71 @@ public class SimulationScanner : MonoBehaviour
 
                 if (headers.SequenceEqual(inputHeaders))
                 {
+                    if (!String.IsNullOrEmpty(currentInputPath))
+                    {
+                        parser.ShowMessage("Warning: Multiple input files found in " + folderName + ". Changing to: " + file + "\n");
+                    }
                     currentInputPath = file;
                     parser.ShowMessage("Input file found for simulation: " + folderName + "\n");
                 }
                 else if (headers.SequenceEqual(soloTreesHeaders))
                 {
+                    if (!String.IsNullOrEmpty(currentInputPath))
+                    {
+                        parser.ShowMessage("Warning: Multiple solo trees files found in " + folderName + ". Changing to: " + file + "\n");
+                    }
                     currentSoloTreesPath = file;
                     parser.ShowMessage("Solo trees file found for simulation: " + folderName + "\n");
                 }
                 else if (headers.SequenceEqual(yieldTableHeaders))
                 {
+                    if (!String.IsNullOrEmpty(currentYieldTablePath))
+                    {
+                        parser.ShowMessage("Warning: Multiple yield table files found in " + folderName + ". Changing to: " + file + "\n");
+                    }
                     currentYieldTablePath = file;
                     parser.ShowMessage("Yield table file found for simulation: " + folderName + "\n");
                 }
                 else if (headers.SequenceEqual(ddTableHeaders))
                 {
+                    if (!String.IsNullOrEmpty(currentDDPath))
+                    {
+                        parser.ShowMessage("Warning: Multiple diameter distribution files found in " + folderName + ". Changing to: " + file + "\n");
+                    }
                     currentDDPath = file;
                     parser.ShowMessage("Diameter distribution file found for simulation: " + folderName + "\n");
                 }
             }
-            var simInfo = new SimulationInfo()
+
+            if (String.IsNullOrEmpty(currentInputPath))
             {
-                folderPath = folder,
-                inputPath = currentInputPath,
-                soloTreesPath = currentSoloTreesPath,
-                yieldTablePath = currentYieldTablePath,
-                ddTablePath = currentDDPath
-            };
+                parser.ShowMessage("Simulation ignored due to missing input file: " + folderName + "\n");
+                continue;
+            }
+            else if (String.IsNullOrEmpty(currentSoloTreesPath))
+            {
+                parser.ShowMessage("Simulation ignored due to missing solo trees file: " + folderName + "\n");
+                continue;
+            }
+            else if (String.IsNullOrEmpty(currentYieldTablePath))
+            {
+                parser.ShowMessage("Simulation ignored due to missing yield table file: " + folderName + "\n");
+                continue;
+            }
+            else if (String.IsNullOrEmpty(currentDDPath))
+            {
+                parser.ShowMessage("Simulation ignored due to missing diamater distribution file: " + folderName + "\n");
+                continue;
+            }
+
+            var simInfo = new SimulationInfo()
+                {
+                    folderPath = folder,
+                    inputPath = currentInputPath,
+                    soloTreesPath = currentSoloTreesPath,
+                    yieldTablePath = currentYieldTablePath,
+                    ddTablePath = currentDDPath
+                };
 
             if (!SimulationContainsOnlySupportedSpecies(currentInputPath))
             {

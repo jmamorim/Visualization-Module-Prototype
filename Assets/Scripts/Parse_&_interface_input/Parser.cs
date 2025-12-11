@@ -47,10 +47,14 @@ public class Parser : MonoBehaviour
 
     public void parse()
     {
-        if (!string.IsNullOrEmpty(intervalInputField.text) && !int.TryParse(intervalInputField.text, out interval) && interval < 0)
+
+        if (!string.IsNullOrEmpty(intervalInputField.text))
         {
-            ShowMessage("Interval is not valid\n");
-            return;
+            if (!int.TryParse(intervalInputField.text, out interval) || interval < 0)
+            {
+                ShowMessage("Interval is not valid\n");
+                return;
+            }
         }
 
         SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData = new SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>();

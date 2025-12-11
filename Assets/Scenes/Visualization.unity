@@ -10649,10 +10649,11 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "LiDAR flyover and orbital flyover simulation:\nL \u2013 LiDAR flyover
-    for plot 1\nO \u2013 Orbital flyover for plot 1\nK \u2013 LiDAR flyover for plot
-    2\nI \u2013 Orbital flyover for plot 2\n\nNote:\nTo stop any of the flyovers
-    you can click either \"L\" or \"O\" when in single visualization or any of these
-    keys in multi-visualization that deal with the flyover simulation feature."
+    (Plot 1 only)\nO \u2013 Orbital flyover (Plot 1 only)\nK \u2013 LiDAR flyover
+    (Plot 2 only)\nI \u2013 Orbital flyover (Plot 2 only)\n\nNote:\nTo stop any of
+    the flyovers you can click either \"L\" or \"O\" when in single visualization
+    or any of these keys in multi-visualization that deal with the flyover simulation
+    feature."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -20383,12 +20384,7 @@ MonoBehaviour:
   flyoverHeight: 50
   flyoverSpeed: 10
   scanWidth: 5
-  lookDownward: 1
   tiltAngle: 15
-  enableLidarEffect: 1
-  pointsPerSecond: 100
-  lidarColor: {r: 0, g: 1, b: 0, a: 1}
-  lidarLineLifetime: 0.5
 --- !u!1 &331490879
 GameObject:
   m_ObjectHideFlags: 1
@@ -144930,12 +144926,7 @@ MonoBehaviour:
   flyoverHeight: 50
   flyoverSpeed: 10
   scanWidth: 5
-  lookDownward: 1
   tiltAngle: 15
-  enableLidarEffect: 1
-  pointsPerSecond: 50
-  lidarColor: {r: 0, g: 1, b: 0, a: 1}
-  lidarLineLifetime: 0.5
 --- !u!1 &2126459341
 GameObject:
   m_ObjectHideFlags: 0
