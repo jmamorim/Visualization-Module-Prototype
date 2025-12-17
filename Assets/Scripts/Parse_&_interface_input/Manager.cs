@@ -67,26 +67,49 @@ public class Manager : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            var cams = Camera.allCameras;
+            foreach (Camera cam in cams)
+            {
+                var behaviour = cam.GetComponent<CameraBehaviour>();
+                if (behaviour.IsMouseOverViewport())
+                {
+                    behaviour.SetFreeCamera(!behaviour.IsFreeCamera());
+                    break;
+                }
+            }
+        }
         if (Input.GetKeyDown(KeyCode.L))
         {
             ResetSelected();
+            cam1.orthographic = false;
+            if (outputSoloTreesData.Count > 1)
+                cam2.orthographic = false;
             visualizer.StartLidarFlyover(1);
         }
         if (Input.GetKeyDown(KeyCode.O))
         {
             ResetSelected();
+            cam1.orthographic = false;
+            if (outputSoloTreesData.Count > 1)
+                cam2.orthographic = false;
             visualizer.StartOrbitalLidarFlyover(1);
         }
-        if(outputSoloTreesData.Count > 1)
+        if (outputSoloTreesData.Count > 1)
         {
             if (Input.GetKeyDown(KeyCode.K))
             {
                 ResetSelected();
+                cam1.orthographic = false;
+                cam2.orthographic = false;
                 visualizer.StartLidarFlyover(2);
             }
             if (Input.GetKeyDown(KeyCode.I))
             {
                 ResetSelected();
+                cam1.orthographic = false;
+                cam2.orthographic = false;
                 visualizer.StartOrbitalLidarFlyover(2);
             }
         }
@@ -109,12 +132,12 @@ public class Manager : MonoBehaviour
             }
 
             //change year for each plot individualy
-            if (Input.GetKeyDown(KeyCode.D))
+            if (Input.GetKeyDown(KeyCode.X))
             {
                 advancePlot1();
                 changeHightlight();
             }
-            if (Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.Z))
             {
                 reversePlot1();
                 changeHightlight();
@@ -122,12 +145,12 @@ public class Manager : MonoBehaviour
 
             if (outputSoloTreesData.Count > 1)
             {
-                if (Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.C))
                 {
                     advancePlot2();
                     changeHightlight();
                 }
-                if (Input.GetKeyDown(KeyCode.Q))
+                if (Input.GetKeyDown(KeyCode.V))
                 {
                     reversePlot2();
                     changeHightlight();
@@ -137,37 +160,11 @@ public class Manager : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.P))
             {
-                if (!isParalelCameraActive)
-                {
-                    isParalelCameraActive = true;
-                    ResetSelected();
+                if (cameraBehaviour1.IsMouseOverViewport())
+                    cameraBehaviour1.SetToTopographic();
 
-                    cam1.orthographic = true;
-                    cam1.orthographicSize = cameraBehaviour1.GetOrthographicSize();
-                    Camera1.transform.position = cameraBehaviour1.paralelPos.position;
-                    Camera1.transform.rotation = cameraBehaviour1.paralelPos.rotation;
-
-                    if (outputSoloTreesData.Count > 1)
-                    {
-                        cam2.orthographic = true;
-                        cam2.orthographicSize = cameraBehaviour2.GetOrthographicSize();
-                        Camera2.transform.position = cameraBehaviour2.paralelPos.position;
-                        Camera2.transform.rotation = cameraBehaviour2.paralelPos.rotation;
-                    }
-                }
-                else
-                {
-                    isParalelCameraActive = false;
-
-                    cam1.orthographic = false;
-                    cameraBehaviour1.ResetCamera();
-
-                    if (outputSoloTreesData.Count > 1)
-                    {
-                        cam2.orthographic = false;
-                        cameraBehaviour2.ResetCamera();
-                    }
-                }
+                if (outputSoloTreesData.Count > 1 && cameraBehaviour2.IsMouseOverViewport())
+                    cameraBehaviour2.SetToTopographic();
             }
         }
     }
@@ -343,7 +340,7 @@ public class Manager : MonoBehaviour
             visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
 
     }
-    
+
     public void positionViewPorts(bool isMulti, Camera cam = null)
     {
         if (isMulti)
@@ -358,9 +355,9 @@ public class Manager : MonoBehaviour
         else if (cam != null)
         {
             var cameras = Camera.allCameras;
-            foreach(Camera camera in cameras)
+            foreach (Camera camera in cameras)
             {
-                if(camera != cam)
+                if (camera != cam)
                 {
                     camera.gameObject.SetActive(false);
                 }

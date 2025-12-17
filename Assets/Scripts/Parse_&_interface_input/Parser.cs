@@ -15,9 +15,9 @@ public class Parser : MonoBehaviour
     public TMP_InputField intervalInputField;
     public SimMetadata simMetadata;
     public InputAndParsedData so;
-    public GameObject dp1, dp2;
+    public GameObject dpsolo, dp1, dp2;
 
-    IdStandsDropdown idStandsDropdown1, IdStandsDropdown2;
+    IdStandsDropdown idStandsDropdownSolo, idStandsDropdown1, idStandsDropdown2;
 
     readonly string[] expectedSoloTreesHeaders = { "id_stand", "id_presc", "ciclo", "Year", "t", "id_arv", "Xarv", "Yarv", "Species", "d", "h", "cw", " hbc", "status" };
     readonly string[] expectedYieldTableHeaders = { "year", "hdom", "Nst", "N", "Ndead", "G", "dg", "Vu_st", "Vst", "Vu_as1", "Vu_as2",
@@ -29,20 +29,24 @@ public class Parser : MonoBehaviour
     List<string> yieldTablePaths = new List<string>();
     List<string> DDTablePaths = new List<string>();
     int interval = 0;
-    const int idStand = 0, idPresc = 1, cicloIndex = 2, yearIndex = 3, tIndex = 4, XarvIndex = 7, YarvIndex = 8, speciesIndex = 9, dIndex = 10, hIndex = 11, cwIndex = 12, hbcIndex = 13, 
-        estadoIndex = 15, tableId_stand = 0, tableSIndex = 1, tableId_presc = 3, tableYearIndex = 6, tablenstIndex = 14, tablenIndex = 15, tablendeadIndex = 16, tablehdomIndex = 13, 
-        tablegIndex = 19, tabledgIndex = 20, tablevu_stIndex = 21, tablevIndex = 24, tablevu_as1Index = 30, tablevu_as2Index = 31, tablevu_as3Index = 32, tablevu_as4Index = 33, 
-        tablevu_as5Index = 34, tablemaiVIndex = 38, tableiVIndex = 39, tablewwIndex = 40, tablewbIndex = 41, tablewbrIndex = 42, tablewlIndex = 43, tablewaIndex = 44, 
+    const int idStand = 0, idPresc = 1, cicloIndex = 2, yearIndex = 3, tIndex = 4, XarvIndex = 7, YarvIndex = 8, speciesIndex = 9, dIndex = 10, hIndex = 11, cwIndex = 12, hbcIndex = 13,
+        estadoIndex = 15, tableId_stand = 0, tableSIndex = 1, tableId_presc = 3, tableYearIndex = 6, tablenstIndex = 14, tablenIndex = 15, tablendeadIndex = 16, tablehdomIndex = 13,
+        tablegIndex = 19, tabledgIndex = 20, tablevu_stIndex = 21, tablevIndex = 24, tablevu_as1Index = 30, tablevu_as2Index = 31, tablevu_as3Index = 32, tablevu_as4Index = 33,
+        tablevu_as5Index = 34, tablemaiVIndex = 38, tableiVIndex = 39, tablewwIndex = 40, tablewbIndex = 41, tablewbrIndex = 42, tablewlIndex = 43, tablewaIndex = 44,
         tablewrIndex = 45, tablenpvsumIndex = 66, tableeeaIndex = 67, ddId_standIndex = 0, ddId_prescIndex = 1, ddYearIndex = 2, dd0Index = 6, dd5Index = 7, dd10Index = 8,
         dd15index = 9, dd20Index = 10, dd25Index = 11, dd30Index = 12, dd35Index = 13, dd40Index = 14, dd45Index = 15, dd50Index = 16, dd55Index = 17, dd60Index = 18, dd65Index = 19,
         dd70Index = 20, dd75Index = 21, dd80Index = 22, dd85Index = 23, dd90Index = 24, dd95Index = 25, dd100Index = 26, dd102Index = 27;
-    //max size 2 for now
     List<string> selectedIdStands = new List<string>();
 
     private void Start()
     {
-        idStandsDropdown1 = dp1.GetComponent<IdStandsDropdown>();
-        IdStandsDropdown2 = dp2.GetComponent<IdStandsDropdown>();
+        if (dpsolo != null)
+            idStandsDropdownSolo = dpsolo.GetComponent<IdStandsDropdown>();
+        if (dp1 != null && dp2 != null)
+        {
+            idStandsDropdown1 = dp1.GetComponent<IdStandsDropdown>();
+            idStandsDropdown2 = dp2.GetComponent<IdStandsDropdown>();
+        }
     }
 
     public void parse()
@@ -61,81 +65,130 @@ public class Parser : MonoBehaviour
         SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> outputYieldTableData = new SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>>();
         SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> outputDDTableData = new SortedDictionary<string, SortedDictionary<string, List<DDEntry>>>();
         List<(int, List<float>)> shapeData = new List<(int, List<float>)>();
-         
-        var dropdown1 = idStandsDropdown1.GetComponent<TMP_Dropdown>();
-        if(dropdown1.options.Count() == 0)
+
+        if (dpsolo != null)
         {
-            ShowMessage("Please pick a simulation for Plot 1\n");
-            return;
-        }
-        string selectedIdStand1 = dropdown1.options[dropdown1.value].text;
-
-        var siminfo1 = simMetadata.simulations[selectedSim1.text];
-
-        var simPlotDimensions1 = siminfo1.plotDataByIdPar[selectedIdStand1];
-
-        selectedIdStands.Add(selectedIdStand1);
-
-        var plotDimensionsData1 = new List<float>();
-
-        if (simPlotDimensions1.plotShape == 0)
-            plotDimensionsData1.Add(simPlotDimensions1.area);
-        else if(simPlotDimensions1.plotShape == 4)
-        {
-            plotDimensionsData1.Add(simPlotDimensions1.minX);
-            plotDimensionsData1.Add(simPlotDimensions1.maxX);
-            plotDimensionsData1.Add(simPlotDimensions1.minY);
-            plotDimensionsData1.Add(simPlotDimensions1.maxY);
-        }
-        else
-        {
-            plotDimensionsData1.Add(simPlotDimensions1.length1);
-            plotDimensionsData1.Add(simPlotDimensions1.length2); 
-        }
-
-        var plotData1 = (simPlotDimensions1.plotShape, plotDimensionsData1);
-
-        soloTreePaths.Add(siminfo1.soloTreesPath);
-        yieldTablePaths.Add(siminfo1.yieldTablePath);
-        DDTablePaths.Add(siminfo1.ddTablePath);
-
-        shapeData.Add(plotData1);
-
-        var dropdown2 = IdStandsDropdown2.GetComponent<TMP_Dropdown>();
-
-        if (dropdown2.options.Count() > 0)
-        {
-            string selectedIdStand2 = dropdown2.options[dropdown2.value].text;
-            var siminfo2 = simMetadata.simulations[selectedSim2.text];
-
-            var simPlotDimensions2 = siminfo2.plotDataByIdPar[selectedIdStand2];
-
-            selectedIdStands.Add(selectedIdStand2);
-
-            var plotDimensionsData2 = new List<float>();
-
-            if (simPlotDimensions2.plotShape == 0)
-                plotDimensionsData2.Add(simPlotDimensions2.area);
-            else if (simPlotDimensions2.plotShape == 4)
+            var dropdownSolo = idStandsDropdownSolo.GetComponent<TMP_Dropdown>();
+            if(dropdownSolo.options.Count() == 0)
             {
-                plotDimensionsData2.Add(simPlotDimensions2.minX);
-                plotDimensionsData2.Add(simPlotDimensions2.maxX);
-                plotDimensionsData2.Add(simPlotDimensions2.minY);
-                plotDimensionsData2.Add(simPlotDimensions2.maxY);
+                ShowMessage("Please pick a simulation for Solo Trees Plot\n");
+                return;
+            }
+            string selectedIdStandSolo = dropdownSolo.options[dropdownSolo.value].text;
+
+            var siminfoSolo = simMetadata.simulations[selectedSim1.text];
+
+            var simPlotDimensionsSolo = siminfoSolo.plotDataByIdPar[selectedIdStandSolo];
+
+            selectedIdStands.Add(selectedIdStandSolo);
+
+            var plotDimensionsDataSolo = new List<float>();
+
+            if (simPlotDimensionsSolo.plotShape == 0)
+                plotDimensionsDataSolo.Add(simPlotDimensionsSolo.area);
+            else if (simPlotDimensionsSolo.plotShape == 4)
+            {
+                plotDimensionsDataSolo.Add(simPlotDimensionsSolo.minX);
+                plotDimensionsDataSolo.Add(simPlotDimensionsSolo.maxX);
+                plotDimensionsDataSolo.Add(simPlotDimensionsSolo.minY);
+                plotDimensionsDataSolo.Add(simPlotDimensionsSolo.maxY);
             }
             else
             {
-                plotDimensionsData2.Add(simPlotDimensions2.length1);
-                plotDimensionsData2.Add(simPlotDimensions2.length2);
+                plotDimensionsDataSolo.Add(simPlotDimensionsSolo.length1);
+                plotDimensionsDataSolo.Add(simPlotDimensionsSolo.length2);
             }
 
-            var plotData2 = (simPlotDimensions2.plotShape, plotDimensionsData2);
+            var plotDataSolo = (simPlotDimensionsSolo.plotShape, plotDimensionsDataSolo);
 
-            soloTreePaths.Add(siminfo2.soloTreesPath);
-            yieldTablePaths.Add(siminfo2.yieldTablePath);
-            DDTablePaths.Add(siminfo2.ddTablePath);
+            soloTreePaths.Add(siminfoSolo.soloTreesPath);
+            yieldTablePaths.Add(siminfoSolo.yieldTablePath);
+            DDTablePaths.Add(siminfoSolo.ddTablePath);
 
-            shapeData.Add(plotData2);
+            shapeData.Add(plotDataSolo);
+        }
+        else
+        {
+            var dropdown1 = idStandsDropdown1.GetComponent<TMP_Dropdown>();
+            var dropdown2 = idStandsDropdown2.GetComponent<TMP_Dropdown>();
+            if (dropdown1.options.Count() == 0)
+            {
+                ShowMessage("Please pick a simulation for Plot 1\n");
+                return;
+            }
+            if(dropdown1.options.Count() == 0)
+            {
+                ShowMessage("Please pick a simulation for Plot 2\n");
+                return;
+            }
+
+            string selectedIdStand1 = dropdown1.options[dropdown1.value].text;
+
+            var siminfo1 = simMetadata.simulations[selectedSim1.text];
+
+            var simPlotDimensions1 = siminfo1.plotDataByIdPar[selectedIdStand1];
+
+            selectedIdStands.Add(selectedIdStand1);
+
+            var plotDimensionsData1 = new List<float>();
+
+            if (simPlotDimensions1.plotShape == 0)
+                plotDimensionsData1.Add(simPlotDimensions1.area);
+            else if (simPlotDimensions1.plotShape == 4)
+            {
+                plotDimensionsData1.Add(simPlotDimensions1.minX);
+                plotDimensionsData1.Add(simPlotDimensions1.maxX);
+                plotDimensionsData1.Add(simPlotDimensions1.minY);
+                plotDimensionsData1.Add(simPlotDimensions1.maxY);
+            }
+            else
+            {
+                plotDimensionsData1.Add(simPlotDimensions1.length1);
+                plotDimensionsData1.Add(simPlotDimensions1.length2);
+            }
+
+            var plotData1 = (simPlotDimensions1.plotShape, plotDimensionsData1);
+
+            soloTreePaths.Add(siminfo1.soloTreesPath);
+            yieldTablePaths.Add(siminfo1.yieldTablePath);
+            DDTablePaths.Add(siminfo1.ddTablePath);
+
+            shapeData.Add(plotData1);
+
+            if (dropdown2.options.Count() > 0)
+            {
+                string selectedIdStand2 = dropdown2.options[dropdown2.value].text;
+                var siminfo2 = simMetadata.simulations[selectedSim2.text];
+
+                var simPlotDimensions2 = siminfo2.plotDataByIdPar[selectedIdStand2];
+
+                selectedIdStands.Add(selectedIdStand2);
+
+                var plotDimensionsData2 = new List<float>();
+
+                if (simPlotDimensions2.plotShape == 0)
+                    plotDimensionsData2.Add(simPlotDimensions2.area);
+                else if (simPlotDimensions2.plotShape == 4)
+                {
+                    plotDimensionsData2.Add(simPlotDimensions2.minX);
+                    plotDimensionsData2.Add(simPlotDimensions2.maxX);
+                    plotDimensionsData2.Add(simPlotDimensions2.minY);
+                    plotDimensionsData2.Add(simPlotDimensions2.maxY);
+                }
+                else
+                {
+                    plotDimensionsData2.Add(simPlotDimensions2.length1);
+                    plotDimensionsData2.Add(simPlotDimensions2.length2);
+                }
+
+                var plotData2 = (simPlotDimensions2.plotShape, plotDimensionsData2);
+
+                soloTreePaths.Add(siminfo2.soloTreesPath);
+                yieldTablePaths.Add(siminfo2.yieldTablePath);
+                DDTablePaths.Add(siminfo2.ddTablePath);
+
+                shapeData.Add(plotData2);
+            }
         }
 
         for (int i = 0; i < soloTreePaths.Count; i++)
@@ -192,7 +245,8 @@ public class Parser : MonoBehaviour
             string[] treeInfo = lines[i].Trim().Split(',');
             string id_stand = treeInfo[idStand].Trim();
             string id_presc = treeInfo[idPresc].Trim();
-            if (id_stand == selectedIdStand) {
+            if (id_stand == selectedIdStand)
+            {
 
                 if (!standPrescGroups.ContainsKey(id_stand))
                 {
@@ -424,47 +478,47 @@ public class Parser : MonoBehaviour
                 string id_presc = entryInfo[tableId_presc].Trim();
                 if (id_stand == selectedIdStand)
                 {
-                YieldTableEntry entry = new YieldTableEntry(
-                            id_stand, // id_stand
-                            id_presc, // id_presc
-                            int.Parse(entryInfo[tableYearIndex].Trim()), // year
-                            Mathf.RoundToInt(float.Parse(entryInfo[tablenstIndex].Trim(), CultureInfo.InvariantCulture)), // Nst
-                            Mathf.RoundToInt(float.Parse(entryInfo[tablenIndex].Trim(), CultureInfo.InvariantCulture)), // N
-                            Mathf.RoundToInt(float.Parse(entryInfo[tablendeadIndex].Trim(), CultureInfo.InvariantCulture)), // Ndead
-                            Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)), // S
-                            float.Parse(entryInfo[tablehdomIndex].Trim(), CultureInfo.InvariantCulture), // hdom
-                            float.Parse(entryInfo[tablegIndex].Trim(), CultureInfo.InvariantCulture), // G
-                            float.Parse(entryInfo[tabledgIndex].Trim(), CultureInfo.InvariantCulture), // dg 
-                            float.Parse(entryInfo[tablevu_stIndex].Trim(), CultureInfo.InvariantCulture), // Vu_st
-                            float.Parse(entryInfo[tablevIndex].Trim(), CultureInfo.InvariantCulture), // Vst 
-                            float.Parse(entryInfo[tablevu_as1Index].Trim(), CultureInfo.InvariantCulture), // Vu_as1 
-                            float.Parse(entryInfo[tablevu_as2Index].Trim(), CultureInfo.InvariantCulture), // Vu_as2 
-                            float.Parse(entryInfo[tablevu_as3Index].Trim(), CultureInfo.InvariantCulture), // Vu_as3 
-                            float.Parse(entryInfo[tablevu_as4Index].Trim(), CultureInfo.InvariantCulture), // Vu_as4 
-                            float.Parse(entryInfo[tablevu_as5Index].Trim(), CultureInfo.InvariantCulture), // Vu_as5 
-                            float.Parse(entryInfo[tablemaiVIndex].Trim(), CultureInfo.InvariantCulture), // maiV 
-                            float.Parse(entryInfo[tableiVIndex].Trim(), CultureInfo.InvariantCulture), // iV 
-                            float.Parse(entryInfo[tablewwIndex].Trim(), CultureInfo.InvariantCulture), // Ww 
-                            float.Parse(entryInfo[tablewbIndex].Trim(), CultureInfo.InvariantCulture), // Wb 
-                            float.Parse(entryInfo[tablewbrIndex].Trim(), CultureInfo.InvariantCulture), // Wbr 
-                            float.Parse(entryInfo[tablewlIndex].Trim(), CultureInfo.InvariantCulture), // Wl 
-                            float.Parse(entryInfo[tablewaIndex].Trim(), CultureInfo.InvariantCulture), // Wa 
-                            float.Parse(entryInfo[tablewrIndex].Trim(), CultureInfo.InvariantCulture), // Wr 
-                            float.Parse(entryInfo[tablenpvsumIndex].Trim(), CultureInfo.InvariantCulture), // NPVsum 
-                            float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)  // EEA 
-                        );
+                    YieldTableEntry entry = new YieldTableEntry(
+                                id_stand, // id_stand
+                                id_presc, // id_presc
+                                int.Parse(entryInfo[tableYearIndex].Trim()), // year
+                                Mathf.RoundToInt(float.Parse(entryInfo[tablenstIndex].Trim(), CultureInfo.InvariantCulture)), // Nst
+                                Mathf.RoundToInt(float.Parse(entryInfo[tablenIndex].Trim(), CultureInfo.InvariantCulture)), // N
+                                Mathf.RoundToInt(float.Parse(entryInfo[tablendeadIndex].Trim(), CultureInfo.InvariantCulture)), // Ndead
+                                Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)), // S
+                                float.Parse(entryInfo[tablehdomIndex].Trim(), CultureInfo.InvariantCulture), // hdom
+                                float.Parse(entryInfo[tablegIndex].Trim(), CultureInfo.InvariantCulture), // G
+                                float.Parse(entryInfo[tabledgIndex].Trim(), CultureInfo.InvariantCulture), // dg 
+                                float.Parse(entryInfo[tablevu_stIndex].Trim(), CultureInfo.InvariantCulture), // Vu_st
+                                float.Parse(entryInfo[tablevIndex].Trim(), CultureInfo.InvariantCulture), // Vst 
+                                float.Parse(entryInfo[tablevu_as1Index].Trim(), CultureInfo.InvariantCulture), // Vu_as1 
+                                float.Parse(entryInfo[tablevu_as2Index].Trim(), CultureInfo.InvariantCulture), // Vu_as2 
+                                float.Parse(entryInfo[tablevu_as3Index].Trim(), CultureInfo.InvariantCulture), // Vu_as3 
+                                float.Parse(entryInfo[tablevu_as4Index].Trim(), CultureInfo.InvariantCulture), // Vu_as4 
+                                float.Parse(entryInfo[tablevu_as5Index].Trim(), CultureInfo.InvariantCulture), // Vu_as5 
+                                float.Parse(entryInfo[tablemaiVIndex].Trim(), CultureInfo.InvariantCulture), // maiV 
+                                float.Parse(entryInfo[tableiVIndex].Trim(), CultureInfo.InvariantCulture), // iV 
+                                float.Parse(entryInfo[tablewwIndex].Trim(), CultureInfo.InvariantCulture), // Ww 
+                                float.Parse(entryInfo[tablewbIndex].Trim(), CultureInfo.InvariantCulture), // Wb 
+                                float.Parse(entryInfo[tablewbrIndex].Trim(), CultureInfo.InvariantCulture), // Wbr 
+                                float.Parse(entryInfo[tablewlIndex].Trim(), CultureInfo.InvariantCulture), // Wl 
+                                float.Parse(entryInfo[tablewaIndex].Trim(), CultureInfo.InvariantCulture), // Wa 
+                                float.Parse(entryInfo[tablewrIndex].Trim(), CultureInfo.InvariantCulture), // Wr 
+                                float.Parse(entryInfo[tablenpvsumIndex].Trim(), CultureInfo.InvariantCulture), // NPVsum 
+                                float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)  // EEA 
+                            );
 
-                if (!standPrescGroups.ContainsKey(id_stand))
-                {
-                    standPrescGroups[id_stand] = new Dictionary<string, List<YieldTableEntry>>();
-                }
-                if (!standPrescGroups[id_stand].ContainsKey(id_presc))
-                {
-                    standPrescGroups[id_stand][id_presc] = new List<YieldTableEntry>();
-                }
+                    if (!standPrescGroups.ContainsKey(id_stand))
+                    {
+                        standPrescGroups[id_stand] = new Dictionary<string, List<YieldTableEntry>>();
+                    }
+                    if (!standPrescGroups[id_stand].ContainsKey(id_presc))
+                    {
+                        standPrescGroups[id_stand][id_presc] = new List<YieldTableEntry>();
+                    }
 
-                standPrescGroups[id_stand][id_presc].Add(entry);
-            }
+                    standPrescGroups[id_stand][id_presc].Add(entry);
+                }
             }
             catch (FormatException fe)
             {
@@ -650,13 +704,13 @@ public class Parser : MonoBehaviour
     {
         insertPath(yieldTablePaths, path, index, true);
 
-        if(index == 0)
+        if (index == 0)
         {
             idStandsDropdown1.initDropdown(getIdsInFile(path));
         }
         else
         {
-            IdStandsDropdown2.initDropdown(getIdsInFile(path));
+            idStandsDropdown2.initDropdown(getIdsInFile(path));
         }
     }
 
@@ -679,7 +733,8 @@ public class Parser : MonoBehaviour
         return ids;
     }
 
-    public void removeEntryList() {
+    public void removeEntryList()
+    {
         if (soloTreePaths.Count > 1)
             soloTreePaths.RemoveAt(soloTreePaths.Count - 1);
         if (yieldTablePaths.Count > 1)

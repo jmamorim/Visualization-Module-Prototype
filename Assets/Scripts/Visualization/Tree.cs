@@ -1,20 +1,16 @@
 using TMPro;
 using UnityEngine;
-
 public class Tree : MonoBehaviour
 {
     public int ciclo, Year, id_arv, estado;
     public float t, Xarv, Yarv, d, h, cw, rotation, hbc;
     public string id_stand, id_presc, specie;
     public bool wasAlive;
-
     private Manager manager;
-
     private void Start()
     {
         manager = GameObject.Find("Manager").GetComponent<Manager>();
     }
-
     public void initTree(TreeData tree)
     {
         this.id_stand = tree.id_stand;
@@ -35,34 +31,41 @@ public class Tree : MonoBehaviour
         this.wasAlive = tree.wasAlive;
     }
 
-    private void OnMouseDown()
+    private void OnMouseOver()
     {
         if (manager.canInteract)
         {
-            Vector3 mousePos = Input.mousePosition;
-
-            foreach (Camera cam in Camera.allCameras)
+            if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
             {
-                Vector2 normalizedMouse = new Vector2(mousePos.x / Screen.width, mousePos.y / Screen.height);
+                bool isRightClick = Input.GetMouseButtonDown(1);
 
-                if (cam.rect.Contains(normalizedMouse))
+                Vector3 mousePos = Input.mousePosition;
+                foreach (Camera cam in Camera.allCameras)
                 {
-                    if ((cam.cullingMask & (1 << gameObject.layer)) != 0)
+                    Vector2 normalizedMouse = new Vector2(mousePos.x / Screen.width, mousePos.y / Screen.height);
+                    if (cam.rect.Contains(normalizedMouse))
                     {
-                        CameraBehaviour behaviour = cam.GetComponent<CameraBehaviour>();
-                        if (behaviour != null && behaviour.CanMoveCamera())
+                        if ((cam.cullingMask & (1 << gameObject.layer)) != 0)
                         {
-                            manager.ShowTreeInfo(this);
-                            behaviour.ChangeLookAt(transform);
-
-                            var lastSelectedTree = manager.GetSelectedTree();
-                            if (lastSelectedTree != null)
-                                lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
-
-                            manager.SelectTree(gameObject);
-                            gameObject.transform.Find("OutlineMesh").gameObject.SetActive(true);
+                            CameraBehaviour behaviour = cam.GetComponent<CameraBehaviour>();
+                            if (behaviour != null && behaviour.CanMoveCamera())
+                            {
+                                if (isRightClick)
+                                {
+                                    behaviour.ChangeLookAt(transform);
+                                }
+                                else
+                                {
+                                    manager.ShowTreeInfo(this);
+                                    var lastSelectedTree = manager.GetSelectedTree();
+                                    if (lastSelectedTree != null)
+                                        lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
+                                    manager.SelectTree(gameObject);
+                                    gameObject.transform.Find("OutlineMesh").gameObject.SetActive(true);
+                                }
+                            }
+                            return;
                         }
-                        return;
                     }
                 }
             }

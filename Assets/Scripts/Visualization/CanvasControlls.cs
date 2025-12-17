@@ -1,57 +1,66 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CanvasControlls : MonoBehaviour
+public class CanvasController : MonoBehaviour
 {
-    public bool isIntroScene = false;
-    public List<GameObject> canvases;
+    [SerializeField] private List<Canvas> canvases;
+    [SerializeField] private bool isIntroScene = false;
 
-    int activeCanvasIndex = 0;
+    private int currentCanvasIndex = 0;
+    private int previousCanvasIndex = 0;
 
-    public void EnableControls()
+    private void Awake()
     {
-        if(!isIntroScene)
-            DissableRotationAllCameras();
-        canvases[activeCanvasIndex].SetActive(false);
-        activeCanvasIndex = 1;
-        canvases[activeCanvasIndex].SetActive(true);
+        InitializeCanvases();
     }
 
-    public void EnableGlossary()
+    private void InitializeCanvases()
     {
-        if (!isIntroScene)
-            DissableRotationAllCameras();
-        canvases[activeCanvasIndex].SetActive(false);
-        activeCanvasIndex = 2;
-        canvases[activeCanvasIndex].SetActive(true);
-    }
-
-    public void EnableVisCanvas()
-    {
-        if (!isIntroScene)
-            EnableRotationAllCameras();
-        canvases[activeCanvasIndex].SetActive(false);
-        activeCanvasIndex = 0;
-        canvases[activeCanvasIndex].SetActive(true);
-    }
-
-    private void DissableRotationAllCameras()
-    {
-        var cameras = Camera.allCameras;
-        foreach (Camera cam in cameras)
+        for (int i = 0; i < canvases.Count; i++)
         {
-            var cameraBehaviour = cam.GetComponent<CameraBehaviour>();
-            cameraBehaviour.DisableCameraMovement();
+            canvases[i].enabled = (i == currentCanvasIndex);
         }
     }
 
-    private void EnableRotationAllCameras()
+    public void SwitchToCanvas(int targetIndex)
+    {
+        if (targetIndex < 0 || targetIndex >= canvases.Count)
+        {
+            Debug.LogWarning($"Invalid canvas index: {targetIndex}");
+            return;
+        }
+
+        if (targetIndex == currentCanvasIndex)
+            return;
+
+        previousCanvasIndex = currentCanvasIndex;
+        currentCanvasIndex = targetIndex;
+
+        if(!isIntroScene)
+            ManageRotationAllCameras();
+
+        canvases[previousCanvasIndex].enabled = false;
+        canvases[currentCanvasIndex].enabled = true;
+    }
+
+    public void SwitchToPrevious()
+    {
+        SwitchToCanvas(previousCanvasIndex);
+    }
+
+    public int GetCurrentIndex() => currentCanvasIndex;
+    public int GetPreviousIndex() => previousCanvasIndex;
+
+    private void ManageRotationAllCameras()
     {
         var cameras = Camera.allCameras;
         foreach (Camera cam in cameras)
         {
             var cameraBehaviour = cam.GetComponent<CameraBehaviour>();
-            cameraBehaviour.EnableCameraMovement();
+            if (!cameraBehaviour.CanMoveCamera())
+                cameraBehaviour.DisableCameraMovement();
+            else
+                cameraBehaviour.EnableCameraMovement();
         }
     }
 }

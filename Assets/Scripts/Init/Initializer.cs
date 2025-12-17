@@ -7,13 +7,15 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using System;
 
-public class SimulationScanner : MonoBehaviour
+public class Initializer : MonoBehaviour
 {
     public SimMetadata simMetadata;
     public GameObject buttonPrefab;
-    public Transform buttonParent;
+    public Transform[] buttonParent;
     public float buttonSpacing = 60f;
-    public InterfaceManager interfaceManager;
+    public GameObject[] selectedSims;
+    public GameObject[] dropdowns;
+    public GameObject[] reloadButtons;
     public Parser parser;
 
     readonly List<string> species = new List<string> { "Pb", "Pm", "Ec", "Ct" };
@@ -81,104 +83,168 @@ public class SimulationScanner : MonoBehaviour
                 continue;
             }
 
-
-            string[] csvs = Directory.GetFiles(folder, "*.csv");
-            if (csvs.Length == 0) continue;
-
-            string currentInputPath = "", currentSoloTreesPath = "", currentYieldTablePath = "", currentDDPath = "";
-
-            foreach (var file in csvs)
+            var simInfo = ProcessSimulationFolder(folder, folderName);
+            if (simInfo != null)
             {
-                var headers = File.ReadLines(file).First().Trim().Split(',')
-                    .Select(h => h.Trim())
-                    .ToArray();
-
-                if (headers.SequenceEqual(inputHeaders))
-                {
-                    if (!String.IsNullOrEmpty(currentInputPath))
-                    {
-                        parser.ShowMessage("Warning: Multiple input files found in " + folderName + ". Changing to: " + file + "\n");
-                    }
-                    currentInputPath = file;
-                    parser.ShowMessage("Input file found for simulation: " + folderName + "\n");
-                }
-                else if (headers.SequenceEqual(soloTreesHeaders))
-                {
-                    if (!String.IsNullOrEmpty(currentInputPath))
-                    {
-                        parser.ShowMessage("Warning: Multiple solo trees files found in " + folderName + ". Changing to: " + file + "\n");
-                    }
-                    currentSoloTreesPath = file;
-                    parser.ShowMessage("Solo trees file found for simulation: " + folderName + "\n");
-                }
-                else if (headers.SequenceEqual(yieldTableHeaders))
-                {
-                    if (!String.IsNullOrEmpty(currentYieldTablePath))
-                    {
-                        parser.ShowMessage("Warning: Multiple yield table files found in " + folderName + ". Changing to: " + file + "\n");
-                    }
-                    currentYieldTablePath = file;
-                    parser.ShowMessage("Yield table file found for simulation: " + folderName + "\n");
-                }
-                else if (headers.SequenceEqual(ddTableHeaders))
-                {
-                    if (!String.IsNullOrEmpty(currentDDPath))
-                    {
-                        parser.ShowMessage("Warning: Multiple diameter distribution files found in " + folderName + ". Changing to: " + file + "\n");
-                    }
-                    currentDDPath = file;
-                    parser.ShowMessage("Diameter distribution file found for simulation: " + folderName + "\n");
-                }
+                simulations.Add(folderName, simInfo);
+                Debug.Log("Registered new simulation: " + folderName);
+                parser.ShowMessage("New simulation saved: " + folderName + "\n");
             }
-
-            if (String.IsNullOrEmpty(currentInputPath))
-            {
-                parser.ShowMessage("Simulation ignored due to missing input file: " + folderName + "\n");
-                continue;
-            }
-            else if (String.IsNullOrEmpty(currentSoloTreesPath))
-            {
-                parser.ShowMessage("Simulation ignored due to missing solo trees file: " + folderName + "\n");
-                continue;
-            }
-            else if (String.IsNullOrEmpty(currentYieldTablePath))
-            {
-                parser.ShowMessage("Simulation ignored due to missing yield table file: " + folderName + "\n");
-                continue;
-            }
-            else if (String.IsNullOrEmpty(currentDDPath))
-            {
-                parser.ShowMessage("Simulation ignored due to missing diamater distribution file: " + folderName + "\n");
-                continue;
-            }
-
-            var simInfo = new SimulationInfo()
-                {
-                    folderPath = folder,
-                    inputPath = currentInputPath,
-                    soloTreesPath = currentSoloTreesPath,
-                    yieldTablePath = currentYieldTablePath,
-                    ddTablePath = currentDDPath
-                };
-
-            if (!SimulationContainsOnlySupportedSpecies(currentInputPath))
-            {
-                parser.ShowMessage("Simulation ignored due to unsupported species: " + folderName + "\n");
-                continue;
-            }
-
-            if (!string.IsNullOrEmpty(currentInputPath))
-            {
-                ParseInputFile(currentInputPath, simInfo);
-            }
-
-            simulations.Add(folderName, simInfo);
-            Debug.Log("Registered new simulation: " + folderName);
-            parser.ShowMessage("New simulation saved: " + folderName + "\n");
         }
+
         simMetadata.simulations = simulations;
         CreateSimulationButtons(simulations);
         simMetadata.Save();
+    }
+
+    public void ReloadSimulation(string simName)
+    {
+        string simsRoot = Path.Combine(Application.streamingAssetsPath, "Simulations");
+        string folderPath = Path.Combine(simsRoot, simName);
+
+        if (!Directory.Exists(folderPath))
+        {
+            parser.ShowMessage("Error: Simulation folder not found: " + simName + "\n");
+            Debug.LogError("Simulation folder not found: " + folderPath);
+            return;
+        }
+
+        if (simMetadata.simulations.ContainsKey(simName))
+        {
+            simMetadata.simulations.Remove(simName);
+            parser.ShowMessage("Removed old data for: " + simName + "\n");
+        }
+
+        var simInfo = ProcessSimulationFolder(folderPath, simName);
+
+        if (simInfo != null)
+        {
+            simMetadata.simulations.Add(simName, simInfo);
+            simMetadata.Save();
+
+            // Destroy all buttons and recreate them to maintain proper positioning
+            DestroyAllButtons();
+            CreateSimulationButtons(simMetadata.simulations);
+
+            parser.ShowMessage("Successfully reloaded simulation: " + simName + "\n");
+            Debug.Log("Reloaded simulation: " + simName);
+            resetSelectedSims();
+        }
+        else
+        {
+            parser.ShowMessage("Failed to reload simulation and removed: " + simName + "\n");
+            Debug.LogError("Failed to reload simulation: " + simName);
+        }
+    }
+
+    void DestroyAllButtons()
+    {
+        foreach (var parent in buttonParent)
+        {
+            foreach (Transform child in parent)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+    }
+
+    SimulationInfo ProcessSimulationFolder(string folder, string folderName)
+    {
+        string[] csvs = Directory.GetFiles(folder, "*.csv");
+        if (csvs.Length == 0)
+        {
+            parser.ShowMessage("No CSV files found in: " + folderName + "\n");
+            return null;
+        }
+
+        string currentInputPath = "", currentSoloTreesPath = "", currentYieldTablePath = "", currentDDPath = "";
+
+        foreach (var file in csvs)
+        {
+            var headers = File.ReadLines(file).First().Trim().Split(',')
+                .Select(h => h.Trim())
+                .ToArray();
+
+            if (headers.SequenceEqual(inputHeaders))
+            {
+                if (!String.IsNullOrEmpty(currentInputPath))
+                {
+                    parser.ShowMessage("Warning: Multiple input files found in " + folderName + ". Changing to: " + file + "\n");
+                }
+                currentInputPath = file;
+                parser.ShowMessage("Input file found for simulation: " + folderName + "\n");
+            }
+            else if (headers.SequenceEqual(soloTreesHeaders))
+            {
+                if (!String.IsNullOrEmpty(currentSoloTreesPath))
+                {
+                    parser.ShowMessage("Warning: Multiple solo trees files found in " + folderName + ". Changing to: " + file + "\n");
+                }
+                currentSoloTreesPath = file;
+                parser.ShowMessage("Solo trees file found for simulation: " + folderName + "\n");
+            }
+            else if (headers.SequenceEqual(yieldTableHeaders))
+            {
+                if (!String.IsNullOrEmpty(currentYieldTablePath))
+                {
+                    parser.ShowMessage("Warning: Multiple yield table files found in " + folderName + ". Changing to: " + file + "\n");
+                }
+                currentYieldTablePath = file;
+                parser.ShowMessage("Yield table file found for simulation: " + folderName + "\n");
+            }
+            else if (headers.SequenceEqual(ddTableHeaders))
+            {
+                if (!String.IsNullOrEmpty(currentDDPath))
+                {
+                    parser.ShowMessage("Warning: Multiple diameter distribution files found in " + folderName + ". Changing to: " + file + "\n");
+                }
+                currentDDPath = file;
+                parser.ShowMessage("Diameter distribution file found for simulation: " + folderName + "\n");
+            }
+        }
+
+        if (String.IsNullOrEmpty(currentInputPath))
+        {
+            parser.ShowMessage("Simulation ignored due to missing input file: " + folderName + "\n");
+            return null;
+        }
+        else if (String.IsNullOrEmpty(currentSoloTreesPath))
+        {
+            parser.ShowMessage("Simulation ignored due to missing solo trees file: " + folderName + "\n");
+            return null;
+        }
+        else if (String.IsNullOrEmpty(currentYieldTablePath))
+        {
+            parser.ShowMessage("Simulation ignored due to missing yield table file: " + folderName + "\n");
+            return null;
+        }
+        else if (String.IsNullOrEmpty(currentDDPath))
+        {
+            parser.ShowMessage("Simulation ignored due to missing diameter distribution file: " + folderName + "\n");
+            return null;
+        }
+
+        if (!SimulationContainsOnlySupportedSpecies(currentInputPath))
+        {
+            parser.ShowMessage("Simulation ignored due to unsupported species: " + folderName + "\n");
+            return null;
+        }
+ 
+        var simInfo = new SimulationInfo()
+        {
+            folderPath = folder,
+            inputPath = currentInputPath,
+            soloTreesPath = currentSoloTreesPath,
+            yieldTablePath = currentYieldTablePath,
+            ddTablePath = currentDDPath
+        };
+
+        if (!string.IsNullOrEmpty(currentInputPath))
+        {
+            ParseInputFile(currentInputPath, simInfo);
+        }
+
+        return simInfo;
     }
 
     bool SimulationContainsOnlySupportedSpecies(string inputPath)
@@ -207,7 +273,6 @@ public class SimulationScanner : MonoBehaviour
         return true;
     }
 
-
     void CreateSimulationButtons(Dictionary<string, SimulationInfo> simulations)
     {
         if (buttonPrefab == null || buttonParent == null)
@@ -224,42 +289,47 @@ public class SimulationScanner : MonoBehaviour
             string simName = kvp.Key;
             SimulationInfo simInfo = kvp.Value;
 
-            GameObject buttonObj = Instantiate(buttonPrefab, buttonParent);
-            buttonObj.name = "Button_" + simName;
-
-            RectTransform rectTransform = buttonObj.GetComponent<RectTransform>();
-            if (rectTransform != null)
+            for (int i = 0; i < buttonParent.Length; i++)
             {
-                rectTransform.sizeDelta = new Vector2(200, 30);
-                rectTransform.anchoredPosition = new Vector2(currentPos.x, currentPos.y - (buttonIndex * buttonSpacing));
-            }
+                int index = i;  // Capture for closure
 
-            TMP_Text buttonText = buttonObj.GetComponentInChildren<TMP_Text>();
-            if (buttonText != null)
-            {
-                buttonText.text = simName;
-                buttonText.color = Color.white;
-            }
+                GameObject buttonObj = Instantiate(buttonPrefab, buttonParent[i]);
+                buttonObj.name = "Button_" + simName;
 
-            Image buttonImage = buttonObj.GetComponent<Image>();
-            if (buttonImage != null)
-            {
-                buttonImage.color = new Color(0f, 0f, 0f, 0.7f);
-            }
+                RectTransform rectTransform = buttonObj.GetComponent<RectTransform>();
+                if (rectTransform != null)
+                {
+                    rectTransform.sizeDelta = new Vector2(200, 30);
+                    rectTransform.anchoredPosition = new Vector2(currentPos.x, currentPos.y - (buttonIndex * buttonSpacing));
+                }
 
-            Button button = buttonObj.GetComponent<Button>();
-            if (button != null)
-            {
-                button.onClick.AddListener(() => OnSimulationButtonClicked(simName, simInfo));
-            }
+                TMP_Text buttonText = buttonObj.GetComponentInChildren<TMP_Text>();
+                if (buttonText != null)
+                {
+                    buttonText.text = simName;
+                    buttonText.color = Color.white;
+                }
 
-            buttonIndex++;
+                Button button = buttonObj.GetComponent<Button>();
+                if (button != null)
+                {
+                    button.onClick.AddListener(() => OnSimulationButtonClicked(simName, simInfo, selectedSims[index], dropdowns[index], reloadButtons[index]));
+                }
+
+                buttonIndex++;
+            }
         }
     }
 
-    void OnSimulationButtonClicked(string simName, SimulationInfo simInfo)
+    void OnSimulationButtonClicked(string simName, SimulationInfo simInfo, GameObject selectedSim, GameObject dropdown, GameObject reloadButton)
     {
-        interfaceManager.selectSim(simName, simInfo);
+        selectedSim.SetActive(true);
+        dropdown.SetActive(true);
+        reloadButton.SetActive(true);
+
+        selectedSim.GetComponentInChildren<TMP_Text>().text = simName;
+
+        dropdown.GetComponent<IdStandsDropdown>().initDropdown(simInfo.plotDataByIdPar.Keys.ToList());
         parser.ShowMessage("Simulation '" + simName + "' selected.\n");
     }
 
@@ -300,7 +370,7 @@ public class SimulationScanner : MonoBehaviour
                     length2 = int.Parse(values[length2Index].Trim())
                 };
             }
-            else if(plotShape == 4)
+            else if (plotShape == 4)
             {
                 int xcoord1Index = System.Array.IndexOf(headers, "CoordX1");
                 int ycoord1Index = System.Array.IndexOf(headers, "CoordY1");
@@ -336,7 +406,6 @@ public class SimulationScanner : MonoBehaviour
                     maxY = coordY.Max()
                 };
             }
-
         }
     }
 
@@ -345,6 +414,24 @@ public class SimulationScanner : MonoBehaviour
         simMetadata.simulations.Clear();
         simMetadata.Save();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void resetSelectedSims()
+    {
+        foreach (var selectedSim in selectedSims)
+        {
+            selectedSim.GetComponentInChildren<TMP_Text>().text = "";
+            selectedSim.SetActive(false);
+        }
+        foreach (var dropdown in dropdowns)
+        {
+            dropdown.GetComponent<TMP_Dropdown>().ClearOptions();
+            dropdown.SetActive(false);
+        }
+        foreach(var reloadButton in reloadButtons)
+        {
+            reloadButton.SetActive(false);
+        }
     }
 }
 
