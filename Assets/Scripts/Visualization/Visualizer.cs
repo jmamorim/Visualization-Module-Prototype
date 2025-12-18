@@ -258,7 +258,6 @@ public class Visualizer : MonoBehaviour
             terrain.transform.position = new Vector3(minX, terrain.transform.position.y, minY);
         }
 
-        manager.setPlotRefPos(plotReference.transform.position);
         PositionCamera(cam, plotReference.transform, newSize);
         terrain.terrainData.size = newSize;
     }

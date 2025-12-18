@@ -9,6 +9,7 @@ using System;
 
 public class Initializer : MonoBehaviour
 {
+    public FeedbackController FeedbackController;
     public SimMetadata simMetadata;
     public GameObject buttonPrefab;
     public Transform[] buttonParent;
@@ -16,7 +17,7 @@ public class Initializer : MonoBehaviour
     public GameObject[] selectedSims;
     public GameObject[] dropdowns;
     public GameObject[] reloadButtons;
-    public Parser parser;
+    public Parser[] parser;
 
     readonly List<string> species = new List<string> { "Pb", "Pm", "Ec", "Ct" };
 
@@ -79,7 +80,7 @@ public class Initializer : MonoBehaviour
             if (simulations.ContainsKey(folderName))
             {
                 Debug.Log("Simulation already registered: " + folderName);
-                parser.ShowMessage("Simulation already saved: " + folderName + "\n");
+                FeedbackController.ShowMessage("Simulation already saved: " + folderName + "\n");
                 continue;
             }
 
@@ -88,7 +89,7 @@ public class Initializer : MonoBehaviour
             {
                 simulations.Add(folderName, simInfo);
                 Debug.Log("Registered new simulation: " + folderName);
-                parser.ShowMessage("New simulation saved: " + folderName + "\n");
+                FeedbackController.ShowMessage("New simulation saved: " + folderName + "\n");
             }
         }
 
@@ -104,7 +105,7 @@ public class Initializer : MonoBehaviour
 
         if (!Directory.Exists(folderPath))
         {
-            parser.ShowMessage("Error: Simulation folder not found: " + simName + "\n");
+            FeedbackController.ShowMessage("Error: Simulation folder not found: " + simName + "\n");
             Debug.LogError("Simulation folder not found: " + folderPath);
             return;
         }
@@ -112,7 +113,7 @@ public class Initializer : MonoBehaviour
         if (simMetadata.simulations.ContainsKey(simName))
         {
             simMetadata.simulations.Remove(simName);
-            parser.ShowMessage("Removed old data for: " + simName + "\n");
+            FeedbackController.ShowMessage("Removed old data for: " + simName + "\n");
         }
 
         var simInfo = ProcessSimulationFolder(folderPath, simName);
@@ -126,13 +127,13 @@ public class Initializer : MonoBehaviour
             DestroyAllButtons();
             CreateSimulationButtons(simMetadata.simulations);
 
-            parser.ShowMessage("Successfully reloaded simulation: " + simName + "\n");
+            FeedbackController.ShowMessage("Successfully reloaded simulation: " + simName + "\n");
             Debug.Log("Reloaded simulation: " + simName);
             resetSelectedSims();
         }
         else
         {
-            parser.ShowMessage("Failed to reload simulation and removed: " + simName + "\n");
+            FeedbackController.ShowMessage("Failed to reload simulation and removed: " + simName + "\n");
             Debug.LogError("Failed to reload simulation: " + simName);
         }
     }
@@ -153,7 +154,7 @@ public class Initializer : MonoBehaviour
         string[] csvs = Directory.GetFiles(folder, "*.csv");
         if (csvs.Length == 0)
         {
-            parser.ShowMessage("No CSV files found in: " + folderName + "\n");
+            FeedbackController.ShowMessage("No CSV files found in: " + folderName + "\n");
             return null;
         }
 
@@ -169,64 +170,64 @@ public class Initializer : MonoBehaviour
             {
                 if (!String.IsNullOrEmpty(currentInputPath))
                 {
-                    parser.ShowMessage("Warning: Multiple input files found in " + folderName + ". Changing to: " + file + "\n");
+                    FeedbackController.ShowMessage("Warning: Multiple input files found in " + folderName + ". Changing to: " + file + "\n");
                 }
                 currentInputPath = file;
-                parser.ShowMessage("Input file found for simulation: " + folderName + "\n");
+                FeedbackController.ShowMessage("Input file found for simulation: " + folderName + "\n");
             }
             else if (headers.SequenceEqual(soloTreesHeaders))
             {
                 if (!String.IsNullOrEmpty(currentSoloTreesPath))
                 {
-                    parser.ShowMessage("Warning: Multiple solo trees files found in " + folderName + ". Changing to: " + file + "\n");
+                    FeedbackController.ShowMessage("Warning: Multiple solo trees files found in " + folderName + ". Changing to: " + file + "\n");
                 }
                 currentSoloTreesPath = file;
-                parser.ShowMessage("Solo trees file found for simulation: " + folderName + "\n");
+                FeedbackController.ShowMessage("Solo trees file found for simulation: " + folderName + "\n");
             }
             else if (headers.SequenceEqual(yieldTableHeaders))
             {
                 if (!String.IsNullOrEmpty(currentYieldTablePath))
                 {
-                    parser.ShowMessage("Warning: Multiple yield table files found in " + folderName + ". Changing to: " + file + "\n");
+                    FeedbackController.ShowMessage("Warning: Multiple yield table files found in " + folderName + ". Changing to: " + file + "\n");
                 }
                 currentYieldTablePath = file;
-                parser.ShowMessage("Yield table file found for simulation: " + folderName + "\n");
+                FeedbackController.ShowMessage("Yield table file found for simulation: " + folderName + "\n");
             }
             else if (headers.SequenceEqual(ddTableHeaders))
             {
                 if (!String.IsNullOrEmpty(currentDDPath))
                 {
-                    parser.ShowMessage("Warning: Multiple diameter distribution files found in " + folderName + ". Changing to: " + file + "\n");
+                    FeedbackController.ShowMessage("Warning: Multiple diameter distribution files found in " + folderName + ". Changing to: " + file + "\n");
                 }
                 currentDDPath = file;
-                parser.ShowMessage("Diameter distribution file found for simulation: " + folderName + "\n");
+                FeedbackController.ShowMessage("Diameter distribution file found for simulation: " + folderName + "\n");
             }
         }
 
         if (String.IsNullOrEmpty(currentInputPath))
         {
-            parser.ShowMessage("Simulation ignored due to missing input file: " + folderName + "\n");
+            FeedbackController.ShowMessage("Simulation ignored due to missing input file: " + folderName + "\n");
             return null;
         }
         else if (String.IsNullOrEmpty(currentSoloTreesPath))
         {
-            parser.ShowMessage("Simulation ignored due to missing solo trees file: " + folderName + "\n");
+            FeedbackController.ShowMessage("Simulation ignored due to missing solo trees file: " + folderName + "\n");
             return null;
         }
         else if (String.IsNullOrEmpty(currentYieldTablePath))
         {
-            parser.ShowMessage("Simulation ignored due to missing yield table file: " + folderName + "\n");
+            FeedbackController.ShowMessage("Simulation ignored due to missing yield table file: " + folderName + "\n");
             return null;
         }
         else if (String.IsNullOrEmpty(currentDDPath))
         {
-            parser.ShowMessage("Simulation ignored due to missing diameter distribution file: " + folderName + "\n");
+            FeedbackController.ShowMessage("Simulation ignored due to missing diameter distribution file: " + folderName + "\n");
             return null;
         }
 
         if (!SimulationContainsOnlySupportedSpecies(currentInputPath))
         {
-            parser.ShowMessage("Simulation ignored due to unsupported species: " + folderName + "\n");
+            FeedbackController.ShowMessage("Simulation ignored due to unsupported species: " + folderName + "\n");
             return null;
         }
  
@@ -313,7 +314,7 @@ public class Initializer : MonoBehaviour
                 Button button = buttonObj.GetComponent<Button>();
                 if (button != null)
                 {
-                    button.onClick.AddListener(() => OnSimulationButtonClicked(simName, simInfo, selectedSims[index], dropdowns[index], reloadButtons[index]));
+                    button.onClick.AddListener(() => OnSimulationButtonClicked(simName, simInfo, selectedSims[index], dropdowns[index], reloadButtons[index], parser[index > 0 ? 1 : 0]));
                 }
 
                 buttonIndex++;
@@ -321,7 +322,7 @@ public class Initializer : MonoBehaviour
         }
     }
 
-    void OnSimulationButtonClicked(string simName, SimulationInfo simInfo, GameObject selectedSim, GameObject dropdown, GameObject reloadButton)
+    void OnSimulationButtonClicked(string simName, SimulationInfo simInfo, GameObject selectedSim, GameObject dropdown, GameObject reloadButton, Parser parser)
     {
         selectedSim.SetActive(true);
         dropdown.SetActive(true);
@@ -330,7 +331,24 @@ public class Initializer : MonoBehaviour
         selectedSim.GetComponentInChildren<TMP_Text>().text = simName;
 
         dropdown.GetComponent<IdStandsDropdown>().initDropdown(simInfo.plotDataByIdPar.Keys.ToList());
-        parser.ShowMessage("Simulation '" + simName + "' selected.\n");
+
+        if(parser.dpsolo != null)
+        {
+            if (!string.IsNullOrEmpty(parser.selectedSim1.text))
+            {
+                parser.gameObject.SetActive(true);
+                parser.intervalInputField.gameObject.SetActive(true);
+            }
+        }
+        else
+        {
+            if (!string.IsNullOrEmpty(parser.selectedSim1.text) && !string.IsNullOrEmpty(parser.selectedSim2.text))
+            {
+                parser.gameObject.SetActive(true);
+                parser.intervalInputField.gameObject.SetActive(true);
+            }
+        }
+            FeedbackController.ShowMessage("Simulation '" + simName + "' selected.\n");
     }
 
     void ParseInputFile(string filePath, SimulationInfo simInfo)
@@ -431,6 +449,11 @@ public class Initializer : MonoBehaviour
         foreach(var reloadButton in reloadButtons)
         {
             reloadButton.SetActive(false);
+        }
+        foreach (var p in parser)
+        {
+            p.gameObject.SetActive(false);
+            p.intervalInputField.gameObject.SetActive(false);
         }
     }
 }

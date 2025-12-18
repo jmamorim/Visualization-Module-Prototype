@@ -26,7 +26,6 @@ public class Manager : MonoBehaviour
     int current_year1, current_year2;
     string selectedId_stand1, selectedId_stand2, selectedId_presc1, selectedId_presc2, selectedId_presc1YT, selectedId_presc2YT;
     GameObject lastSelectedTree;
-    Vector3 initialPlotRefPosition;
 
     private void Start()
     {
@@ -432,22 +431,11 @@ public class Manager : MonoBehaviour
         }
     }
 
-    public void setPlotRefPos(Vector3 pos)
-    {
-        initialPlotRefPosition = pos;
-    }
-
     public void DeselectTree()
     {
         ResetSelected();
         HideTreeInfo();
 
-    }
-
-
-    public Vector3 getPlotRef()
-    {
-        return initialPlotRefPosition;
     }
 
     public void ShowTreeInfo(Tree t)
@@ -461,7 +449,7 @@ public class Manager : MonoBehaviour
                                 $"Heigth: {t.h} m\n" +
                                 $"Diameter: {t.d} cm\n" +
                                 $"Heigth of crown base: {t.hbc} m\n" +
-                                $"Crown Width: {t.cw} cm";
+                                $"Crown width: {t.cw} cm";
         }
     }
 

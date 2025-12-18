@@ -6,15 +6,23 @@ public class EmptyClickHandler : MonoBehaviour
     private Vector3 mouseDownPosition;
     private float dragThreshold = 5f;
     private bool isMouseDown = false;
+    private int mouseButton = -1;
 
     void Update()
     {
         if (!manager.canInteract) return;
 
-        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(0))
         {
             mouseDownPosition = Input.mousePosition;
             isMouseDown = true;
+            mouseButton = 0;
+        }
+        else if (Input.GetMouseButtonDown(1))
+        {
+            mouseDownPosition = Input.mousePosition;
+            isMouseDown = true;
+            mouseButton = 1;
         }
 
         if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
@@ -24,23 +32,23 @@ public class EmptyClickHandler : MonoBehaviour
                 float dragDistance = Vector3.Distance(mouseDownPosition, Input.mousePosition);
                 if (dragDistance < dragThreshold)
                 {
-                    CheckForEmptyClick();
+                    CheckForEmptyClick(mouseButton);
                 }
                 isMouseDown = false;
+                mouseButton = -1;
             }
         }
     }
 
-    void CheckForEmptyClick()
+    void CheckForEmptyClick(int button)
     {
         Camera clickedCamera = GetCameraUnderMouse();
         if (clickedCamera == null) return;
 
         Ray ray = clickedCamera.ScreenPointToRay(Input.mousePosition);
-
         if (!Physics.Raycast(ray, out RaycastHit hit) || hit.collider.GetComponent<Tree>() == null)
         {
-            HandleEmptyClick();
+            HandleEmptyClick(button);
         }
     }
 
@@ -59,17 +67,22 @@ public class EmptyClickHandler : MonoBehaviour
         return null;
     }
 
-    void HandleEmptyClick()
+    void HandleEmptyClick(int button)
     {
-        manager.DeselectTree();
-
-        foreach (var cam in Camera.allCameras)
+        if (button == 0) 
         {
-            var behaviour = cam.GetComponent<CameraBehaviour>();
-            if (behaviour != null && behaviour.IsMouseOverViewport() && behaviour.CanMoveCamera())
+            manager.DeselectTree();
+        }
+        else if (button == 1) 
+        {
+            foreach (var cam in Camera.allCameras)
             {
-                behaviour.ResetLookAt();
-                break;
+                var behaviour = cam.GetComponent<CameraBehaviour>();
+                if (behaviour != null && behaviour.IsMouseOverViewport() && behaviour.CanMoveCamera())
+                {
+                    behaviour.ResetLookAt();
+                    break;
+                }
             }
         }
     }

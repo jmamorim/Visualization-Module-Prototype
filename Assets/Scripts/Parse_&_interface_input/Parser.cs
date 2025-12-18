@@ -10,11 +10,12 @@ using UnityEngine.UI;
 
 public class Parser : MonoBehaviour
 {
-    public TMP_Text feedbackText;
+    public FeedbackController FeedbackController;
     public TMP_Text selectedSim1, selectedSim2;
     public TMP_InputField intervalInputField;
     public SimMetadata simMetadata;
     public InputAndParsedData so;
+    //dropdowns
     public GameObject dpsolo, dp1, dp2;
 
     IdStandsDropdown idStandsDropdownSolo, idStandsDropdown1, idStandsDropdown2;
@@ -51,12 +52,11 @@ public class Parser : MonoBehaviour
 
     public void parse()
     {
-
         if (!string.IsNullOrEmpty(intervalInputField.text))
         {
             if (!int.TryParse(intervalInputField.text, out interval) || interval < 0)
             {
-                ShowMessage("Interval is not valid\n");
+                FeedbackController.ShowMessage("Interval is not valid\n", dpsolo != null);
                 return;
             }
         }
@@ -69,9 +69,9 @@ public class Parser : MonoBehaviour
         if (dpsolo != null)
         {
             var dropdownSolo = idStandsDropdownSolo.GetComponent<TMP_Dropdown>();
-            if(dropdownSolo.options.Count() == 0)
+            if (dropdownSolo.options.Count() == 0)
             {
-                ShowMessage("Please pick a simulation for Solo Trees Plot\n");
+                FeedbackController.ShowMessage("Please pick a simulation for Solo Trees Plot\n", dpsolo != null);
                 return;
             }
             string selectedIdStandSolo = dropdownSolo.options[dropdownSolo.value].text;
@@ -113,12 +113,12 @@ public class Parser : MonoBehaviour
             var dropdown2 = idStandsDropdown2.GetComponent<TMP_Dropdown>();
             if (dropdown1.options.Count() == 0)
             {
-                ShowMessage("Please pick a simulation for Plot 1\n");
+                FeedbackController.ShowMessage("Please pick a simulation for Plot 1\n", dpsolo != null);
                 return;
             }
-            if(dropdown1.options.Count() == 0)
+            if (dropdown2.options.Count() == 0)
             {
-                ShowMessage("Please pick a simulation for Plot 2\n");
+                FeedbackController.ShowMessage("Please pick a simulation for Plot 2\n", dpsolo != null);
                 return;
             }
 
@@ -209,7 +209,7 @@ public class Parser : MonoBehaviour
     {
         if (string.IsNullOrEmpty(soloTreePath))
         {
-            ShowMessage("No solo trees file selected\n");
+            FeedbackController.ShowMessage("No solo trees file selected\n", dpsolo != null);
             throw new ArgumentException("No solo trees file selected");
         }
 
@@ -217,7 +217,7 @@ public class Parser : MonoBehaviour
 
         if (lines.Length == 0)
         {
-            ShowMessage($"File is empty on {soloTreePath}\n");
+            FeedbackController.ShowMessage($"File is empty on {soloTreePath}\n", dpsolo != null);
             throw new ArgumentException("File is empty");
         }
 
@@ -225,7 +225,7 @@ public class Parser : MonoBehaviour
 
         if (!VerifyHeaders(headers, expectedSoloTreesHeaders))
         {
-            ShowMessage($"Incorect headers on {soloTreePath}\n");
+            FeedbackController.ShowMessage($"Incorect headers on {soloTreePath}\n", dpsolo != null);
             throw new ArgumentException("Incorrect headers");
         }
 
@@ -234,7 +234,7 @@ public class Parser : MonoBehaviour
 
         if (interval > (ending_year - starting_year))
         {
-            ShowMessage("Interval is greater than the planing horizon\n");
+            FeedbackController.ShowMessage("Interval is greater than the planing horizon\n", dpsolo != null);
             throw new ArgumentException("Interval is greater than the planing horizon");
         }
 
@@ -372,11 +372,15 @@ public class Parser : MonoBehaviour
                 int treeYear = int.Parse(treeInfo[yearIndex].Trim());
 
                 int targetYear = starting_year;
+
                 foreach (int y in yearGroups.Keys)
                 {
-                    if (treeYear == y)
+                    if (y <= treeYear)
                     {
                         targetYear = y;
+                    }
+                    else
+                    {
                         break;
                     }
                 }
@@ -432,7 +436,7 @@ public class Parser : MonoBehaviour
     {
         if (string.IsNullOrEmpty(yieldTablePath))
         {
-            ShowMessage($"No yield table file selected\n");
+            FeedbackController.ShowMessage($"No yield table file selected\n", dpsolo != null);
             throw new ArgumentException("No yield table file selected");
         }
 
@@ -440,7 +444,7 @@ public class Parser : MonoBehaviour
 
         if (lines.Length == 0)
         {
-            ShowMessage($"File is empty on {yieldTablePath}\n");
+            FeedbackController.ShowMessage($"File is empty on {yieldTablePath}\n", dpsolo != null);
             throw new ArgumentException("File is empty");
         }
 
@@ -448,11 +452,42 @@ public class Parser : MonoBehaviour
 
         if (!VerifyHeaders(headers, expectedYieldTableHeaders))
         {
-            ShowMessage($"Incorrect headers on {yieldTablePath}\n");
+            FeedbackController.ShowMessage($"Incorrect headers on {yieldTablePath}\n", dpsolo != null);
             throw new ArgumentException("Incorrect headers");
         }
 
+        int starting_year = int.MaxValue;
+        int ending_year = int.MinValue;
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
+            string id_stand = entryInfo[tableId_stand].Trim();
+
+            if (id_stand == selectedIdStand)
+            {
+                int year = int.Parse(entryInfo[tableYearIndex].Trim());
+                if (year < starting_year) starting_year = year;
+                if (year > ending_year) ending_year = year;
+            }
+        }
+
         var standPrescGroups = new Dictionary<string, Dictionary<string, List<YieldTableEntry>>>();
+
+        SortedSet<int> targetYears = new SortedSet<int>();
+        if (interval > 0)
+        {
+            int year = starting_year;
+            while (year <= ending_year)
+            {
+                targetYears.Add(year);
+                year += interval;
+            }
+            if (!targetYears.Contains(ending_year))
+            {
+                targetYears.Add(ending_year);
+            }
+        }
 
         for (int i = 1; i < lines.Length; i++)
         {
@@ -476,37 +511,54 @@ public class Parser : MonoBehaviour
             {
                 string id_stand = entryInfo[tableId_stand].Trim();
                 string id_presc = entryInfo[tableId_presc].Trim();
+
                 if (id_stand == selectedIdStand)
                 {
+                    int entryYear = int.Parse(entryInfo[tableYearIndex].Trim());
+
+                    int targetYear = starting_year;
+                    foreach (int y in targetYears)
+                    {
+                        if (y <= entryYear)
+                        {
+                            targetYear = y;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+
                     YieldTableEntry entry = new YieldTableEntry(
-                                id_stand, // id_stand
-                                id_presc, // id_presc
-                                int.Parse(entryInfo[tableYearIndex].Trim()), // year
-                                Mathf.RoundToInt(float.Parse(entryInfo[tablenstIndex].Trim(), CultureInfo.InvariantCulture)), // Nst
-                                Mathf.RoundToInt(float.Parse(entryInfo[tablenIndex].Trim(), CultureInfo.InvariantCulture)), // N
-                                Mathf.RoundToInt(float.Parse(entryInfo[tablendeadIndex].Trim(), CultureInfo.InvariantCulture)), // Ndead
-                                Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)), // S
-                                float.Parse(entryInfo[tablehdomIndex].Trim(), CultureInfo.InvariantCulture), // hdom
-                                float.Parse(entryInfo[tablegIndex].Trim(), CultureInfo.InvariantCulture), // G
-                                float.Parse(entryInfo[tabledgIndex].Trim(), CultureInfo.InvariantCulture), // dg 
-                                float.Parse(entryInfo[tablevu_stIndex].Trim(), CultureInfo.InvariantCulture), // Vu_st
-                                float.Parse(entryInfo[tablevIndex].Trim(), CultureInfo.InvariantCulture), // Vst 
-                                float.Parse(entryInfo[tablevu_as1Index].Trim(), CultureInfo.InvariantCulture), // Vu_as1 
-                                float.Parse(entryInfo[tablevu_as2Index].Trim(), CultureInfo.InvariantCulture), // Vu_as2 
-                                float.Parse(entryInfo[tablevu_as3Index].Trim(), CultureInfo.InvariantCulture), // Vu_as3 
-                                float.Parse(entryInfo[tablevu_as4Index].Trim(), CultureInfo.InvariantCulture), // Vu_as4 
-                                float.Parse(entryInfo[tablevu_as5Index].Trim(), CultureInfo.InvariantCulture), // Vu_as5 
-                                float.Parse(entryInfo[tablemaiVIndex].Trim(), CultureInfo.InvariantCulture), // maiV 
-                                float.Parse(entryInfo[tableiVIndex].Trim(), CultureInfo.InvariantCulture), // iV 
-                                float.Parse(entryInfo[tablewwIndex].Trim(), CultureInfo.InvariantCulture), // Ww 
-                                float.Parse(entryInfo[tablewbIndex].Trim(), CultureInfo.InvariantCulture), // Wb 
-                                float.Parse(entryInfo[tablewbrIndex].Trim(), CultureInfo.InvariantCulture), // Wbr 
-                                float.Parse(entryInfo[tablewlIndex].Trim(), CultureInfo.InvariantCulture), // Wl 
-                                float.Parse(entryInfo[tablewaIndex].Trim(), CultureInfo.InvariantCulture), // Wa 
-                                float.Parse(entryInfo[tablewrIndex].Trim(), CultureInfo.InvariantCulture), // Wr 
-                                float.Parse(entryInfo[tablenpvsumIndex].Trim(), CultureInfo.InvariantCulture), // NPVsum 
-                                float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)  // EEA 
-                            );
+                        id_stand,
+                        id_presc,
+                        entryYear,
+                        Mathf.RoundToInt(float.Parse(entryInfo[tablenstIndex].Trim(), CultureInfo.InvariantCulture)),
+                        Mathf.RoundToInt(float.Parse(entryInfo[tablenIndex].Trim(), CultureInfo.InvariantCulture)),
+                        Mathf.RoundToInt(float.Parse(entryInfo[tablendeadIndex].Trim(), CultureInfo.InvariantCulture)),
+                        Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)),
+                        float.Parse(entryInfo[tablehdomIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablegIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tabledgIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablevu_stIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablevIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablevu_as1Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablevu_as2Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablevu_as3Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablevu_as4Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablevu_as5Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablemaiVIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tableiVIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablewwIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablewbIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablewbrIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablewlIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablewaIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablewrIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tablenpvsumIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)
+                    );
 
                     if (!standPrescGroups.ContainsKey(id_stand))
                     {
@@ -555,7 +607,7 @@ public class Parser : MonoBehaviour
     {
         if (string.IsNullOrEmpty(DDTablePath))
         {
-            ShowMessage($"No diamater distribution table file selected\n");
+            FeedbackController.ShowMessage($"No diamater distribution table file selected\n", dpsolo != null);
             throw new ArgumentException("No DD table file selected");
         }
 
@@ -563,7 +615,7 @@ public class Parser : MonoBehaviour
 
         if (lines.Length == 0)
         {
-            ShowMessage($"File is empty on {DDTablePath}\n");
+            FeedbackController.ShowMessage($"File is empty on {DDTablePath}\n", dpsolo != null);
             throw new ArgumentException("File is empty");
         }
 
@@ -573,11 +625,42 @@ public class Parser : MonoBehaviour
 
         if (!VerifyHeaders(headers, expectedDDTableHeaders))
         {
-            ShowMessage($"Incorrect headers on {DDTablePath}\n");
+            FeedbackController.ShowMessage($"Incorrect headers on {DDTablePath}\n", dpsolo != null);
             throw new ArgumentException("Incorrect headers");
         }
 
+        int starting_year = int.MaxValue;
+        int ending_year = int.MinValue;
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
+            string id_stand = entryInfo[ddId_standIndex].Trim();
+
+            if (id_stand == selectedIdStand)
+            {
+                int year = int.Parse(entryInfo[ddYearIndex].Trim());
+                if (year < starting_year) starting_year = year;
+                if (year > ending_year) ending_year = year;
+            }
+        }
+
         var standPrescGroups = new Dictionary<string, Dictionary<string, List<DDEntry>>>();
+
+        SortedSet<int> targetYears = new SortedSet<int>();
+        if (interval > 0)
+        {
+            int year = starting_year;
+            while (year <= ending_year)
+            {
+                targetYears.Add(year);
+                year += interval;
+            }
+            if (!targetYears.Contains(ending_year))
+            {
+                targetYears.Add(ending_year);
+            }
+        }
 
         for (int i = 1; i < lines.Length; i++)
         {
@@ -601,34 +684,51 @@ public class Parser : MonoBehaviour
             {
                 string id_stand = entryInfo[ddId_standIndex].Trim();
                 string id_presc = entryInfo[ddId_prescIndex].Trim();
+
                 if (id_stand == selectedIdStand)
                 {
+                    int entryYear = int.Parse(entryInfo[ddYearIndex].Trim());
+
+                    int targetYear = starting_year;
+                    foreach (int y in targetYears)
+                    {
+                        if (y <= entryYear)
+                        {
+                            targetYear = y;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+
                     DDEntry entry = new DDEntry(
-                        id_stand, // id_stand
-                        id_presc, // id_presc
-                        float.Parse(entryInfo[dd0Index].Trim(), CultureInfo.InvariantCulture), // dd0
-                        float.Parse(entryInfo[dd5Index].Trim(), CultureInfo.InvariantCulture), // dd5
-                        float.Parse(entryInfo[dd10Index].Trim(), CultureInfo.InvariantCulture), // dd10
-                        float.Parse(entryInfo[dd15index].Trim(), CultureInfo.InvariantCulture), // dd15
-                        float.Parse(entryInfo[dd20Index].Trim(), CultureInfo.InvariantCulture), // dd20
-                        float.Parse(entryInfo[dd25Index].Trim(), CultureInfo.InvariantCulture), // dd25
-                        float.Parse(entryInfo[dd30Index].Trim(), CultureInfo.InvariantCulture), // dd30
-                        float.Parse(entryInfo[dd35Index].Trim(), CultureInfo.InvariantCulture), // dd35
-                        float.Parse(entryInfo[dd40Index].Trim(), CultureInfo.InvariantCulture), // dd40
-                        float.Parse(entryInfo[dd45Index].Trim(), CultureInfo.InvariantCulture), // dd45
-                        float.Parse(entryInfo[dd50Index].Trim(), CultureInfo.InvariantCulture), // dd50
-                        float.Parse(entryInfo[dd55Index].Trim(), CultureInfo.InvariantCulture), // dd55
-                        float.Parse(entryInfo[dd60Index].Trim(), CultureInfo.InvariantCulture), // dd60
-                        float.Parse(entryInfo[dd65Index].Trim(), CultureInfo.InvariantCulture), // dd65
-                        float.Parse(entryInfo[dd70Index].Trim(), CultureInfo.InvariantCulture), // dd70
-                        float.Parse(entryInfo[dd75Index].Trim(), CultureInfo.InvariantCulture), // dd75
-                        float.Parse(entryInfo[dd80Index].Trim(), CultureInfo.InvariantCulture), // dd80
-                        float.Parse(entryInfo[dd85Index].Trim(), CultureInfo.InvariantCulture), // dd85
-                        float.Parse(entryInfo[dd90Index].Trim(), CultureInfo.InvariantCulture), // dd90
-                        float.Parse(entryInfo[dd95Index].Trim(), CultureInfo.InvariantCulture), // dd95
-                        float.Parse(entryInfo[dd100Index].Trim(), CultureInfo.InvariantCulture), // dd100
-                        float.Parse(entryInfo[dd102Index].Trim(), CultureInfo.InvariantCulture)  // dd102
-                        );
+                        id_stand,
+                        id_presc,
+                        float.Parse(entryInfo[dd0Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd5Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd10Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd15index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd20Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd25Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd30Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd35Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd40Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd45Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd50Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd55Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd60Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd65Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd70Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd75Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd80Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd85Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd90Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd95Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd100Index].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(entryInfo[dd102Index].Trim(), CultureInfo.InvariantCulture)
+                    );
 
                     if (!standPrescGroups.ContainsKey(id_stand))
                     {
@@ -686,15 +786,6 @@ public class Parser : MonoBehaviour
         return true;
     }
 
-    public void ShowMessage(string msg)
-    {
-        if (feedbackText != null)
-        {
-            feedbackText.text += msg;
-            feedbackText.GetComponentInParent<ScrollControler>().ScrollDown();
-        }
-    }
-
     public void receiveSoloTreePath(int index, string path)
     {
         insertPath(soloTreePaths, path, index, false);
@@ -745,8 +836,6 @@ public class Parser : MonoBehaviour
     {
         list[index] = path;
         string text = isYieldTable ? "Yield table" : "Solo trees";
-        if (feedbackText != null)
-            feedbackText.text += $"{text} selected for plot {index + 1}: {Path.GetFileName(path)}\n";
+        FeedbackController.ShowMessage($"{text} file selected: {Path.GetFileName(path)}\n", dpsolo != null);
     }
-
 }
