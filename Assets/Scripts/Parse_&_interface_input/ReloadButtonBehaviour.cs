@@ -4,10 +4,10 @@ using UnityEngine;
 public class ReloadButtonBehaviour : MonoBehaviour
 {
     public Initializer initializer;
-    public TMP_Text selectedSim;
+    public TMP_Dropdown selectedSim;
 
     public void reloadSim()
     {
-        initializer.ReloadSimulation(selectedSim.text);
+        initializer.ReloadSimulation(selectedSim.options[selectedSim.value].text);
     }
 }

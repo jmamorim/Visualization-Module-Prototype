@@ -9,13 +9,13 @@ using System;
 
 public class Initializer : MonoBehaviour
 {
-    public FeedbackController FeedbackController;
     public SimMetadata simMetadata;
-    public GameObject buttonPrefab;
-    public Transform[] buttonParent;
-    public float buttonSpacing = 60f;
-    public GameObject[] selectedSims;
-    public GameObject[] dropdowns;
+    public TMP_Dropdown[] simulationDropdowns;
+    public GameObject[] standsText;
+    public TMP_Dropdown[] idstandDropdown;
+    public GameObject[] simReadme;
+    public GameObject[] simPrescs;
+    public GameObject[] simInfoBox;
     public GameObject[] reloadButtons;
     public Parser[] parser;
 
@@ -80,7 +80,6 @@ public class Initializer : MonoBehaviour
             if (simulations.ContainsKey(folderName))
             {
                 Debug.Log("Simulation already registered: " + folderName);
-                FeedbackController.ShowMessage("Simulation already saved: " + folderName + "\n");
                 continue;
             }
 
@@ -89,12 +88,11 @@ public class Initializer : MonoBehaviour
             {
                 simulations.Add(folderName, simInfo);
                 Debug.Log("Registered new simulation: " + folderName);
-                FeedbackController.ShowMessage("New simulation saved: " + folderName + "\n");
             }
         }
 
         simMetadata.simulations = simulations;
-        CreateSimulationButtons(simulations);
+        PopulateSimulationDropdowns(simulations);
         simMetadata.Save();
     }
 
@@ -105,7 +103,6 @@ public class Initializer : MonoBehaviour
 
         if (!Directory.Exists(folderPath))
         {
-            FeedbackController.ShowMessage("Error: Simulation folder not found: " + simName + "\n");
             Debug.LogError("Simulation folder not found: " + folderPath);
             return;
         }
@@ -113,7 +110,6 @@ public class Initializer : MonoBehaviour
         if (simMetadata.simulations.ContainsKey(simName))
         {
             simMetadata.simulations.Remove(simName);
-            FeedbackController.ShowMessage("Removed old data for: " + simName + "\n");
         }
 
         var simInfo = ProcessSimulationFolder(folderPath, simName);
@@ -123,29 +119,15 @@ public class Initializer : MonoBehaviour
             simMetadata.simulations.Add(simName, simInfo);
             simMetadata.Save();
 
-            // Destroy all buttons and recreate them to maintain proper positioning
-            DestroyAllButtons();
-            CreateSimulationButtons(simMetadata.simulations);
+            // Repopulate dropdowns
+            PopulateSimulationDropdowns(simMetadata.simulations);
 
-            FeedbackController.ShowMessage("Successfully reloaded simulation: " + simName + "\n");
             Debug.Log("Reloaded simulation: " + simName);
             resetSelectedSims();
         }
         else
         {
-            FeedbackController.ShowMessage("Failed to reload simulation and removed: " + simName + "\n");
             Debug.LogError("Failed to reload simulation: " + simName);
-        }
-    }
-
-    void DestroyAllButtons()
-    {
-        foreach (var parent in buttonParent)
-        {
-            foreach (Transform child in parent)
-            {
-                Destroy(child.gameObject);
-            }
         }
     }
 
@@ -154,7 +136,6 @@ public class Initializer : MonoBehaviour
         string[] csvs = Directory.GetFiles(folder, "*.csv");
         if (csvs.Length == 0)
         {
-            FeedbackController.ShowMessage("No CSV files found in: " + folderName + "\n");
             return null;
         }
 
@@ -168,69 +149,44 @@ public class Initializer : MonoBehaviour
 
             if (headers.SequenceEqual(inputHeaders))
             {
-                if (!String.IsNullOrEmpty(currentInputPath))
-                {
-                    FeedbackController.ShowMessage("Warning: Multiple input files found in " + folderName + ". Changing to: " + file + "\n");
-                }
                 currentInputPath = file;
-                FeedbackController.ShowMessage("Input file found for simulation: " + folderName + "\n");
             }
             else if (headers.SequenceEqual(soloTreesHeaders))
             {
-                if (!String.IsNullOrEmpty(currentSoloTreesPath))
-                {
-                    FeedbackController.ShowMessage("Warning: Multiple solo trees files found in " + folderName + ". Changing to: " + file + "\n");
-                }
                 currentSoloTreesPath = file;
-                FeedbackController.ShowMessage("Solo trees file found for simulation: " + folderName + "\n");
             }
             else if (headers.SequenceEqual(yieldTableHeaders))
             {
-                if (!String.IsNullOrEmpty(currentYieldTablePath))
-                {
-                    FeedbackController.ShowMessage("Warning: Multiple yield table files found in " + folderName + ". Changing to: " + file + "\n");
-                }
                 currentYieldTablePath = file;
-                FeedbackController.ShowMessage("Yield table file found for simulation: " + folderName + "\n");
             }
             else if (headers.SequenceEqual(ddTableHeaders))
             {
-                if (!String.IsNullOrEmpty(currentDDPath))
-                {
-                    FeedbackController.ShowMessage("Warning: Multiple diameter distribution files found in " + folderName + ". Changing to: " + file + "\n");
-                }
                 currentDDPath = file;
-                FeedbackController.ShowMessage("Diameter distribution file found for simulation: " + folderName + "\n");
             }
         }
 
         if (String.IsNullOrEmpty(currentInputPath))
         {
-            FeedbackController.ShowMessage("Simulation ignored due to missing input file: " + folderName + "\n");
             return null;
         }
         else if (String.IsNullOrEmpty(currentSoloTreesPath))
         {
-            FeedbackController.ShowMessage("Simulation ignored due to missing solo trees file: " + folderName + "\n");
             return null;
         }
         else if (String.IsNullOrEmpty(currentYieldTablePath))
         {
-            FeedbackController.ShowMessage("Simulation ignored due to missing yield table file: " + folderName + "\n");
             return null;
         }
         else if (String.IsNullOrEmpty(currentDDPath))
         {
-            FeedbackController.ShowMessage("Simulation ignored due to missing diameter distribution file: " + folderName + "\n");
             return null;
         }
 
         if (!SimulationContainsOnlySupportedSpecies(currentInputPath))
         {
-            FeedbackController.ShowMessage("Simulation ignored due to unsupported species: " + folderName + "\n");
             return null;
         }
- 
+
         var simInfo = new SimulationInfo()
         {
             folderPath = folder,
@@ -274,83 +230,63 @@ public class Initializer : MonoBehaviour
         return true;
     }
 
-    void CreateSimulationButtons(Dictionary<string, SimulationInfo> simulations)
+    void PopulateSimulationDropdowns(Dictionary<string, SimulationInfo> simulations)
     {
-        if (buttonPrefab == null || buttonParent == null)
+        if (simulationDropdowns == null || simulationDropdowns.Length == 0)
         {
-            Debug.LogWarning("Button prefab or parent not assigned!");
+            Debug.LogWarning("Simulation dropdowns not assigned!");
             return;
         }
 
-        int buttonIndex = 0;
-        Vector3 currentPos = new Vector3(0, 0, 0);
+        List<string> simNames = new List<string> { "Escolha uma simulação..."};
+        simNames.AddRange(simulations.Keys.OrderBy(k => k));
 
-        foreach (var kvp in simulations)
+        for (int i = 0; i < simulationDropdowns.Length; i++)
         {
-            string simName = kvp.Key;
-            SimulationInfo simInfo = kvp.Value;
+            TMP_Dropdown dropdown = simulationDropdowns[i];
+            int index = i; // Capture for closure
 
-            for (int i = 0; i < buttonParent.Length; i++)
+            dropdown.ClearOptions();
+            dropdown.AddOptions(simNames);
+            dropdown.value = 0;
+
+            dropdown.onValueChanged.RemoveAllListeners();
+
+            dropdown.onValueChanged.AddListener((value) =>
             {
-                int index = i;  // Capture for closure
-
-                GameObject buttonObj = Instantiate(buttonPrefab, buttonParent[i]);
-                buttonObj.name = "Button_" + simName;
-
-                RectTransform rectTransform = buttonObj.GetComponent<RectTransform>();
-                if (rectTransform != null)
+                if (value > 0)
                 {
-                    rectTransform.sizeDelta = new Vector2(200, 30);
-                    rectTransform.anchoredPosition = new Vector2(currentPos.x, currentPos.y - (buttonIndex * buttonSpacing));
+                    string selectedSimName = simNames[value];
+                    SimulationInfo simInfo = simulations[selectedSimName];
+                    standsText[index].SetActive(true);
+                    OnSimulationSelected(selectedSimName, simInfo, idstandDropdown[index], simReadme[index], reloadButtons[index]);
                 }
-
-                TMP_Text buttonText = buttonObj.GetComponentInChildren<TMP_Text>();
-                if (buttonText != null)
+                else
                 {
-                    buttonText.text = simName;
-                    buttonText.color = Color.white;
+                    standsText[index].SetActive(false);
+                    idstandDropdown[index].ClearOptions();
+                    idstandDropdown[index].gameObject.SetActive(false);
+                    simReadme[index].SetActive(false);
+                    simPrescs[index].SetActive(false);
+                    simInfoBox[index].SetActive(false);
+                    reloadButtons[index].SetActive(false);
+                    var curParser = parser[index > 0 ? 1 : 0];
+                    curParser.gameObject.SetActive(false);
+                    curParser.intervalInputField.gameObject.SetActive(false);
                 }
-
-                Button button = buttonObj.GetComponent<Button>();
-                if (button != null)
-                {
-                    button.onClick.AddListener(() => OnSimulationButtonClicked(simName, simInfo, selectedSims[index], dropdowns[index], reloadButtons[index], parser[index > 0 ? 1 : 0]));
-                }
-
-                buttonIndex++;
-            }
+            });
         }
     }
 
-    void OnSimulationButtonClicked(string simName, SimulationInfo simInfo, GameObject selectedSim, GameObject dropdown, GameObject reloadButton, Parser parser)
+    void OnSimulationSelected(string simName, SimulationInfo simInfo, TMP_Dropdown dropdown, GameObject readme, GameObject reloadButton)
     {
-        selectedSim.SetActive(true);
-        dropdown.SetActive(true);
+        dropdown.gameObject.SetActive(true);
         reloadButton.SetActive(true);
-
-        selectedSim.GetComponentInChildren<TMP_Text>().text = simName;
-
+        readme.SetActive(true);
         dropdown.GetComponent<IdStandsDropdown>().initDropdown(simInfo.plotDataByIdPar.Keys.ToList());
-
-        if(parser.dpsolo != null)
-        {
-            if (!string.IsNullOrEmpty(parser.selectedSim1.text))
-            {
-                parser.gameObject.SetActive(true);
-                parser.intervalInputField.gameObject.SetActive(true);
-            }
-        }
-        else
-        {
-            if (!string.IsNullOrEmpty(parser.selectedSim1.text) && !string.IsNullOrEmpty(parser.selectedSim2.text))
-            {
-                parser.gameObject.SetActive(true);
-                parser.intervalInputField.gameObject.SetActive(true);
-            }
-        }
-            FeedbackController.ShowMessage("Simulation '" + simName + "' selected.\n");
     }
 
+    //TODO : parse extra info from input file
     void ParseInputFile(string filePath, SimulationInfo simInfo)
     {
         string[] lines = File.ReadAllLines(filePath);
@@ -436,17 +372,13 @@ public class Initializer : MonoBehaviour
 
     public void resetSelectedSims()
     {
-        foreach (var selectedSim in selectedSims)
-        {
-            selectedSim.GetComponentInChildren<TMP_Text>().text = "";
-            selectedSim.SetActive(false);
-        }
-        foreach (var dropdown in dropdowns)
+        foreach (var dropdown in idstandDropdown)
         {
             dropdown.GetComponent<TMP_Dropdown>().ClearOptions();
-            dropdown.SetActive(false);
+            dropdown.gameObject.SetActive(false);
+            dropdown.GetComponent<IdStandsDropdown>().textSimInfo.SetActive(false);
         }
-        foreach(var reloadButton in reloadButtons)
+        foreach (var reloadButton in reloadButtons)
         {
             reloadButton.SetActive(false);
         }
@@ -454,6 +386,16 @@ public class Initializer : MonoBehaviour
         {
             p.gameObject.SetActive(false);
             p.intervalInputField.gameObject.SetActive(false);
+        }
+
+        foreach (var simDropdown in simulationDropdowns)
+        {
+            simDropdown.value = 0;
+        }
+
+        foreach (var idDropdown in idstandDropdown)
+        {
+            idDropdown.value = 0;
         }
     }
 }

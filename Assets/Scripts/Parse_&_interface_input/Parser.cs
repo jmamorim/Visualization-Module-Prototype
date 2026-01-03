@@ -11,7 +11,7 @@ using UnityEngine.UI;
 public class Parser : MonoBehaviour
 {
     public FeedbackController FeedbackController;
-    public TMP_Text selectedSim1, selectedSim2;
+    public TMP_Dropdown selectedSim1, selectedSim2;
     public TMP_InputField intervalInputField;
     public SimMetadata simMetadata;
     public InputAndParsedData so;
@@ -50,6 +50,7 @@ public class Parser : MonoBehaviour
         }
     }
 
+    //TODO :  needs changes so it works with new ui
     public void parse()
     {
         if (!string.IsNullOrEmpty(intervalInputField.text))
@@ -76,7 +77,7 @@ public class Parser : MonoBehaviour
             }
             string selectedIdStandSolo = dropdownSolo.options[dropdownSolo.value].text;
 
-            var siminfoSolo = simMetadata.simulations[selectedSim1.text];
+            var siminfoSolo = simMetadata.simulations[selectedSim1.options[selectedSim1.value].text];
 
             var simPlotDimensionsSolo = siminfoSolo.plotDataByIdPar[selectedIdStandSolo];
 
@@ -124,7 +125,7 @@ public class Parser : MonoBehaviour
 
             string selectedIdStand1 = dropdown1.options[dropdown1.value].text;
 
-            var siminfo1 = simMetadata.simulations[selectedSim1.text];
+            var siminfo1 = simMetadata.simulations[selectedSim1.options[selectedSim1.value].text];
 
             var simPlotDimensions1 = siminfo1.plotDataByIdPar[selectedIdStand1];
 
@@ -158,7 +159,7 @@ public class Parser : MonoBehaviour
             if (dropdown2.options.Count() > 0)
             {
                 string selectedIdStand2 = dropdown2.options[dropdown2.value].text;
-                var siminfo2 = simMetadata.simulations[selectedSim2.text];
+                var siminfo2 = simMetadata.simulations[selectedSim2.options[selectedSim2.value].text];
 
                 var simPlotDimensions2 = siminfo2.plotDataByIdPar[selectedIdStand2];
 
