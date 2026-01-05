@@ -196,9 +196,36 @@ public class Initializer : MonoBehaviour
             ddTablePath = currentDDPath
         };
 
+        // Parse input file and store input data
         if (!string.IsNullOrEmpty(currentInputPath))
         {
             ParseInputFile(currentInputPath, simInfo);
+        }
+
+        // Parse yield table to get prescriptions for each plot
+        if (!string.IsNullOrEmpty(currentYieldTablePath))
+        {
+            ParsePrescriptionsFromYieldTable(currentYieldTablePath, simInfo);
+        }
+
+        string readmePath = Path.Combine(folder, "readme.txt");
+        if (File.Exists(readmePath))
+        {
+            try
+            {
+                simInfo.readmeContent = File.ReadAllText(readmePath);
+                Debug.Log("Loaded readme for simulation: " + folderName);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("Failed to read readme.txt for " + folderName + ": " + e.Message);
+                simInfo.readmeContent = "";
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No readme.txt found for simulation: " + folderName);
+            simInfo.readmeContent = "";
         }
 
         return simInfo;
@@ -238,7 +265,7 @@ public class Initializer : MonoBehaviour
             return;
         }
 
-        List<string> simNames = new List<string> { "Escolha uma simulação..."};
+        List<string> simNames = new List<string> { "Escolha uma simulação..." };
         simNames.AddRange(simulations.Keys.OrderBy(k => k));
 
         for (int i = 0; i < simulationDropdowns.Length; i++)
@@ -283,84 +310,146 @@ public class Initializer : MonoBehaviour
         dropdown.gameObject.SetActive(true);
         reloadButton.SetActive(true);
         readme.SetActive(true);
+        readme.GetComponentInChildren<TMP_Text>().text = simInfo.readmeContent;
         dropdown.GetComponent<IdStandsDropdown>().initDropdown(simInfo.plotDataByIdPar.Keys.ToList());
     }
 
-    //TODO : parse extra info from input file
     void ParseInputFile(string filePath, SimulationInfo simInfo)
     {
         string[] lines = File.ReadAllLines(filePath);
         if (lines.Length < 2) return;
 
-        string[] headers = lines[0].Split(',');
+        string[] headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
 
+        // Get all header indices
         int idParIndex = System.Array.IndexOf(headers, "id_par");
         int plotShapeIndex = System.Array.IndexOf(headers, "Plot_shape");
 
+        // Store input data for each id_par
         for (int i = 1; i < lines.Length; i++)
         {
             string[] values = lines[i].Trim().Split(',');
+            if (values.Length < headers.Length) continue;
 
             string idPar = values[idParIndex].Trim();
 
             var plotShape = int.Parse(values[plotShapeIndex].Trim());
+
+            PlotData plotData = new PlotData
+            {
+                plotShape = plotShape
+            };
+
+            plotData.id_par = GetValue(headers, values, "id_par");
+            plotData.AreaUG = GetFloatValue(headers, values, "AreaUG");
+            plotData.id_presc = GetValue(headers, values, "id_presc");
+            plotData.tlag = GetFloatValue(headers, values, "tlag");
+            plotData.CoordX = GetFloatValue(headers, values, "CoordX");
+            plotData.CoordY = GetFloatValue(headers, values, "CoordY");
+            plotData.id_meteo = GetValue(headers, values, "id_meteo");
+            plotData.Altitude = GetFloatValue(headers, values, "Altitude");
+            plotData.year = GetIntValue(headers, values, "year");
+            plotData.month = GetIntValue(headers, values, "month");
+            plotData.composition = GetValue(headers, values, "composition");
+            plotData.PlotType = GetValue(headers, values, "PlotType");
+            plotData.Sp1 = GetValue(headers, values, "Sp1");
+            plotData.Sp2 = GetValue(headers, values, "Sp2");
+            plotData.Structure = GetValue(headers, values, "Structure");
+            plotData.S = GetFloatValue(headers, values, "S");
+            plotData.rot = GetIntValue(headers, values, "rot");
+            plotData.t = GetFloatValue(headers, values, "t");
+            plotData.tst = GetFloatValue(headers, values, "tst");
+            plotData.tsd = GetFloatValue(headers, values, "tsd");
+            plotData.Narvp = GetIntValue(headers, values, "Narvp");
+            plotData.Aplot = GetFloatValue(headers, values, "Aplot");
+
             if (plotShape == 0)
             {
-                int areaIndex = System.Array.IndexOf(headers, "Aplot");
-                simInfo.plotDataByIdPar[idPar] = new PlotData
-                {
-                    plotShape = plotShape,
-                    area = float.Parse(values[areaIndex].Trim())
-                };
+                plotData.area = plotData.Aplot;
             }
             else if (plotShape == 1 || plotShape == 2 || plotShape == 3)
             {
-                int length1Index = System.Array.IndexOf(headers, "lenght1");
-                int length2Index = System.Array.IndexOf(headers, "lenght2");
-                simInfo.plotDataByIdPar[idPar] = new PlotData
-                {
-                    plotShape = plotShape,
-                    length1 = int.Parse(values[length1Index].Trim()),
-                    length2 = int.Parse(values[length2Index].Trim())
-                };
+                plotData.length1 = GetFloatValue(headers, values, "lenght1");
+                plotData.length2 = GetFloatValue(headers, values, "lenght2");
             }
             else if (plotShape == 4)
             {
-                int xcoord1Index = System.Array.IndexOf(headers, "CoordX1");
-                int ycoord1Index = System.Array.IndexOf(headers, "CoordY1");
-                int xcoord2Index = System.Array.IndexOf(headers, "CoordX2");
-                int ycoord2Index = System.Array.IndexOf(headers, "CoordY2");
-                int xcoord3Index = System.Array.IndexOf(headers, "CoordX3");
-                int ycoord3Index = System.Array.IndexOf(headers, "CoordY3");
-                int xcoord4Index = System.Array.IndexOf(headers, "CoordX4");
-                int ycoord4Index = System.Array.IndexOf(headers, "CoordY4");
+                plotData.CoordX1 = GetFloatValue(headers, values, "CoordX1");
+                plotData.CoordY1 = GetFloatValue(headers, values, "CoordY1");
+                plotData.CoordX2 = GetFloatValue(headers, values, "CoordX2");
+                plotData.CoordY2 = GetFloatValue(headers, values, "CoordY2");
+                plotData.CoordX3 = GetFloatValue(headers, values, "CoordX3");
+                plotData.CoordY3 = GetFloatValue(headers, values, "CoordY3");
+                plotData.CoordX4 = GetFloatValue(headers, values, "CoordX4");
+                plotData.CoordY4 = GetFloatValue(headers, values, "CoordY4");
 
-                List<float> coordX = new List<float>
-                {
-                    float.Parse(values[xcoord1Index].Trim()),
-                    float.Parse(values[xcoord2Index].Trim()),
-                    float.Parse(values[xcoord3Index].Trim()),
-                    float.Parse(values[xcoord4Index].Trim())
-                };
+                List<float> coordX = new List<float> { plotData.CoordX1, plotData.CoordX2, plotData.CoordX3, plotData.CoordX4 };
+                List<float> coordY = new List<float> { plotData.CoordY1, plotData.CoordY2, plotData.CoordY3, plotData.CoordY4 };
 
-                List<float> coordY = new List<float>
-                {
-                    float.Parse(values[ycoord1Index].Trim()),
-                    float.Parse(values[ycoord2Index].Trim()),
-                    float.Parse(values[ycoord3Index].Trim()),
-                    float.Parse(values[ycoord4Index].Trim())
-                };
+                plotData.minX = coordX.Min();
+                plotData.maxX = coordX.Max();
+                plotData.minY = coordY.Min();
+                plotData.maxY = coordY.Max();
+            }
 
-                simInfo.plotDataByIdPar[idPar] = new PlotData
+            simInfo.plotDataByIdPar[idPar] = plotData;
+        }
+    }
+
+    void ParsePrescriptionsFromYieldTable(string filePath, SimulationInfo simInfo)
+    {
+        string[] lines = File.ReadAllLines(filePath);
+        if (lines.Length < 2) return;
+
+        string[] headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
+
+        int idStandIndex = System.Array.IndexOf(headers, "id_stand");
+        int idPrescIndex = System.Array.IndexOf(headers, "id_presc");
+
+        if (idStandIndex == -1 || idPrescIndex == -1) return;
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string[] values = lines[i].Trim().Split(',');
+            if (values.Length <= Math.Max(idStandIndex, idPrescIndex)) continue;
+
+            string idStand = values[idStandIndex].Trim();
+            string idPresc = values[idPrescIndex].Trim();
+
+            if (simInfo.plotDataByIdPar.ContainsKey(idStand))
+            {
+                if (!simInfo.plotDataByIdPar[idStand].prescriptions.Contains(idPresc))
                 {
-                    plotShape = plotShape,
-                    minX = coordX.Min(),
-                    maxX = coordX.Max(),
-                    minY = coordY.Min(),
-                    maxY = coordY.Max()
-                };
+                    simInfo.plotDataByIdPar[idStand].prescriptions.Add(idPresc);
+                }
             }
         }
+    }
+
+    string GetValue(string[] headers, string[] values, string header)
+    {
+        int index = System.Array.IndexOf(headers, header);
+        if (index >= 0 && index < values.Length)
+            return values[index].Trim();
+        return "";
+    }
+
+    float GetFloatValue(string[] headers, string[] values, string header)
+    {
+        string val = GetValue(headers, values, header);
+        float result;
+        if (float.TryParse(val, out result))
+            return result;
+        return 0f;
+    }
+
+    int GetIntValue(string[] headers, string[] values, string header)
+    {
+        string val = GetValue(headers, values, header);
+        int result;
+        if (int.TryParse(val, out result))
+            return result;
+        return 0;
     }
 
     public void ReloadSims()
@@ -403,6 +492,7 @@ public class Initializer : MonoBehaviour
 public class SimulationInfo
 {
     public string folderPath, inputPath, soloTreesPath, yieldTablePath, ddTablePath;
+    public string readmeContent;
     public Dictionary<string, PlotData> plotDataByIdPar = new Dictionary<string, PlotData>();
 }
 
@@ -416,4 +506,38 @@ public class PlotData
     public float maxX;
     public float minY;
     public float maxY;
+
+    public string id_par;
+    public float AreaUG;
+    public string id_presc;
+    public float tlag;
+    public float CoordX;
+    public float CoordY;
+    public string id_meteo;
+    public float Altitude;
+    public int year;
+    public int month;
+    public string composition;
+    public string PlotType;
+    public string Sp1;
+    public string Sp2;
+    public string Structure;
+    public float S;
+    public int rot;
+    public float t;
+    public float tst;
+    public float tsd;
+    public int Narvp;
+    public float Aplot;
+
+    public float CoordX1;
+    public float CoordY1;
+    public float CoordX2;
+    public float CoordY2;
+    public float CoordX3;
+    public float CoordY3;
+    public float CoordX4;
+    public float CoordY4;
+
+    public List<string> prescriptions = new List<string>();
 }

@@ -153,8 +153,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -100, y: 230}
-  m_SizeDelta: {x: 728, y: 50}
+  m_AnchoredPosition: {x: 4, y: 230}
+  m_SizeDelta: {x: 920, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6727256
 MonoBehaviour:
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Welcome to standSIM's visualization module!
+  m_text: "Seja bem vindo ao m\xF3dulo de visualiza\xE7\xE3o do standSIM!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -644,8 +644,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1955692031}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.7070149}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1405,8 +1405,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -100, y: 174.1}
-  m_SizeDelta: {x: 700, y: 50}
+  m_AnchoredPosition: {x: 4, y: 170}
+  m_SizeDelta: {x: 920, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &182393177
 MonoBehaviour:
@@ -1428,18 +1428,25 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Before using the module, please take note of a few important points:\n\nMake
-    sure your simulations directory is properly organized. Each subdirectory inside
-    simulations should represent a single simulation. Every simulation folder must
-    contain:\n\n-One standSIM input file\n-Solo trees output\n-Yield table output\n-Diameter
-    distribution file \n\nAny files that are not of these types will be ignored.\nIf
-    you need to make any changes to the organization, please do so and click \"Reload
-    Simulations\" to update all saved files.\nIf there are duplicate files, the system
-    will consider only the last file of each type present in the designated directory
-    for the simulation.\n\nThis module currently supports visualization only for
-    simulations of the following species:\n\nPinus pinaster, Pinus pinea, Eucalyptus
-    globulus, and Castanea sativa.\n\nAny simulations with these species will be
-    ignored."
+  m_text: "Antes de utilizar o m\xF3dulo, tenha em aten\xE7\xE3o alguns pontos importantes:\n\nCertifique-se
+    de que a diretoria simulations est\xE1 corretamente organizada. Cada subdiretoria
+    dentro de simulations deve representar uma \xFAnica simula\xE7\xE3o. Cada pasta
+    de simula\xE7\xE3o tem de conter obrigatoriamente:\n\n-Um ficheiro de input do
+    standSIM\n-Um ficheiro de output de \xE1rvores individuais (solo trees)\n-Um
+    ficheiro de output da tabela de produ\xE7\xE3o (yield table)\n-Um ficheiro de
+    distribui\xE7\xE3o diam\xE9trica\n-Opcional: se o utilizador quiser acrescentar
+    detalhes ou uma descri\xE7\xE3o sobre uma simula\xE7\xE3o espec\xEDfica, pode
+    colocar na respetiva diretoria um ficheiro chamado \"readme.txt\", contendo a
+    informa\xE7\xE3o descritiva da simula\xE7\xE3o.\n\nQuaisquer ficheiros que n\xE3o
+    sejam destes tipos ser\xE3o ignorados.\nCaso seja necess\xE1rio fazer altera\xE7\xF5es
+    \xE0 organiza\xE7\xE3o das pastas ou ficheiros, fa\xE7a-as e clique em \u201CReload
+    Simulations\u201D para atualizar todos os ficheiros guardados.\n\nSe existirem
+    ficheiros duplicados do mesmo tipo numa simula\xE7\xE3o, o sistema ir\xE1 considerar
+    apenas o \xFAltimo ficheiro de cada tipo presente na diretoria dessa simula\xE7\xE3o.\n\nEste
+    m\xF3dulo suporta atualmente a visualiza\xE7\xE3o apenas de simula\xE7\xF5es
+    das seguintes esp\xE9cies:\n\nPinus pinaster, Pinus pinea, Eucalyptus globulus,
+    Castanea sativa.\n\nQuaisquer simula\xE7\xF5es que n\xE3o correspondam a estas
+    esp\xE9cies ser\xE3o ignoradas."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1466,8 +1473,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1763,7 +1770,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -280, y: 210}
+  m_AnchoredPosition: {x: -280, y: 200}
   m_SizeDelta: {x: 130, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &210716055
@@ -2405,7 +2412,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 58841706}
   m_HandleRect: {fileID: 58841705}
   m_Direction: 3
-  m_Value: -0.00000004516573
+  m_Value: -0.000000045165727
   m_Size: 0.2929851
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2869,7 +2876,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1744128078}
   m_HandleRect: {fileID: 1744128077}
   m_Direction: 3
-  m_Value: 0.0000001211528
+  m_Value: 0.9999998
   m_Size: 0.20927508
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -4003,7 +4010,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -250, y: 150}
+  m_AnchoredPosition: {x: -250, y: 140}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &497123713
@@ -5125,7 +5132,7 @@ GameObject:
   - component: {fileID: 667984640}
   - component: {fileID: 667984639}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5371,7 +5378,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1518918590}
   m_HandleRect: {fileID: 1518918589}
   m_Direction: 3
-  m_Value: 0.0000001211528
+  m_Value: 0.00000028268985
   m_Size: 0.20927508
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -5755,7 +5762,7 @@ GameObject:
   - component: {fileID: 724925571}
   - component: {fileID: 724925570}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6312,7 +6319,7 @@ GameObject:
   - component: {fileID: 753190032}
   - component: {fileID: 753190031}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6335,7 +6342,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0.000030517578, y: 377.83997}
-  m_SizeDelta: {x: 200, y: 477.84}
+  m_SizeDelta: {x: 200, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &753190031
 MonoBehaviour:
@@ -10308,7 +10315,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -10, y: 150}
+  m_AnchoredPosition: {x: -10, y: 140}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1143293491
@@ -11097,8 +11104,11 @@ MonoBehaviour:
   simInfo: {fileID: 142505464}
   intervalField: {fileID: 751405571}
   parseButton: {fileID: 1544303118}
+  prescInfoText: {fileID: 1802321876}
+  simInfoText: {fileID: 724925572}
   initializer: {fileID: 1503501873}
   dropdown2: {fileID: 1785414282}
+  simulationDropdown: {fileID: 1921046604}
 --- !u!114 &1223729469
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11228,7 +11238,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -250, y: -195}
+  m_AnchoredPosition: {x: -260, y: -220}
   m_SizeDelta: {x: 245, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1224549033
@@ -12821,7 +12831,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -45, y: 210}
+  m_AnchoredPosition: {x: -45, y: 200}
   m_SizeDelta: {x: 130, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1428863982
@@ -13658,8 +13668,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1465325600}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.7907248}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -13820,8 +13830,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0.000030517578, y: 377.83997}
-  m_SizeDelta: {x: 200, y: 477.84}
+  m_AnchoredPosition: {x: 0.000030517578, y: 0.000091552734}
+  m_SizeDelta: {x: 200, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1526597436
 MonoBehaviour:
@@ -14783,7 +14793,7 @@ GameObject:
   - component: {fileID: 1615537702}
   - component: {fileID: 1615537701}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15056,7 +15066,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -280, y: 0}
+  m_AnchoredPosition: {x: -280, y: -10}
   m_SizeDelta: {x: 130, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1668768974
@@ -15577,7 +15587,7 @@ GameObject:
   - component: {fileID: 1708908388}
   - component: {fileID: 1708908387}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15984,8 +15994,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2075933238}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.7907248}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -16201,8 +16211,11 @@ MonoBehaviour:
   simInfo: {fileID: 66650016}
   intervalField: {fileID: 882822179}
   parseButton: {fileID: 1103176862}
+  prescInfoText: {fileID: 1615537703}
+  simInfoText: {fileID: 667984641}
   initializer: {fileID: 1503501873}
   dropdown2: {fileID: 0}
+  simulationDropdown: {fileID: 346142587}
 --- !u!114 &1761627822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16564,8 +16577,11 @@ MonoBehaviour:
   simInfo: {fileID: 2093886333}
   intervalField: {fileID: 751405571}
   parseButton: {fileID: 1544303118}
+  prescInfoText: {fileID: 753190033}
+  simInfoText: {fileID: 2105372940}
   initializer: {fileID: 1503501873}
   dropdown2: {fileID: 1223729469}
+  simulationDropdown: {fileID: 842209282}
 --- !u!114 &1785414282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16770,7 +16786,7 @@ GameObject:
   - component: {fileID: 1802321875}
   - component: {fileID: 1802321874}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18101,7 +18117,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -50, y: 0}
+  m_AnchoredPosition: {x: -50, y: -10}
   m_SizeDelta: {x: 130, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1980265652
@@ -18806,7 +18822,7 @@ GameObject:
   - component: {fileID: 2105372939}
   - component: {fileID: 2105372938}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18829,7 +18845,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0.000030517578, y: 337.84003}
-  m_SizeDelta: {x: 200, y: 477.84}
+  m_SizeDelta: {x: 200, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &2105372938
 MonoBehaviour:
