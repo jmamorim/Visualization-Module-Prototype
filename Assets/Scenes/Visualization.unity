@@ -3992,6 +3992,13 @@ MonoBehaviour:
   isBar: 1
   isDD: 0
   chart: {fileID: 78380075}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 105522905}
+  percentageButton: {fileID: 1593144191}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &78380075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5474,9 +5481,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 80015106}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1340589830}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6975,9 +6982,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 105522904}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 78380074}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8392,6 +8399,13 @@ MonoBehaviour:
   isBar: 1
   isDD: 0
   chart: {fileID: 134378385}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 2060946819}
+  percentageButton: {fileID: 1581998788}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &134378385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18210,9 +18224,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 292478749}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1197477122}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -19195,9 +19209,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 310015211}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1772771488}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -22194,6 +22208,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 336039236}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 975330713}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!222 &336039238
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -24480,6 +24501,13 @@ MonoBehaviour:
   isBar: 1
   isDD: 1
   chart: {fileID: 367390818}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 1156587582}
+  percentageButton: {fileID: 876940525}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &367390818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -35588,6 +35616,13 @@ MonoBehaviour:
   isBar: 1
   isDD: 0
   chart: {fileID: 532471076}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 1205258189}
+  percentageButton: {fileID: 727281117}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &532471076
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -39072,9 +39107,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 586576122}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1916241620}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -40952,9 +40987,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 613092683}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1652524481}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -46837,9 +46872,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 725785500}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1788543540}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -53114,9 +53149,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 854690476}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 952360086}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -54713,9 +54748,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 532471075}
+      - m_Target: {fileID: 367390817}
         m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
-        m_MethodName: TogglePercentageView
+        m_MethodName: ToggleDDPercentageView
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -60120,6 +60155,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 952360085}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 854690477}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!222 &952360087
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -61420,9 +61462,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 975330712}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 336039237}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -65801,6 +65843,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 1031976364}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 1686850151}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!222 &1031976366
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -68049,9 +68098,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1063486385}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1395379639}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -72707,9 +72756,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1156587581}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 367390817}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -74716,6 +74765,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 1197477124}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 292478750}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!222 &1197477123
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -76490,9 +76546,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1205258188}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 532471075}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -83239,6 +83295,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 1340589831}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 80015107}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1340589831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86414,6 +86477,13 @@ MonoBehaviour:
   isBar: 1
   isDD: 0
   chart: {fileID: 1395379640}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 1063486386}
+  percentageButton: {fileID: 1576494847}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1395379640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97737,7 +97807,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 532471075}
+      - m_Target: {fileID: 1395379639}
         m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
         m_MethodName: TogglePercentageView
         m_Mode: 1
@@ -98199,7 +98269,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 532471075}
+      - m_Target: {fileID: 134378384}
         m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
         m_MethodName: TogglePercentageView
         m_Mode: 1
@@ -98770,7 +98840,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 532471075}
+      - m_Target: {fileID: 78380074}
         m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
         m_MethodName: TogglePercentageView
         m_Mode: 1
@@ -102098,6 +102168,13 @@ MonoBehaviour:
   isBar: 1
   isDD: 1
   chart: {fileID: 1652524482}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 613092684}
+  percentageButton: {fileID: 1849816874}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1652524482
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105137,6 +105214,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 1664951761}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 1983313180}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!1 &1667917280
 GameObject:
   m_ObjectHideFlags: 0
@@ -106861,9 +106945,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1686850150}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1031976365}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -111189,6 +111273,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 1748497988}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 1977454313}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!222 &1748497990
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -112827,6 +112918,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 1772771489}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 310015212}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1772771489
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116423,6 +116521,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 1788543539}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 725785501}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!222 &1788543541
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -119501,9 +119606,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 532471075}
+      - m_Target: {fileID: 1652524481}
         m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
-        m_MethodName: TogglePercentageView
+        m_MethodName: ToggleDDPercentageView
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -123722,6 +123827,13 @@ MonoBehaviour:
   isBar: 0
   isDD: 0
   chart: {fileID: 1916241619}
+  rootCanvas: {fileID: 1334169299}
+  fullscreenButton: {fileID: 586576123}
+  percentageButton: {fileID: 0}
+  inactiveSprite: {fileID: 21300000, guid: 3225d741746e6e448ba1fb31baafb12d, type: 3}
+  activeSprite: {fileID: 21300000, guid: 7b7aa92c3952fde4d9a19a521fd9db01, type: 3}
+  inactiveColor: {r: 1, g: 0, b: 0, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!222 &1916241621
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -127377,9 +127489,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1977454312}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1748497989}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -127935,9 +128047,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1983313179}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 1664951763}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -133083,9 +133195,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2060946818}
-        m_TargetAssemblyTypeName: ButtonBehaviour, Assembly-CSharp
-        m_MethodName: clickItem
+      - m_Target: {fileID: 134378384}
+        m_TargetAssemblyTypeName: GraphBehaviour, Assembly-CSharp
+        m_MethodName: ToggleFullscreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

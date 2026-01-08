@@ -224,7 +224,7 @@ public class GraphGenerator : MonoBehaviour
             if (plotData == null || plotData.Count == 0) continue;
 
             string standId = plotData[0].id_stand;
-            chart.GetChartComponent<Title>().text = $"Vu_as {standId}";
+            chart.GetChartComponent<Title>().text = $"Volume extraído {standId}";
 
             for (int c = 0; c < VolumeComponents.Length; c++)
             {
@@ -282,7 +282,7 @@ public class GraphGenerator : MonoBehaviour
             if (plotData == null || plotData.Count == 0) continue;
 
             string standId = plotData[0].id_stand;
-            chart.GetChartComponent<Title>().text = $"Biomass {standId}";
+            chart.GetChartComponent<Title>().text = $"Biomassa {standId}";
 
             for (int c = 0; c < BiomassComponents.Length; c++)
             {
@@ -334,6 +334,7 @@ public class GraphGenerator : MonoBehaviour
             var behaviour = chart.GetComponent<GraphBehaviour>();
             prepareDDBarChart(chart);
 
+            chart.GetChartComponent<Title>().text = $"Distrubuição de diâmetros {id_stands[standIndex]}";
             var plotData = DDtableData[id_stands[standIndex]][id_prescs[standIndex]];
             if (plotData == null || plotData.Count == 0) continue;
 
@@ -356,7 +357,6 @@ public class GraphGenerator : MonoBehaviour
         }
     }
 
-    // Add this helper function inside GraphGenerator
     private float GetDDValueByIndex(DDEntry entry, int index)
     {
         switch (index)
