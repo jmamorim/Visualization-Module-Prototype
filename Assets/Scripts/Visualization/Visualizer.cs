@@ -304,8 +304,8 @@ public class Visualizer : MonoBehaviour
         clear("Plot1");
         var trees = data.Values.ToList();
         createObjects(trees, terrain1, false, isCircularPlot1);
-        yearText1.text = "Year: " + currentYear.ToString();
-        idStand1.text = trees[0].id_stand;
+        yearText1.text = "Ano: " + currentYear.ToString();
+        idStand1.text = "Povoamento:" + trees[0].id_stand;
         box1.SetActive(true);
         displayTrees(trees, terrain1, isCircularPlot1);
     }
@@ -315,8 +315,8 @@ public class Visualizer : MonoBehaviour
         clear("Plot2");
         var trees = data.Values.ToList();
         createObjects(trees, terrain2, true, isCircularPlot2);
-        yearText2.text = "Year: " + currentYear.ToString();
-        idStand2.text = trees[0].id_stand;
+        yearText2.text = "Ano: " + currentYear.ToString();
+        idStand2.text = "Povoamento:" + trees[0].id_stand;
         box2.SetActive(true);
         displayTrees(trees, terrain2, isCircularPlot2);
     }

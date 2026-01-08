@@ -16,6 +16,7 @@ public class Manager : MonoBehaviour
     public bool isParalelCameraActive = false;
     public GameObject prescDropdown1, prescDropdown2;
     public bool canInteract = true;
+    public TMP_Text sim1, sim2;
 
     CameraBehaviour cameraBehaviour1, cameraBehaviour2;
     PrescsDropdown pDropdown1, pDropdown2;
@@ -39,6 +40,9 @@ public class Manager : MonoBehaviour
         outputSoloTreesData = inputAndParsedData.outputSoloTreesData;
         YieldTableData = inputAndParsedData.outputYieldTable;
         DDTableData = inputAndParsedData.outputDDTable;
+
+        sim1.text = "Simulação:" + inputAndParsedData.simIds[0];
+        sim2.text = inputAndParsedData.simIds.Count > 1 ? "Simulação:" + inputAndParsedData.simIds[1] : "";
 
         pDropdown1.initDropdown(
             outputSoloTreesData.First().Value.Keys.ToList(),
@@ -212,7 +216,7 @@ public class Manager : MonoBehaviour
 
     private void advancePlot2()
     {
-        if (current_year2 < outputSoloTreesData[selectedId_stand1][selectedId_presc1].Count - 1)
+        if (current_year2 < outputSoloTreesData[selectedId_stand2][selectedId_presc2].Count - 1)
         {
             current_year2++;
             treeInfoText.text = "";
@@ -348,8 +352,8 @@ public class Manager : MonoBehaviour
             Camera2.SetActive(true);
             cameraBehaviour1.isMultiVisualization = true;
             cameraBehaviour2.isMultiVisualization = true;
-            Camera1.GetComponent<Camera>().rect = new Rect(0, 0, 0.5f, 1);
-            Camera2.GetComponent<Camera>().rect = new Rect(0.5f, 0, 0.5f, 1);
+            Camera1.GetComponent<Camera>().rect = new Rect(-0.25f, 0.5f, 1, 1);
+            Camera2.GetComponent<Camera>().rect = new Rect(-0.25f, -0.5f, 1, 1);
         }
         else if (cam != null)
         {
@@ -372,8 +376,9 @@ public class Manager : MonoBehaviour
             Camera2.SetActive(false);
             cameraBehaviour1.isMultiVisualization = false;
             cameraBehaviour2.isMultiVisualization = false;
-            Camera1.GetComponent<Camera>().rect = new Rect(0, 0, 1, 1);
+            Camera1.GetComponent<Camera>().rect = new Rect(-0.25f, 0, 1, 1);
         }
+        Debug.Log("Viewports positioned. Multi Visualization: " + isMulti);
     }
 
     public void receiveYieldTableData(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> dataYT, SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> dataDD)

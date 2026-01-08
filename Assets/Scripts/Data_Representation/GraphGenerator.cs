@@ -1,12 +1,10 @@
-using JetBrains.Annotations;
+using CustomUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
+using TMPro;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 using XCharts.Runtime;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class GraphGenerator : MonoBehaviour
 {
@@ -14,10 +12,30 @@ public class GraphGenerator : MonoBehaviour
     public List<LineChart> MultiLineCharts;
     public List<BarChart> barCharts;
     public List<BarChart> ddBarCharts;
-    public List<GameObject> textAndButtons;
+    public DropdownEx graphDropdown;
 
     int highlightedIndex1, highlightedIndex2;
     List<int> sortedYears;
+
+    readonly string[] graphDesc = {
+        "Número de Árvores",
+        "Número de Cepos",
+        "Número de Árvores Mortas",
+        "Altura Dominante",
+        "Diâmetro Médio Quadrático",
+        "Área Basal",
+        "Volume Total",
+        "Incremento de Volume",
+        "Volume do fuste sem cepo nem casca",
+        "Valores Económicos",
+    };
+
+    readonly string[] addedGraphDesc = {
+        "Volume extraído dívidido 5 classificações",
+        "Biomassa Total dividida em 5 classes",
+        "Distribuição de diâmetros"
+    };
+
     // Inside GraphGenerator class
     readonly string[] DDCategories = {
     "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
@@ -46,6 +64,7 @@ public class GraphGenerator : MonoBehaviour
             prepareChart(chart);
         string[] id_stands = { selectedId_stand1, selectedId_stand2 };
         string[] id_prescs = { selectedId_presc1, selectedId_presc2 };
+        prepareDropdown(id_stands);
         populateLineChart(lineCharts[0], tableData, e => e.N, id_stands, id_prescs);
         populateLineChart(lineCharts[1], tableData, e => e.Nst, id_stands, id_prescs);
         populateLineChart(lineCharts[2], tableData, e => e.Ndead, id_stands, id_prescs);
@@ -70,6 +89,30 @@ public class GraphGenerator : MonoBehaviour
         foreach (LineChart chart in MultiLineCharts)
             highlightPointMultiLine(chart, current_year1, current_year2);
     }
+
+    private void prepareDropdown(string[] idStands)
+    {
+        graphDropdown.ClearOptions(); 
+
+        List<string> options = new List<string>();
+
+        foreach (var desc in graphDesc)
+            options.Add(desc);
+
+        foreach (var id in idStands)
+        {
+            if (string.IsNullOrEmpty(id))
+                continue;
+
+            foreach (var desc in addedGraphDesc)
+                options.Add($"{desc} ({id})");
+        }
+
+        graphDropdown.AddOptions(options);
+        graphDropdown.RefreshShownValue();
+    }
+
+
 
     private void populateLineChart(
         LineChart chart,
@@ -163,9 +206,6 @@ public class GraphGenerator : MonoBehaviour
         string[] id_stands,
         string[] id_prescs)
     {
-        foreach (var go in textAndButtons)
-            go.SetActive(tableData.Count > 1);
-
         string[] VolumeComponents = { "Vu_as1", "Vu_as2", "Vu_as3", "Vu_as4", "Vu_as5" };
         Color[] volumeColors = {
             new Color(0.36f, 0.20f, 0.09f),
@@ -301,7 +341,7 @@ public class GraphGenerator : MonoBehaviour
 
             var serie = chart.AddSerie<Bar>(id_stands[standIndex]);
             serie.stack = $"DD_stand_{id_stands[standIndex]}";
-            
+
             List<float> values = new List<float>();
 
             for (int c = 0; c < DDCategories.Length; c++)

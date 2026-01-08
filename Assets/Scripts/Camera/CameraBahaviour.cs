@@ -25,7 +25,7 @@ public class CameraBehaviour : MonoBehaviour
     float maxZoomOrtho = 100f;
     float orthographicSize;
     bool isTopographic = false;
-    
+
     [SerializeField] bool isFree = false;
     [SerializeField] bool canUseCameraMovement = true;
     [SerializeField] float freeCameraMoveSpeed = 10.0f;
@@ -52,98 +52,100 @@ public class CameraBehaviour : MonoBehaviour
 
     void Update()
     {
-            float scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (Input.GetKeyDown(KeyCode.R))
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ResetCamera();
+        }
+        if (scroll != 0 && IsMouseOverViewport())
+        {
+            if (!isTopographic)
             {
-                ResetCamera();
+                cam.fieldOfView = Mathf.Clamp(cam.fieldOfView - scroll * zoomSpeed, minZoomFOV, maxZoomFOV);
             }
-            if (scroll != 0 && IsMouseOverViewport())
+            else
             {
-                if (!isTopographic)
+                cam.orthographicSize = Mathf.Clamp(cam.orthographicSize - scroll * zoomSpeed, minZoomOrtho, maxZoomOrtho);
+            }
+        }
+        if (canUseCameraMovement && ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
+        {
+            if (isFree && !isTopographic)
+            {
+                float mouseX = Input.GetAxis("Mouse X") * lookSensitivity;
+                float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity;
+
+                yaw += mouseX;
+                pitch -= mouseY;
+                pitch = Mathf.Clamp(pitch, -89f, 89f);
+
+                transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+
+                // WASD movement
+                Vector3 movement = Vector3.zero;
+
+                if (Input.GetKey(KeyCode.W))
                 {
-                    cam.fieldOfView = Mathf.Clamp(cam.fieldOfView - scroll * zoomSpeed, minZoomFOV, maxZoomFOV);
+                    movement += transform.forward;
                 }
-                else
+                if (Input.GetKey(KeyCode.S))
                 {
-                    cam.orthographicSize = Mathf.Clamp(cam.orthographicSize - scroll * zoomSpeed, minZoomOrtho, maxZoomOrtho);
+                    movement -= transform.forward;
+                }
+                if (Input.GetKey(KeyCode.A))
+                {
+                    movement -= transform.right;
+                }
+                if (Input.GetKey(KeyCode.D))
+                {
+                    movement += transform.right;
+                }
+
+                if (Input.GetKey(KeyCode.Q))
+                {
+                    movement -= Vector3.up;
+                }
+                if (Input.GetKey(KeyCode.E))
+                {
+                    movement += Vector3.up;
+                }
+
+                if (movement != Vector3.zero)
+                {
+                    transform.position += movement.normalized * freeCameraMoveSpeed * Time.deltaTime;
                 }
             }
-            if (canUseCameraMovement && ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
+            else
             {
-                if (isFree && !isTopographic)
+                if (Input.GetMouseButtonDown(0) && IsMouseOverViewport())
                 {
-                    float mouseX = Input.GetAxis("Mouse X") * lookSensitivity;
-                    float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity;
-
-                    yaw += mouseX;
-                    pitch -= mouseY;
-                    pitch = Mathf.Clamp(pitch, -89f, 89f);
-
-                    transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
-
-                    // WASD movement
-                    Vector3 movement = Vector3.zero;
-
-                    if (Input.GetKey(KeyCode.W))
-                    {
-                        movement += transform.forward;
-                    }
-                    if (Input.GetKey(KeyCode.S))
-                    {
-                        movement -= transform.forward;
-                    }
-                    if (Input.GetKey(KeyCode.A))
-                    {
-                        movement -= transform.right;
-                    }
-                    if (Input.GetKey(KeyCode.D))
-                    {
-                        movement += transform.right;
-                    }
-
-                    if (Input.GetKey(KeyCode.Q))
-                    {
-                        movement -= Vector3.up;
-                    }
-                    if (Input.GetKey(KeyCode.E))
-                    {
-                        movement += Vector3.up;
-                    }
-
-                    if (movement != Vector3.zero)
-                    {
-                        transform.position += movement.normalized * freeCameraMoveSpeed * Time.deltaTime;
-                    }
+                    lastMousePosition = Input.mousePosition;
                 }
-                else
+
+                if (Input.GetMouseButton(0) && IsMouseOverViewport())
                 {
-                    if (Input.GetMouseButtonDown(0))
+                    Vector3 delta = Input.mousePosition - lastMousePosition;
+
+                    if (!isTopographic)
                     {
-                        lastMousePosition = Input.mousePosition;
+                        float angleX = delta.x * rotationSpeed * Time.deltaTime;
+                        float angleY = -delta.y * rotationSpeed * Time.deltaTime;
+                        transform.RotateAround(target.position, Vector3.up, angleX);
+                        transform.RotateAround(target.position, transform.right, angleY);
+                    }
+                    else
+                    {
+                        Vector3 move = (transform.right * -delta.x + transform.up * -delta.y) * panSpeed;
+                        move.y = 0;
+                        transform.position += move;
+                        target.position += move;
                     }
 
-                    if (Input.GetMouseButton(0))
-                    {
-                        Vector3 delta = Input.mousePosition - lastMousePosition;
-                        if (!isTopographic)
-                        {
-                            float angleX = delta.x * rotationSpeed * Time.deltaTime;
-                            float angleY = -delta.y * rotationSpeed * Time.deltaTime;
-                            transform.RotateAround(target.position, Vector3.up, angleX);
-                            transform.RotateAround(target.position, transform.right, angleY);
-                        }
-                        else
-                        {
-                            Vector3 move = (transform.right * -delta.x + transform.up * -delta.y) * panSpeed;
-                            move.y = 0;
-                            transform.position += move;
-                            target.position += move;
-                        }
-                        lastMousePosition = Input.mousePosition;
-                    }
+                    lastMousePosition = Input.mousePosition;
                 }
             }
         }
+    }
 
     public void InitializeCamera(Vector3 initPos, Quaternion initRot, Transform lookAt, Vector3 paralelPos, Quaternion paralelRot)
     {

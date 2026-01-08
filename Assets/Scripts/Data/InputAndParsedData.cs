@@ -8,6 +8,7 @@ public class InputAndParsedData : ScriptableObject
     [Header("Plot shape settings")]
     public List<(int, List<float>)> plotShapeAndDimensions;
 
+    public List<string> simIds;
     [System.NonSerialized]
     public SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData;
     [System.NonSerialized]

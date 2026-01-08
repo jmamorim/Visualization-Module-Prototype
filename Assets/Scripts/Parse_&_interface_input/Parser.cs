@@ -50,7 +50,6 @@ public class Parser : MonoBehaviour
         }
     }
 
-    //TODO :  needs changes so it works with new ui
     public void parse()
     {
         if (!string.IsNullOrEmpty(intervalInputField.text))
@@ -199,6 +198,7 @@ public class Parser : MonoBehaviour
             parseDDTable(outputDDTableData, DDTablePaths[i], selectedIdStands[i]);
         }
 
+        so.simIds = new List<string> { selectedSim1.options[selectedSim1.value].text, selectedSim2 != null ? selectedSim2.options[selectedSim2.value].text : ""};
         so.outputSoloTreesData = outputSoloTreesData;
         so.outputYieldTable = outputYieldTableData;
         so.outputDDTable = outputDDTableData;

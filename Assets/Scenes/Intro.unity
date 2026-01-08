@@ -7854,8 +7854,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -14024,14 +14024,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FeedbackController: {fileID: 351537998}
-  selectedSim1: {fileID: 0}
-  selectedSim2: {fileID: 0}
+  selectedSim1: {fileID: 842209282}
+  selectedSim2: {fileID: 1921046604}
   intervalInputField: {fileID: 751405572}
   simMetadata: {fileID: 11400000, guid: b8984634b77a87a49994bae6090a1b50, type: 2}
   so: {fileID: 11400000, guid: 24849724a7db169408041f84a6ecdaae, type: 2}
-  dpsolo: {fileID: 1785414280}
-  dp1: {fileID: 0}
-  dp2: {fileID: 0}
+  dpsolo: {fileID: 0}
+  dp1: {fileID: 1785414280}
+  dp2: {fileID: 1223729466}
 --- !u!114 &1544303121
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14210,8 +14210,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -14691,8 +14691,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 13
-  m_fontSizeBase: 13
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -15910,8 +15910,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -17015,8 +17015,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 13
-  m_fontSizeBase: 13
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -17608,8 +17608,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 13
-  m_fontSizeBase: 13
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using XCharts.Runtime;
 
-public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
+public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
 {
     public CameraBehaviour cam1, cam2;
     public Manager manager;
@@ -15,25 +15,12 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     [SerializeField] bool isBar = false;
     [SerializeField] bool isDD = false;
     [SerializeField] BaseChart chart;
-    RectTransform rectTransform;
-    Canvas canvas;
-    Vector2 dragOffset;
     bool isDragging = false;
     bool isResizing = false;
-    Vector2 originalSize;
-    Vector2 originalMousePos;
-    const float minSize = 100f;
-
+    
     List<float> originalDDValues = new List<float>();
     bool ddPercentageMode = false;
-
-
-    private void Start()
-    {
-        rectTransform = GetComponent<RectTransform>();
-        canvas = GetComponentInParent<Canvas>();
-    }
-
+    
     public void SaveDDOriginalValues(List<float> values)
     {
         if (!isDD || chart == null) return;
@@ -108,68 +95,6 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             serie.barPercentStack = false;
         }
     }
-
-
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-        {
-            isResizing = true;
-            cam1.DisableCameraMovement();
-            cam2.DisableCameraMovement();
-            originalSize = rectTransform.sizeDelta;
-            originalMousePos = eventData.position;
-        }
-        else
-        {
-            isDragging = true;
-            cam1.DisableCameraMovement();
-            cam2.DisableCameraMovement();
-            rectTransform.SetAsLastSibling();
-
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                rectTransform.parent as RectTransform,
-                eventData.position,
-                eventData.pressEventCamera,
-                out Vector2 localPoint
-            );
-
-            dragOffset = rectTransform.anchoredPosition - localPoint;
-        }
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (isResizing)
-        {
-            if (canvas == null) return;
-
-            Vector2 delta = (eventData.position - originalMousePos) / canvas.scaleFactor;
-            float scale = Mathf.Max(delta.x, delta.y);
-            Vector2 newSize = originalSize + new Vector2(scale, scale);
-
-            newSize.x = Mathf.Max(minSize, newSize.x);
-            newSize.y = Mathf.Max(minSize, newSize.y);
-
-            rectTransform.sizeDelta = newSize;
-
-            return;
-        }
-
-        if (isDragging)
-        {
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                rectTransform.parent as RectTransform,
-                eventData.position,
-                eventData.pressEventCamera,
-                out Vector2 localPoint
-            ))
-            {
-                rectTransform.anchoredPosition = localPoint + dragOffset;
-            }
-        }
-    }
-
     public void ToggleDDPercentageView()
     {
         ddPercentageMode = true;
@@ -218,24 +143,4 @@ public class GraphBehaviour : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     }
 
 
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        if (isResizing)
-        {
-            isResizing = false;
-            cam1.EnableCameraMovement();
-            cam2.EnableCameraMovement();
-            return;
-        }
-
-        if (isDragging)
-        {
-            isDragging = false;
-            if (!manager.isParalelCameraActiveFunc())
-            {
-                cam1.EnableCameraMovement();
-                cam2.EnableCameraMovement();
-            }
-        }
-    }
 }

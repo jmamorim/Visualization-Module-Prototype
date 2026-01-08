@@ -1,22 +1,25 @@
-using NUnit.Framework;
+using CustomUI;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public class PrescsDropdown : MonoBehaviour
 {
     public Manager manager;
     public bool isMainPlot;
-    private TMP_Dropdown dropdown;
 
-    private void Awake() 
+    private DropdownEx dropdown;
+
+    private void Awake()
     {
-        dropdown = GetComponent<TMP_Dropdown>();
+        dropdown = GetComponent<DropdownEx>();
     }
 
     private void Start()
     {
-        dropdown.onValueChanged.AddListener(OnDropdownValueChanged);
+        if (dropdown != null)
+        {
+            dropdown.onValueChanged.AddListener(OnDropdownValueChanged);
+        }
     }
 
     private void OnDestroy()
@@ -29,12 +32,11 @@ public class PrescsDropdown : MonoBehaviour
 
     public void initDropdown(List<string> prescNameSO, List<string> prescNameYT)
     {
-        if (dropdown == null) 
-        {
-            dropdown = GetComponent<TMP_Dropdown>();
-        }
+        if (dropdown == null)
+            dropdown = GetComponent<DropdownEx>();
 
         dropdown.ClearOptions();
+
         List<string> prescNames = new List<string>();
 
         for (int i = 0; i < prescNameSO.Count; i++)
@@ -42,20 +44,23 @@ public class PrescsDropdown : MonoBehaviour
             prescNames.Add($"{prescNameSO[i]}-{prescNameYT[i]}");
         }
 
-        foreach (string name in prescNames)
-        {
-            dropdown.options.Add(new TMP_Dropdown.OptionData() { text = name });
-        }
+        dropdown.AddOptions(prescNames);
 
         dropdown.RefreshShownValue();
-
     }
 
-    public void OnDropdownValueChanged(int value)
+    private void OnDropdownValueChanged(uint value)
     {
-        if (dropdown == null || dropdown.options.Count == 0) return;
+        if (dropdown == null || dropdown.options.Count == 0)
+            return;
 
-        string selectedText = dropdown.options[value].text;
+        int index = (int)value;
+
+        if (index < 0 || index >= dropdown.options.Count)
+            return;
+
+        string selectedText = dropdown.options[index].text;
         manager.updateSelectedPrescriptions(selectedText, isMainPlot);
     }
+
 }
