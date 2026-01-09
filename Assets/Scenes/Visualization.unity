@@ -74391,7 +74391,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 725.2, y: 3.5}
-  m_SizeDelta: {x: 289.39, y: 690.2}
+  m_SizeDelta: {x: 289.39, y: 613.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1175913689
 GameObject:
@@ -85299,9 +85299,9 @@ MonoBehaviour:
   treeInfoText: {fileID: 1672349781}
   treeInfoBox: {fileID: 208998531}
   graphsBox: {fileID: 1455496486}
-  showingTreeInfoGraphsBoxPos: {x: -5, y: 23.6, z: 0}
+  showingTreeInfoGraphsBoxPos: {x: -5, y: 21.5, z: 0}
   showingTreeInfoGraphsBoxWidth: 290
-  showingTreeInfoGraphsBoxHeight: 409
+  showingTreeInfoGraphsBoxHeight: 403.5
   visualizer: {fileID: 671107854}
   visulaizationCanvas: {fileID: 1334169299}
   Camera1: {fileID: 330585543}
