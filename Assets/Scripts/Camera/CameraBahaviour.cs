@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.EventSystems;  // ADD THIS
 
 public class CameraBehaviour : MonoBehaviour
 {
@@ -52,12 +53,14 @@ public class CameraBehaviour : MonoBehaviour
 
     void Update()
     {
+        bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (Input.GetKeyDown(KeyCode.R))
         {
             ResetCamera();
         }
-        if (scroll != 0 && IsMouseOverViewport())
+        if (scroll != 0 && IsMouseOverViewport() && !isOverUI)
         {
             if (!isTopographic)
             {
@@ -68,7 +71,7 @@ public class CameraBehaviour : MonoBehaviour
                 cam.orthographicSize = Mathf.Clamp(cam.orthographicSize - scroll * zoomSpeed, minZoomOrtho, maxZoomOrtho);
             }
         }
-        if (canUseCameraMovement && ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
+        if (canUseCameraMovement && !isOverUI && ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
         {
             if (isFree && !isTopographic)
             {

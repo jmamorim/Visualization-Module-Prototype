@@ -3054,53 +3054,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 346142584}
   m_CullTransparentMesh: 1
---- !u!1 &351537997
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 351537999}
-  - component: {fileID: 351537998}
-  m_Layer: 0
-  m_Name: FeedbackController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &351537998
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 351537997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81bf302ee1cfd344a8ffcfc4e37b6637, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FeedbackController
-  feedbackTexts:
-  - {fileID: 0}
-  - {fileID: 0}
---- !u!4 &351537999
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 351537997}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1104.4761, y: 330.32983, z: -39.98712}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &366522312
 GameObject:
   m_ObjectHideFlags: 0
@@ -9667,7 +9620,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85975577881a6a64c83c14bcadbdc06d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FeedbackController: {fileID: 351537998}
+  FeedbackController: {fileID: 0}
   selectedSim1: {fileID: 346142587}
   selectedSim2: {fileID: 0}
   intervalInputField: {fileID: 882822180}
@@ -14023,7 +13976,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85975577881a6a64c83c14bcadbdc06d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FeedbackController: {fileID: 351537998}
+  FeedbackController: {fileID: 0}
   selectedSim1: {fileID: 842209282}
   selectedSim2: {fileID: 1921046604}
   intervalInputField: {fileID: 751405572}
@@ -19146,4 +19099,3 @@ SceneRoots:
   - {fileID: 1503501874}
   - {fileID: 842428534}
   - {fileID: 1408055150}
-  - {fileID: 351537999}

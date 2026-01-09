@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 // Manages the overall application state, including data reception, user input handling, and UI updates.
 // needs to change so it can adapt visualization and data representation for yield table data and multi visualization 
@@ -17,6 +18,9 @@ public class Manager : MonoBehaviour
     public GameObject prescDropdown1, prescDropdown2;
     public bool canInteract = true;
     public TMP_Text sim1, sim2;
+    public Slider yearSlider1;
+    public Slider yearSlider2;
+    public Transform multiVisSliderPos;
 
     CameraBehaviour cameraBehaviour1, cameraBehaviour2;
     PrescsDropdown pDropdown1, pDropdown2;
@@ -52,6 +56,7 @@ public class Manager : MonoBehaviour
         selectedId_presc1 = outputSoloTreesData[selectedId_stand1].First().Key;
         selectedId_presc1YT = YieldTableData[selectedId_stand1].First().Key;
 
+
         if (outputSoloTreesData.Count() > 1)
         {
             prescDropdown2.SetActive(true);
@@ -64,6 +69,27 @@ public class Manager : MonoBehaviour
             selectedId_presc2YT = YieldTableData[selectedId_stand2].First().Key;
         }
 
+        if (yearSlider1 != null)
+        {
+            int maxYear1 = outputSoloTreesData[selectedId_stand1][selectedId_presc1].Count - 1;
+            yearSlider1.minValue = 0;
+            yearSlider1.maxValue = maxYear1;
+            yearSlider1.value = 0;
+            yearSlider1.wholeNumbers = true;
+            yearSlider1.onValueChanged.AddListener(OnYearSlider1Changed);
+        }
+
+        if (yearSlider2 != null && outputSoloTreesData.Count > 1)
+        {
+            yearSlider1.transform.localPosition = multiVisSliderPos.localPosition;
+            int maxYear2 = outputSoloTreesData[selectedId_stand2][selectedId_presc2].Count - 1;
+            yearSlider2.minValue = 0;
+            yearSlider2.maxValue = maxYear2;
+            yearSlider2.value = 0;
+            yearSlider2.wholeNumbers = true;
+            yearSlider2.onValueChanged.AddListener(OnYearSlider2Changed);
+        }
+        
         receiveSoloTreesData(outputSoloTreesData);
         receiveYieldTableData(YieldTableData, DDTableData);
     }
@@ -172,6 +198,26 @@ public class Manager : MonoBehaviour
         }
     }
 
+    private void OnYearSlider1Changed(float value)
+    {
+        int newYear = Mathf.RoundToInt(value);
+        if (newYear != current_year1)
+        {
+            changePlot1(newYear);
+            changeHightlight();
+        }
+    }
+
+    private void OnYearSlider2Changed(float value)
+    {
+        int newYear = Mathf.RoundToInt(value);
+        if (newYear != current_year2)
+        {
+            changePlot2(newYear);
+            changeHightlight();
+        }
+    }
+
     public bool isParalelCameraActiveFunc()
     {
         return isParalelCameraActive;
@@ -195,6 +241,11 @@ public class Manager : MonoBehaviour
                 new string[] { selectedId_presc1YT, selectedId_presc2YT },
                 new int[] { current_year1, current_year2 }
             );
+
+            if (yearSlider1 != null)
+            {
+                yearSlider1.value = current_year1;
+            }
         }
     }
 
@@ -211,6 +262,11 @@ public class Manager : MonoBehaviour
                 new string[] { selectedId_presc1YT, selectedId_presc2YT },
                 new int[] { current_year1, current_year2 }
             );
+
+            if (yearSlider1 != null)
+            {
+                yearSlider1.value = current_year1;
+            }
         }
     }
 
@@ -227,6 +283,11 @@ public class Manager : MonoBehaviour
                 new string[] { selectedId_presc1YT, selectedId_presc2YT },
                 new int[] { current_year1, current_year2 }
             );
+
+            if (yearSlider2 != null)
+            {
+                yearSlider2.value = current_year2;
+            }
         }
     }
 
@@ -243,6 +304,11 @@ public class Manager : MonoBehaviour
                 new string[] { selectedId_presc1YT, selectedId_presc2YT },
                 new int[] { current_year1, current_year2 }
             );
+
+            if (yearSlider2 != null)
+            {
+                yearSlider2.value = current_year2;
+            }
         }
     }
 
@@ -301,6 +367,10 @@ public class Manager : MonoBehaviour
                 new string[] { selectedId_presc1YT, selectedId_presc2YT },
                 new int[] { current_year1, current_year2 }
             );
+            if (yearSlider1 != null)
+            {
+                yearSlider1.value = current_year1;
+            }
             changeHightlight();
         }
     }
@@ -324,6 +394,10 @@ public class Manager : MonoBehaviour
                 new string[] { selectedId_presc1YT, selectedId_presc2YT },
                 new int[] { current_year1, current_year2 }
             );
+            if (yearSlider2 != null)
+            {
+                yearSlider2.value = current_year2;
+            }
             changeHightlight();
         }
     }
@@ -396,6 +470,13 @@ public class Manager : MonoBehaviour
             selectedId_presc1 = prescIds[0];
             selectedId_presc1YT = prescIds[1];
             current_year1 = 0;
+
+            if (yearSlider1 != null)
+            {
+                int maxYear1 = outputSoloTreesData[selectedId_stand1][selectedId_presc1].Count - 1;
+                yearSlider1.maxValue = maxYear1;
+                yearSlider1.value = 0;
+            }
         }
         else
         {
@@ -403,6 +484,13 @@ public class Manager : MonoBehaviour
             selectedId_presc2 = prescIds2[0];
             selectedId_presc2YT = prescIds2[1];
             current_year2 = 0;
+
+            if (yearSlider2 != null)
+            {
+                int maxYear2 = outputSoloTreesData[selectedId_stand2][selectedId_presc2].Count - 1;
+                yearSlider2.maxValue = maxYear2;
+                yearSlider2.value = 0;
+            }
         }
 
         visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
