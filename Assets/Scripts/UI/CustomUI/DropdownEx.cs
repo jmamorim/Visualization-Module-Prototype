@@ -1250,11 +1250,13 @@ namespace CustomUI
         /// </summary>
         public void Hide()
         {
+            if (AllowMultiSelect && m_IsSelectingItem)
+                return;
+
             if (m_Dropdown != null)
             {
                 AlphaFadeList(0.15f, 0f);
 
-                // User could have disabled the dropdown during the OnValueChanged call.
                 if (IsActive())
                     StartCoroutine(DelayedDestroyDropdownList(0.15f));
             }
@@ -1278,9 +1280,12 @@ namespace CustomUI
             m_Dropdown = null;
         }
 
-        // Change the value and hide the dropdown.
+        private bool m_IsSelectingItem = false;
+
         private void OnSelectItem(Toggle toggle)
         {
+            m_IsSelectingItem = true;
+
             if (!toggle.isOn && !AllowMultiSelect)
                 toggle.isOn = true;
 
@@ -1291,16 +1296,16 @@ namespace CustomUI
             {
                 if (parent.GetChild(i) == tr)
                 {
-                    // Subtract one to account for template child.
                     selectedIndex = i - 1;
                     break;
                 }
             }
 
             if (selectedIndex < 0)
+            {
+                m_IsSelectingItem = false;
                 return;
-
-            // options[selectedIndex].selected = toggle.isOn;
+            }
 
             if (toggle.isOn)
             {
@@ -1313,12 +1318,14 @@ namespace CustomUI
             {
                 if (AllowMultiSelect)
                     value &= ~(1u << selectedIndex);
-                else
-                    value = (uint)selectedIndex;
             }
 
-            Hide();
+            m_IsSelectingItem = false;
+
+            if (!AllowMultiSelect)
+                Hide();
         }
+
 
         public void DeselectAll()
         {

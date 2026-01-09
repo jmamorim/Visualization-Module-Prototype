@@ -1,9 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Rendering;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.EventSystems;  // ADD THIS
+using UnityEngine.EventSystems;
 
 public class CameraBehaviour : MonoBehaviour
 {

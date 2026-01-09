@@ -22,26 +22,26 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
     List<float> originalDDValues = new List<float>();
     bool ddPercentageMode = false;
 
-    [SerializeField] private Canvas rootCanvas;
-    [SerializeField] private Button fullscreenButton;
-    [SerializeField] private Button percentageButton;
-    [SerializeField] private Sprite inactiveSprite;
-    [SerializeField] private Sprite activeSprite;
-    [SerializeField] private Color inactiveColor = Color.red;
-    [SerializeField] private Color activeColor = Color.green;
+    [SerializeField] Canvas rootCanvas;
+    [SerializeField] Button fullscreenButton;
+    [SerializeField] Button percentageButton;
+    [SerializeField] Sprite inactiveSprite;
+    [SerializeField] Sprite activeSprite;
+    [SerializeField] Color inactiveColor = Color.red;
+    [SerializeField] Color activeColor = Color.green;
 
-    private RectTransform rect;
-    private Transform originalParent;
-    private int originalSiblingIndex;
+    RectTransform rect;
+    Transform originalParent;
+    int originalSiblingIndex;
 
-    private Vector2 originalAnchorMin;
-    private Vector2 originalAnchorMax;
-    private Vector2 originalOffsetMin;
-    private Vector2 originalOffsetMax;
-    private Vector2 originalScale;
+    Vector2 originalAnchorMin;
+    Vector2 originalAnchorMax;
+    Vector2 originalOffsetMin;
+    Vector2 originalOffsetMax;
+    Vector2 originalScale;
 
-    private bool isPercentage = false;
-    private bool isFullscreen = false;
+    bool isPercentage = false;
+    bool isFullscreen = false;
 
 
     private void Awake()
@@ -81,6 +81,7 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
             return;
 
         isFullscreen = true;
+        manager.isExpanded = true;
 
         originalParent = rect.parent;
         originalSiblingIndex = rect.GetSiblingIndex();
@@ -113,6 +114,7 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
             return;
 
         isFullscreen = false;
+        manager.isExpanded = false;
 
         rect.SetParent(originalParent, false);
         rect.SetSiblingIndex(originalSiblingIndex);

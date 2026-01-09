@@ -21,6 +21,7 @@ public class Manager : MonoBehaviour
     public Slider yearSlider1;
     public Slider yearSlider2;
     public Transform multiVisSliderPos;
+    public bool isExpanded = false;
 
     CameraBehaviour cameraBehaviour1, cameraBehaviour2;
     PrescsDropdown pDropdown1, pDropdown2;
@@ -31,7 +32,6 @@ public class Manager : MonoBehaviour
     int current_year1, current_year2;
     string selectedId_stand1, selectedId_stand2, selectedId_presc1, selectedId_presc2, selectedId_presc1YT, selectedId_presc2YT;
     GameObject lastSelectedTree;
-
     private void Start()
     {
         cameraBehaviour1 = Camera1.GetComponent<CameraBehaviour>();
@@ -96,104 +96,107 @@ public class Manager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (!isExpanded)
         {
-            var cams = Camera.allCameras;
-            foreach (Camera cam in cams)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                var behaviour = cam.GetComponent<CameraBehaviour>();
-                if (behaviour.IsMouseOverViewport())
+                var cams = Camera.allCameras;
+                foreach (Camera cam in cams)
                 {
-                    behaviour.SetFreeCamera(!behaviour.IsFreeCamera());
-                    break;
+                    var behaviour = cam.GetComponent<CameraBehaviour>();
+                    if (behaviour.IsMouseOverViewport())
+                    {
+                        behaviour.SetFreeCamera(!behaviour.IsFreeCamera());
+                        break;
+                    }
                 }
             }
-        }
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            ResetSelected();
-            cam1.orthographic = false;
-            if (outputSoloTreesData.Count > 1)
-                cam2.orthographic = false;
-            visualizer.StartLidarFlyover(1);
-        }
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            ResetSelected();
-            cam1.orthographic = false;
-            if (outputSoloTreesData.Count > 1)
-                cam2.orthographic = false;
-            visualizer.StartOrbitalLidarFlyover(1);
-        }
-        if (outputSoloTreesData.Count > 1)
-        {
-            if (Input.GetKeyDown(KeyCode.K))
+            if (Input.GetKeyDown(KeyCode.L))
             {
                 ResetSelected();
                 cam1.orthographic = false;
-                cam2.orthographic = false;
-                visualizer.StartLidarFlyover(2);
+                if (outputSoloTreesData.Count > 1)
+                    cam2.orthographic = false;
+                visualizer.StartLidarFlyover(1);
             }
-            if (Input.GetKeyDown(KeyCode.I))
+            if (Input.GetKeyDown(KeyCode.O))
             {
                 ResetSelected();
                 cam1.orthographic = false;
-                cam2.orthographic = false;
-                visualizer.StartOrbitalLidarFlyover(2);
-            }
-        }
-
-        if (outputSoloTreesData != null && canInteract)
-        {
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                advancePlot1();
                 if (outputSoloTreesData.Count > 1)
-                    advancePlot2();
-                changeHightlight();
+                    cam2.orthographic = false;
+                visualizer.StartOrbitalLidarFlyover(1);
             }
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                reversePlot1();
-                if (outputSoloTreesData.Count > 1)
-                    reversePlot2();
-                changeHightlight();
-            }
-
-            //change year for each plot individualy
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                advancePlot1();
-                changeHightlight();
-            }
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                reversePlot1();
-                changeHightlight();
-            }
-
             if (outputSoloTreesData.Count > 1)
             {
-                if (Input.GetKeyDown(KeyCode.C))
+                if (Input.GetKeyDown(KeyCode.K))
                 {
-                    advancePlot2();
-                    changeHightlight();
+                    ResetSelected();
+                    cam1.orthographic = false;
+                    cam2.orthographic = false;
+                    visualizer.StartLidarFlyover(2);
                 }
-                if (Input.GetKeyDown(KeyCode.V))
+                if (Input.GetKeyDown(KeyCode.I))
                 {
-                    reversePlot2();
-                    changeHightlight();
+                    ResetSelected();
+                    cam1.orthographic = false;
+                    cam2.orthographic = false;
+                    visualizer.StartOrbitalLidarFlyover(2);
                 }
             }
 
-
-            if (Input.GetKeyDown(KeyCode.P))
+            if (outputSoloTreesData != null && canInteract)
             {
-                if (cameraBehaviour1.IsMouseOverViewport())
-                    cameraBehaviour1.SetToTopographic();
+                if (Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    advancePlot1();
+                    if (outputSoloTreesData.Count > 1)
+                        advancePlot2();
+                    changeHightlight();
+                }
+                if (Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    reversePlot1();
+                    if (outputSoloTreesData.Count > 1)
+                        reversePlot2();
+                    changeHightlight();
+                }
 
-                if (outputSoloTreesData.Count > 1 && cameraBehaviour2.IsMouseOverViewport())
-                    cameraBehaviour2.SetToTopographic();
+                //change year for each plot individualy
+                if (Input.GetKeyDown(KeyCode.X))
+                {
+                    advancePlot1();
+                    changeHightlight();
+                }
+                if (Input.GetKeyDown(KeyCode.Z))
+                {
+                    reversePlot1();
+                    changeHightlight();
+                }
+
+                if (outputSoloTreesData.Count > 1)
+                {
+                    if (Input.GetKeyDown(KeyCode.C))
+                    {
+                        advancePlot2();
+                        changeHightlight();
+                    }
+                    if (Input.GetKeyDown(KeyCode.V))
+                    {
+                        reversePlot2();
+                        changeHightlight();
+                    }
+                }
+
+
+                if (Input.GetKeyDown(KeyCode.P))
+                {
+                    if (cameraBehaviour1.IsMouseOverViewport())
+                        cameraBehaviour1.SetToTopographic();
+
+                    if (outputSoloTreesData.Count > 1 && cameraBehaviour2.IsMouseOverViewport())
+                        cameraBehaviour2.SetToTopographic();
+                }
             }
         }
     }
