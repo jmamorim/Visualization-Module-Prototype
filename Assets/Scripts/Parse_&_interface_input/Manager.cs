@@ -5,10 +5,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // Manages the overall application state, including data reception, user input handling, and UI updates.
-// needs to change so it can adapt visualization and data representation for yield table data and multi visualization 
 public class Manager : MonoBehaviour
 {
     public TMP_Text treeInfoText;
+    public GameObject treeInfoBox, graphsBox;
+    public Vector3 showingTreeInfoGraphsBoxPos;
+    public float showingTreeInfoGraphsBoxWidth, showingTreeInfoGraphsBoxHeight;
     public Visualizer visualizer;
     public Canvas visulaizationCanvas;
     public GameObject Camera1, Camera2;
@@ -32,6 +34,9 @@ public class Manager : MonoBehaviour
     int current_year1, current_year2;
     string selectedId_stand1, selectedId_stand2, selectedId_presc1, selectedId_presc2, selectedId_presc1YT, selectedId_presc2YT;
     GameObject lastSelectedTree;
+    Vector3 originalGraphsBoxPos;
+    float originalGraphsBoxWidth, originalGraphBoxHeight;
+
     private void Start()
     {
         cameraBehaviour1 = Camera1.GetComponent<CameraBehaviour>();
@@ -40,6 +45,9 @@ public class Manager : MonoBehaviour
         cam2 = Camera2.GetComponent<Camera>();
         pDropdown1 = prescDropdown1.GetComponent<PrescsDropdown>();
         pDropdown2 = prescDropdown2.GetComponent<PrescsDropdown>();
+        originalGraphsBoxPos = graphsBox.transform.localPosition;
+        originalGraphsBoxWidth = (int)graphsBox.GetComponent<RectTransform>().sizeDelta.x;
+        originalGraphBoxHeight = (int)graphsBox.GetComponent<RectTransform>().sizeDelta.y;
 
         outputSoloTreesData = inputAndParsedData.outputSoloTreesData;
         YieldTableData = inputAndParsedData.outputYieldTable;
@@ -236,7 +244,7 @@ public class Manager : MonoBehaviour
         if (current_year1 < outputSoloTreesData[selectedId_stand1][selectedId_presc1].Count - 1)
         {
             current_year1++;
-            treeInfoText.text = "";
+            HideTreeInfo();
             visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
             graphGenerator.populateDDBarCharts(
                 DDTableData,
@@ -257,7 +265,7 @@ public class Manager : MonoBehaviour
         if (current_year1 > 0)
         {
             current_year1--;
-            treeInfoText.text = "";
+            HideTreeInfo(); 
             visualizer.receiveTreeDataPlot1(outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1], outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year);
             graphGenerator.populateDDBarCharts(
                 DDTableData,
@@ -278,7 +286,7 @@ public class Manager : MonoBehaviour
         if (current_year2 < outputSoloTreesData[selectedId_stand2][selectedId_presc2].Count - 1)
         {
             current_year2++;
-            treeInfoText.text = "";
+            HideTreeInfo(); 
             visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
             graphGenerator.populateDDBarCharts(
                DDTableData,
@@ -299,7 +307,7 @@ public class Manager : MonoBehaviour
         if (current_year2 > 0)
         {
             current_year2--;
-            treeInfoText.text = "";
+            HideTreeInfo(); 
             visualizer.receiveTreeDataPlot2(outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2], outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year);
             graphGenerator.populateDDBarCharts(
                 DDTableData,
@@ -359,7 +367,7 @@ public class Manager : MonoBehaviour
 
         if (current_year1 >= 0)
         {
-            treeInfoText.text = "";
+            HideTreeInfo(); 
             visualizer.receiveTreeDataPlot1(
                 outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1],
                 outputSoloTreesData[selectedId_stand1][selectedId_presc1][current_year1].Values.First().Year
@@ -386,7 +394,7 @@ public class Manager : MonoBehaviour
 
         if (current_year2 >= 0)
         {
-            treeInfoText.text = "";
+            HideTreeInfo(); 
             visualizer.receiveTreeDataPlot2(
                 outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2],
                 outputSoloTreesData[selectedId_stand2][selectedId_presc2][current_year2].Values.First().Year
@@ -538,6 +546,9 @@ public class Manager : MonoBehaviour
     {
         if (treeInfoText != null)
         {
+            graphsBox.transform.localPosition = showingTreeInfoGraphsBoxPos;
+            graphsBox.GetComponent<RectTransform>().sizeDelta = new Vector2(showingTreeInfoGraphsBoxWidth, showingTreeInfoGraphsBoxHeight);
+            treeInfoBox.SetActive(true);
             treeInfoText.text = $"Tree information:\n" +
                                 $"Cicle: {t.ciclo}\n" +
                                 $"Year: {t.Year}\n" +
@@ -553,6 +564,9 @@ public class Manager : MonoBehaviour
     {
         if (treeInfoText != null)
         {
+            graphsBox.transform.localPosition = originalGraphsBoxPos;
+            graphsBox.GetComponent<RectTransform>().sizeDelta = new Vector2(originalGraphsBoxWidth, originalGraphBoxHeight);
+            treeInfoBox.SetActive(false);
             treeInfoText.text = "";
         }
     }
