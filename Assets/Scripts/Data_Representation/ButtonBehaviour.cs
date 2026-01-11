@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class ButtonBehaviour : MonoBehaviour
@@ -9,14 +7,13 @@ public class ButtonBehaviour : MonoBehaviour
     public bool disablesSelf;
     public Vector2 origianlPos;
     public Animator animator;
-    public List<GameObject> objectsToDisable;
     public bool isButtonDisableEnable = false, open = false;
 
     RectTransform rectTransform;
 
     private void Start()
     {
-        if(item != null)
+        if (item != null)
             rectTransform = item.GetComponent<RectTransform>();
     }
 
@@ -24,12 +21,10 @@ public class ButtonBehaviour : MonoBehaviour
     {
         if (isButtonDisableEnable)
         {
-        if (animator != null)
-        {
-            animator.SetBool("IsOpen",open);
-        }
-            foreach (GameObject obj in objectsToDisable)
-                obj.SetActive(!obj.activeSelf);
+            if (animator != null)
+            {
+                animator.SetBool("IsOpen", open);
+            }
         }
         if (item != null)
         {

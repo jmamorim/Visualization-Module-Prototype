@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class TreeData
 {
     public int ciclo, Year, id_arv, estado;
