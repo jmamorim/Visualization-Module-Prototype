@@ -72,4 +72,17 @@ public class GraphMultiSelectManager : MonoBehaviour
             LayoutRebuilder.ForceRebuildLayoutImmediate(contentRoot);
         }
     }
+    public void DeactivateLastTwoGraphs()
+    {
+        if (allGraphs.Count >= 2 && graphDropdown != null)
+        {
+            int lastIndex = allGraphs.Count - 1;
+            int secondLastIndex = allGraphs.Count - 2;
+
+            //bit mask for the last two graphs because of how value works in DropdownEx
+            uint mask = ~((1u << lastIndex) | (1u << secondLastIndex));
+
+            graphDropdown.value &= mask;
+        }
+    }
 }

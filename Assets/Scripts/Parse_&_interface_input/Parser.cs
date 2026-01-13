@@ -60,9 +60,9 @@ public class Parser : MonoBehaviour
             }
         }
 
-        SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData = new SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>();
-        SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> outputYieldTableData = new SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>>();
-        SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> outputDDTableData = new SortedDictionary<string, SortedDictionary<string, List<DDEntry>>>();
+        List<Dictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>> outputSoloTreesDataList = new List<Dictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>>();
+        List<Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>>> outputYieldTableDataList = new List<Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>>>();
+        List<Dictionary<string, SortedDictionary<string, List<DDEntry>>>> outputDDTableDataList = new List<Dictionary<string, SortedDictionary<string, List<DDEntry>>>>();
         List<(int, List<float>)> shapeData = new List<(int, List<float>)>();
 
         if (dpsolo != null)
@@ -192,20 +192,28 @@ public class Parser : MonoBehaviour
 
         for (int i = 0; i < soloTreePaths.Count; i++)
         {
-            parseSoloTrees(outputSoloTreesData, soloTreePaths[i], selectedIdStands[i]);
-            parseYieldTable(outputYieldTableData, yieldTablePaths[i], selectedIdStands[i]);
-            parseDDTable(outputDDTableData, DDTablePaths[i], selectedIdStands[i]);
+            Dictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> soloTreesData = new Dictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>();
+            Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>> yieldTableData = new Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>>();
+            Dictionary<string, SortedDictionary<string, List<DDEntry>>> ddTableData = new Dictionary<string, SortedDictionary<string, List<DDEntry>>>();
+
+            parseSoloTrees(soloTreesData, soloTreePaths[i], selectedIdStands[i]);
+            parseYieldTable(yieldTableData, yieldTablePaths[i], selectedIdStands[i]);
+            parseDDTable(ddTableData, DDTablePaths[i], selectedIdStands[i]);
+
+            outputSoloTreesDataList.Add(soloTreesData);
+            outputYieldTableDataList.Add(yieldTableData);
+            outputDDTableDataList.Add(ddTableData);
         }
 
         so.simIds = new List<string> { selectedSim1.options[selectedSim1.value].text, selectedSim2 != null ? selectedSim2.options[selectedSim2.value].text : ""};
-        so.outputSoloTreesData = outputSoloTreesData;
-        so.outputYieldTable = outputYieldTableData;
-        so.outputDDTable = outputDDTableData;
+        so.outputSoloTreesData = outputSoloTreesDataList;
+        so.outputYieldTable = outputYieldTableDataList;
+        so.outputDDTable = outputDDTableDataList;
         so.plotShapeAndDimensions = shapeData;
         SceneManager.LoadScene(1);//GOTO VISUALIZATION SCENE
     }
 
-    private void parseSoloTrees(SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> output, string soloTreePath, string selectedIdStand)
+    private void parseSoloTrees(Dictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> output, string soloTreePath, string selectedIdStand)
     {
         if (string.IsNullOrEmpty(soloTreePath))
         {
@@ -432,7 +440,7 @@ public class Parser : MonoBehaviour
         return treesInfoPerYear;
     }
 
-    private void parseYieldTable(SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> output, string yieldTablePath, string selectedIdStand)
+    private void parseYieldTable(Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>> output, string yieldTablePath, string selectedIdStand)
     {
         if (string.IsNullOrEmpty(yieldTablePath))
         {
@@ -603,7 +611,7 @@ public class Parser : MonoBehaviour
         }
     }
 
-    private void parseDDTable(SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> output, string DDTablePath, string selectedIdStand)
+    private void parseDDTable(Dictionary<string, SortedDictionary<string, List<DDEntry>>> output, string DDTablePath, string selectedIdStand)
     {
         if (string.IsNullOrEmpty(DDTablePath))
         {

@@ -122,7 +122,7 @@ public class IdStandsDropdown : MonoBehaviour
 
             if (plotData.prescriptions.Count > 0)
             {
-                prescText += "Prescrições Aplicadas:\n";
+                prescText += "Prescrições:\n";
                 foreach (string presc in plotData.prescriptions)
                 {
                     prescText += "• " + presc + "\n";
@@ -142,8 +142,8 @@ public class IdStandsDropdown : MonoBehaviour
 
             infoText += "<b>Identificação:</b>\n";
             infoText += "ID Povoamento: " + plotData.id_par + "\n";
-            infoText += "Área UG: " + plotData.AreaUG.ToString("F2") + " ha\n";
-            infoText += "ID Meteo: " + plotData.id_meteo + "\n\n";
+            infoText += "Área: " + plotData.AreaUG.ToString("F2") + " ha\n";
+            infoText += "ID Meteorologia: " + plotData.id_meteo + "\n\n";
 
             infoText += "<b>Localização:</b>\n";
             infoText += "Coordenadas: (" + plotData.CoordX.ToString("F2") + ", " + plotData.CoordY.ToString("F2") + ")\n";
@@ -161,17 +161,17 @@ public class IdStandsDropdown : MonoBehaviour
 
             if (plotData.plotShape == 0)
             {
-                infoText += "Área da Parcela: " + plotData.Aplot.ToString("F2") + " m²";
+                infoText += "Área da Parcela: " + plotData.Aplot.ToString("F2") + " m²\n\n";
             }
             else if (plotData.plotShape == 1 || plotData.plotShape == 2 || plotData.plotShape == 3)
             {
                 infoText += "Comprimento 1: " + plotData.length1.ToString("F2") + " m\n";
-                infoText += "Comprimento 2: " + plotData.length2.ToString("F2") + " m\n";
+                infoText += "Comprimento 2: " + plotData.length2.ToString("F2") + " m\n\n";
             }
             else if (plotData.plotShape == 4)
             {
                 infoText += "Coordenadas X: [" + plotData.CoordX1.ToString("F2") + ", " + plotData.CoordX2.ToString("F2") + ", " + plotData.CoordX3.ToString("F2") + ", " + plotData.CoordX4.ToString("F2") + "]\n";
-                infoText += "Coordenadas Y: [" + plotData.CoordY1.ToString("F2") + ", " + plotData.CoordY2.ToString("F2") + ", " + plotData.CoordY3.ToString("F2") + ", " + plotData.CoordY4.ToString("F2") + "]\n";
+                infoText += "Coordenadas Y: [" + plotData.CoordY1.ToString("F2") + ", " + plotData.CoordY2.ToString("F2") + ", " + plotData.CoordY3.ToString("F2") + ", " + plotData.CoordY4.ToString("F2") + "]\n\n";
             }
 
             infoText += "Nº Árvores/Parcela: " + plotData.Narvp + "\n\n";

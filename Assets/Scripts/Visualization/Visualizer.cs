@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.ProBuilder;
 
 public class Visualizer : MonoBehaviour
 {
@@ -170,7 +171,11 @@ public class Visualizer : MonoBehaviour
                 ConfigureTerrainOrigin(terrain2, shapeType2, dims2, out isCircularPlot2, plotReference2, cam2);
             }
         }
-        GenerateNoise();
+        else
+        {
+            ConfigureTerrainOrigin(terrain2, shapeType1, dims1, out isCircularPlot2, plotReference2, cam2);
+        }
+            GenerateNoise();
     }
     private void GenerateNoise()
     {
@@ -308,14 +313,16 @@ public class Visualizer : MonoBehaviour
         displayTrees(trees, terrain1, isCircularPlot1);
     }
 
-    public void receiveTreeDataPlot2(SortedDictionary<int, TreeData> data, int currentYear)
+    public void receiveTreeDataPlot2(SortedDictionary<int, TreeData> data, int currentYear, bool isMulti)
     {
         clear("Plot2");
         var trees = data.Values.ToList();
         createObjects(trees, terrain2, true, isCircularPlot2);
-        yearText2.text = "Ano: " + currentYear.ToString();
-        idStand2.text = "Povoamento:" + trees[0].id_stand;
-        box2.SetActive(true);
+        if (isMulti) {
+            yearText2.text = "Ano: " + currentYear.ToString();
+            idStand2.text = "Povoamento:" + trees[0].id_stand;
+            box2.SetActive(true);
+        }
         displayTrees(trees, terrain2, isCircularPlot2);
     }
 

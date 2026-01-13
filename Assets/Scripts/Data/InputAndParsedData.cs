@@ -9,9 +9,10 @@ public class InputAndParsedData : ScriptableObject
 
     public List<string> simIds;
     [System.NonSerialized]
-    public SortedDictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>> outputSoloTreesData;
+    public List<Dictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>> outputSoloTreesData;
     [System.NonSerialized]
-    public SortedDictionary<string, SortedDictionary<string, List<YieldTableEntry>>> outputYieldTable;
+    public List<Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>>> outputYieldTable;
     [System.NonSerialized]
-    public SortedDictionary<string, SortedDictionary<string, List<DDEntry>>> outputDDTable;
+    public List<Dictionary<string, SortedDictionary<string, List<DDEntry>>>> outputDDTable;
+
 }

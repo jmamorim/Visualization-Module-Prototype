@@ -16,8 +16,8 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
     [SerializeField] BaseChart chart;
     bool isDragging = false;
     bool isResizing = false;
-    
-    List<float> originalDDValues = new List<float>();
+
+    List<List<float>> originalDDValues = new List<List<float>>();
     bool ddPercentageMode = false;
 
     [SerializeField] Canvas rootCanvas;
@@ -130,13 +130,12 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
         chart.RefreshChart();
     }
 
-    public void SaveDDOriginalValues(List<float> values)
+    public void SaveDDOriginalValues(List<List<float>> allValues)
     {
         if (!isDD || chart == null) return;
 
         originalDDValues.Clear();
-
-        originalDDValues = values;
+        originalDDValues = allValues;
 
         if (ddPercentageMode)
         {
@@ -187,6 +186,7 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
         Debug.Log($"Clicked on serie {clickedSerieIndex}, data index {clickedDataIndex}");
         manager.changeSimYearOnGraphClick(clickedSerieIndex, clickedDataIndex, isMultiLine, isBar);
     }
+
     public void TogglePercentageView()
     {
         if (!isPercentage)
@@ -215,31 +215,35 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
             serie.barPercentStack = false;
         }
     }
+
     public void ToggleDDPercentageView()
     {
         if (!ddPercentageMode)
         {
             Debug.Log("Toggling DD Percentage View");
-        
+
             ddPercentageMode = true;
             percentageButton.GetComponent<Image>().color = activeColor;
 
-            var serie = chart.series.First();
-
-            float total = 0f;
-            foreach (float v in originalDDValues)
-                total += v;
-
-            serie.ClearData();
-
-            foreach (float v in originalDDValues)
+            for (int serieIndex = 0; serieIndex < chart.series.Count && serieIndex < originalDDValues.Count; serieIndex++)
             {
-                float percentage = (v / total) * 100f;
-                serie.AddData(percentage);
+                var serie = chart.series[serieIndex];
+                var values = originalDDValues[serieIndex];
+
+                float total = 0f;
+                foreach (float v in values)
+                    total += v;
+
+                serie.ClearData();
+
+                foreach (float v in values)
+                {
+                    float percentage = total > 0 ? (v / total) * 100f : 0f;
+                    serie.AddData(percentage);
+                }
             }
 
             var yaxis = chart.GetChartComponent<YAxis>();
-
             yaxis.min = 0;
             yaxis.max = 100;
 
@@ -257,20 +261,22 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
 
         ddPercentageMode = false;
         percentageButton.GetComponent<Image>().color = inactiveColor;
-        
-        var serie = chart.series.First();
-        serie.ClearData();
 
-        foreach (float v in originalDDValues)
-            serie.AddData(v);
+        for (int serieIndex = 0; serieIndex < chart.series.Count && serieIndex < originalDDValues.Count; serieIndex++)
+        {
+            var serie = chart.series[serieIndex];
+            var values = originalDDValues[serieIndex];
+
+            serie.ClearData();
+
+            foreach (float v in values)
+                serie.AddData(v);
+        }
 
         var yaxis = chart.GetChartComponent<YAxis>();
-
         yaxis.min = double.NaN;
         yaxis.max = double.NaN;
 
         chart.RefreshChart();
     }
-
-
 }

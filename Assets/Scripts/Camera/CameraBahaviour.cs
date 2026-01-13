@@ -27,9 +27,12 @@ public class CameraBehaviour : MonoBehaviour
     [SerializeField] bool canUseCameraMovement = true;
     [SerializeField] float freeCameraMoveSpeed = 10.0f;
     [SerializeField] float lookSensitivity = 2.0f;
+    [SerializeField] float minVerticalAngle = -45f;
+    [SerializeField] float maxVerticalAngle = 45f;
 
     private float pitch = 0f;
     private float yaw = 0f;
+    private float currentVerticalAngle = 0f;
 
     private void Start()
     {
@@ -129,8 +132,14 @@ public class CameraBehaviour : MonoBehaviour
                     {
                         float angleX = delta.x * rotationSpeed * Time.deltaTime;
                         float angleY = -delta.y * rotationSpeed * Time.deltaTime;
+
                         transform.RotateAround(target.position, Vector3.up, angleX);
-                        transform.RotateAround(target.position, transform.right, angleY);
+                        float newVerticalAngle = currentVerticalAngle + angleY;
+                        newVerticalAngle = Mathf.Clamp(newVerticalAngle, minVerticalAngle, maxVerticalAngle);
+                        float actualAngleY = newVerticalAngle - currentVerticalAngle;
+                        transform.RotateAround(target.position, transform.right, actualAngleY);
+
+                        currentVerticalAngle = newVerticalAngle;
                     }
                     else
                     {
@@ -162,6 +171,7 @@ public class CameraBehaviour : MonoBehaviour
         transform.position = initialPosition;
         transform.rotation = initialRotation;
         target.position = initialLookAt.position;
+        currentVerticalAngle = 0f;
         manager.ResetSelected();
     }
 
