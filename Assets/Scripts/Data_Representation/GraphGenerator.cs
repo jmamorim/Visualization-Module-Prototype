@@ -257,6 +257,8 @@ public class GraphGenerator : MonoBehaviour
         {
             chart.AddXAxisData(cat);
         }
+
+        chart.RefreshChart();
     }
 
     private void prepareBarChart(BaseChart chart, List<int> years)
@@ -405,13 +407,12 @@ public class GraphGenerator : MonoBehaviour
             chart.RefreshChart();
         }
     }
-
     public void populateDDBarCharts(
         List<Dictionary<string, SortedDictionary<string, List<DDEntry>>>> DDtableData,
         string[] id_stands,
         string[] id_prescs,
         int[] currentYears,
-        bool isComparingPresc = false)
+        bool isComparingPresc)
     {
         var chart = ddBarCharts[0];
         var behaviour = chart.GetComponent<GraphBehaviour>();
@@ -419,7 +420,7 @@ public class GraphGenerator : MonoBehaviour
 
         chart.GetChartComponent<Title>().text = "Distribuição de diâmetros";
 
-        int seriesToPopulate = DDtableData.Count > 1 ? 2 : (isComparingPresc ? 2 : 1);
+        int seriesToPopulate = (DDtableData.Count > 1 || isComparingPresc) ? 2 : 1;
 
         List<List<float>> allValues = new List<List<float>>();
 
@@ -430,15 +431,17 @@ public class GraphGenerator : MonoBehaviour
 
             if (plotData == null || plotData.Count == 0) continue;
 
-            int yearIndex = isComparingPresc && DDtableData.Count == 1 ? currentYears[0] : currentYears[standIndex];
+            int yearIndex = currentYears[standIndex];
+
+            if (yearIndex < 0 || yearIndex >= plotData.Count) continue;
+
             var entry = plotData[yearIndex];
 
-            // Get real stand ID from the data
             string standId = entry.id_stand;
             string serieName = isComparingPresc ? $"{standId} - {id_prescs[standIndex]}" : standId;
 
             var serie = chart.AddSerie<Bar>(serieName);
-            serie.stack = ""; 
+            serie.stack = "";
 
             Color serieColor = Color.HSVToRGB((standIndex * 0.3f) % 1f, 0.8f, 1f);
             serie.itemStyle.color = serieColor;
