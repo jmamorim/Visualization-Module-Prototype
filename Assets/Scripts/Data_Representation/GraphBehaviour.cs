@@ -185,7 +185,7 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
 
         Debug.Log($"Clicked on serie {clickedSerieIndex}, data index {clickedDataIndex}");
         int realYear = GetYearFromChartIndex(clickedDataIndex);
-        manager.changeSimYearOnGraphClick(clickedSerieIndex, realYear, isMultiLine, isBar);
+        manager.changeSimYearOnGraphClick(clickedSerieIndex, clickedDataIndex, isMultiLine, isBar);
     }
 
     int GetYearFromChartIndex(int index)
