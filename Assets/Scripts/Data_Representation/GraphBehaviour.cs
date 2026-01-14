@@ -184,8 +184,23 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
         }
 
         Debug.Log($"Clicked on serie {clickedSerieIndex}, data index {clickedDataIndex}");
-        manager.changeSimYearOnGraphClick(clickedSerieIndex, clickedDataIndex, isMultiLine, isBar);
+        int realYear = GetYearFromChartIndex(clickedDataIndex);
+        manager.changeSimYearOnGraphClick(clickedSerieIndex, realYear, isMultiLine, isBar);
     }
+
+    int GetYearFromChartIndex(int index)
+    {
+        var xAxis = chart.GetChartComponent<XAxis>();
+        if (xAxis == null || xAxis.data == null || index < 0 || index >= xAxis.data.Count)
+            return index;
+
+        string yearLabel = xAxis.data[index];
+        if (int.TryParse(yearLabel, out int year))
+            return year;
+
+        return index;
+    }
+
 
     public void TogglePercentageView()
     {

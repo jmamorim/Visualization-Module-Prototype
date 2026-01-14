@@ -86,10 +86,15 @@ public class GraphGenerator : MonoBehaviour
 
         populateMultiLineChart(tableData, id_stands, id_prescs, isComparingPresc);
 
+        int y1 = current_year1;
+        int y2 = isComparingPresc ? current_year1 : current_year2;
+
         foreach (LineChart chart in lineCharts)
-            highlightPoint(chart, current_year1, current_year2);
+            highlightPoint(chart, y1, y2);
+
         foreach (LineChart chart in MultiLineCharts)
-            highlightPointMultiLine(chart, current_year1, current_year2);
+            highlightPointMultiLine(chart, y1, y2);
+
     }
 
     private void prepareDropdown(
@@ -157,7 +162,6 @@ public class GraphGenerator : MonoBehaviour
         highlightedIndex1 = -1;
         highlightedIndex2 = -1;
 
-        // First series (always from first simulation/prescription)
         var entries1 = tableData.First().Values.First()[id_prescs[0]];
         if (entries1 != null && entries1.Count > 0)
         {
@@ -174,8 +178,6 @@ public class GraphGenerator : MonoBehaviour
                 chart.AddData(0, entry.year, valueSelector(entry));
             }
         }
-
-        // Second series (either from second simulation or second prescription)
         if (tableData.Count > 1)
         {
             // Multi-simulation case
@@ -713,15 +715,21 @@ public class GraphGenerator : MonoBehaviour
         }
     }
 
-    public void changeHighlightedYearGraphs(int year1, int year2)
+    public void changeHighlightedYearGraphs(int year1, int year2, bool isComparing)
     {
         foreach (var chart in lineCharts)
             removeHighlight(chart);
         foreach (var chart in MultiLineCharts)
             removeHighlightMultiLine(chart);
+        
+        int y1 = year1;
+        int y2 = isComparing ? year1 : year2;
+
         foreach (var chart in lineCharts)
-            highlightPoint(chart, year1, year2);
+            highlightPoint(chart, y1, y2);
+
         foreach (var chart in MultiLineCharts)
-            highlightPointMultiLine(chart, year1, year2);
+            highlightPointMultiLine(chart, y1, y2);
+
     }
 }

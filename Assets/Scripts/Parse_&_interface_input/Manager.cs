@@ -265,18 +265,32 @@ public class Manager : MonoBehaviour
         }
     }
 
+
     public void comparePresc()
     {
         isComparingPresc = !isComparingPresc;
         PrescBox2.SetActive(isComparingPresc);
         comparePrescsButton.GetComponent<Image>().color = isComparingPresc ? Color.green : Color.red;
-        if (!isComparingPresc)
+
+        if (isComparingPresc)
+        {
+            pDropdown1.SetComparisonMode(true);
+            pDropdown2.SetComparisonMode(true);
+        }
+        else
+        {
+            pDropdown1.SetComparisonMode(false);
+            pDropdown2.SetComparisonMode(false);
             graphMultiSelectManager.DeactivateLastTwoGraphs();
-        graphGenerator.receiveData(YieldTableData, DDTableData, current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, selectedId_stand1, selectedId_stand2, selectedId_presc1YT, selectedId_presc2YT, isComparingPresc);
+        }
 
         changeLayoutButton.SetActive(isComparingPresc);
-
         positionViewPorts(outputSoloTreesData.Count > 1, null);
+    }
+
+    public bool IsComparingPresc()
+    {
+        return isComparingPresc;
     }
 
     private void OnYearSlider2Changed(float value)
@@ -306,7 +320,7 @@ public class Manager : MonoBehaviour
 
     private void changeHightlight()
     {
-        graphGenerator.changeHighlightedYearGraphs(current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1);
+        graphGenerator.changeHighlightedYearGraphs(current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, isComparingPresc);
     }
 
     private void advancePlot2()
@@ -414,32 +428,26 @@ public class Manager : MonoBehaviour
                 changePlot2(year);
             return;
         }
-        if (serieId == 0)
+        if (isComparingPresc)
         {
             changePlot1(year);
             return;
         }
-        else if (serieId == 1)
+        if (!isMultiLine)
         {
-            if (isMultiLine || isComparingPresc)
-                changePlot1(year);
-            else
-                changePlot2(year);
+            changePlot1(year);
             return;
         }
-        if (isMultiLine)
+        if (serieId == 0 || serieId == 1)
         {
-            if (serieId == 2)
-            {
-                changePlot2(year);
-            }
-            else if (serieId == 3)
-            {
-                changePlot2(year);
-            }
-            return;
+            changePlot1(year);
+        }
+        else if (serieId == 2 || serieId == 3)
+        {
+            changePlot2(year);
         }
     }
+
 
     private void changePlot1(int year)
     {
