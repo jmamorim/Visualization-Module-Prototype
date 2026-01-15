@@ -6,9 +6,10 @@ public class PrescsDropdown : MonoBehaviour
 {
     public Manager manager;
     public bool isMainPlot;
-    private DropdownEx dropdown;
-    private List<string> allPrescNames = new List<string>();
-    private string currentSelectedPresc;
+
+    DropdownEx dropdown;
+    List<string> allPrescNames = new List<string>();
+    string currentSelectedPresc;
 
     private void Awake()
     {

@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 
+// This class is responsible for visualizing the trees in the scene based on the parsed data
 public class Visualizer : MonoBehaviour
 {
     [Header("Pinheiro-bravo Prefabs")]
@@ -82,6 +83,7 @@ public class Visualizer : MonoBehaviour
     const float perspectiveAngleFactor = 0.7f;
     CameraBehaviour behaviour1, behaviour2;
 
+    #region unity methods
     private void Start()
     {
         behaviour1 = cam1.GetComponent<CameraBehaviour>();
@@ -93,8 +95,10 @@ public class Visualizer : MonoBehaviour
         terrain1.terrainData = Instantiate(terrain1.terrainData);
         terrain2.terrainData = Instantiate(terrain2.terrainData);
     }
+    #endregion
 
-    //Lidar flyover simulation------------
+    #region Flyover methods
+    //Lidar flyover simulation
     public void StartLidarFlyover(int plotNumber)
     {
         LidarFlyover lidar1 = cam1.gameObject.GetComponent<LidarFlyover>();
@@ -149,8 +153,9 @@ public class Visualizer : MonoBehaviour
 
         lidarFlyover.StartOrbitalFlyover(targetTerrain, radius, duration);
     }
-    //-----------------------------------
+    #endregion
 
+    #region terrain and camera configuration
     public void ConfigureTerrains()
     {
         var plot1Shape = plotShapeAndDimensions[0];
@@ -301,7 +306,9 @@ public class Visualizer : MonoBehaviour
             orthographicRot
         );
     }
+    #endregion
 
+    #region data reception and 3D visualization of trees
     public void receiveTreeDataPlot1(SortedDictionary<int, TreeData> data, int currentYear)
     {
         clear("Plot1");
@@ -399,121 +406,6 @@ public class Visualizer : MonoBehaviour
         }
 
         terrain.terrainData.treeInstances = treeInstancesTerrain.ToArray();
-    }
-
-    private void GetFactorAndPrefabSpecie(string specie, float height, float hbc, float age, out float factor, out GameObject prefab)
-    {
-        prefab = null;
-        factor = 0f;
-
-        if (specie.Equals(species[0]))
-        {
-            prefab = getPBPrefabForCurrentAge(age, height, hbc);
-            factor = calculatePBFactor(height, age, prefab);
-        }
-        else if (specie.Equals(species[1]))
-        {
-            prefab = getPMPrefabForCurrentHeight(age, height, hbc);
-            factor = calculatePMFactor(height, age, prefab);
-        }
-        else if (specie.Equals(species[2]))
-        {
-            prefab = getEGPrefabForCurrentHeight(age, height, hbc);
-            factor = calculateEGFactor(height, age, prefab);
-        }
-        else if (specie.Equals(species[3]))
-        {
-            prefab = getCASPrefabForCurrentHeight(age, height, hbc);
-            factor = calculateCASFactor(height, age, prefab);
-        }
-    }
-
-    //-----Prefab selection methods-----//
-    private GameObject getPBPrefabForCurrentAge(float currentAge, float h, float hbc)
-    {
-        if (currentAge < pbAdultStartingAge)
-            return pbPrefabs[hbc >= h / 2 ? 0 + offsetToPbCa : 0];
-        else if (currentAge >= pbAdultStartingAge && currentAge < pbYoungAdultAge)
-            return pbPrefabs[hbc >= h / 2 ? 1 + offsetToPbCa : 1];
-        else if (currentAge >= pbAdultStartingAge && currentAge < pbMidAdultAge)
-            return pbPrefabs[hbc >= h / 2 ? 2 + offsetToPbCa : 2];
-        else if (currentAge >= pbAdultStartingAge && currentAge < pbSeniourStartingAge)
-            return pbPrefabs[hbc >= h / 2 ? 3 + offsetToPbCa : 3];
-        else
-            return pbPrefabs[hbc >= h / 2 ? 4 + offsetToPbCa : 4];
-    }
-
-    private GameObject getPMPrefabForCurrentHeight(float currentAge, float h, float hbc)
-    {
-        if (currentAge < pmMidYougAge)
-            return pmPrefabs[hbc >= h / 2 ? 0 + offsetToPmCa : 0];
-        else if (currentAge >= pmMidYougAge && currentAge < pmAdultStartingAge)
-            return pmPrefabs[hbc >= h / 2 ? 1 + offsetToPmCa : 1];
-        else if (currentAge >= pmAdultStartingAge && currentAge < pmSeniourStartingAge)
-            return pmPrefabs[hbc >= h / 2 ? 2 + offsetToPmCa : 2];
-        else
-            return pmPrefabs[hbc >= h / 2 ? 3 + offsetToPmCa : 3];
-    }
-
-    private GameObject getEGPrefabForCurrentHeight(float currentAge, float h, float hbc)
-    {
-        if (currentAge < egAdultStartingAge)
-            return egPrefabs[hbc >= h / 2 ? 0 + offsetToEgCa : 0];
-        else if (currentAge >= egAdultStartingAge && currentAge < egSeniourStartingAge)
-            return egPrefabs[hbc >= h / 2 ? 1 + offsetToEgCa : 1];
-        else
-            return egPrefabs[hbc >= h / 2 ? 2 + offsetToEgCa : 2];
-    }
-
-    private GameObject getCASPrefabForCurrentHeight(float currentAge, float h, float hbc)
-    {
-        if (currentAge < casAdultStartingAge)
-            return casPrefabs[hbc >= h / 2 ? 0 + offsetToCasCa : 0];
-        else if (currentAge >= casAdultStartingAge && currentAge < casSeniourStartingAge)
-            return casPrefabs[hbc >= h / 2 ? 1 + offsetToCasCa : 1];
-        else
-            return casPrefabs[hbc >= h / 2 ? 2 + offsetToCasCa : 2];
-    }
-
-    //-----Scale factor calculation methods-----//
-    private float calculatePBFactor(float currentHeight, float currentAge, GameObject prefab)
-    {
-        if (pbPrefabs[0] == prefab)
-            return currentHeight / thresholdPbYoungHeight;
-        else if (pbPrefabs[1] == prefab || pbPrefabs[2] == prefab || pbPrefabs[3] == prefab)
-            return currentHeight / thresholdPbAdultHeight;
-        else
-            return currentHeight / thresholdPbSeniourHeight;
-    }
-
-    private float calculatePMFactor(float currentHeight, float currentAge, GameObject prefab)
-    {
-        if (pmPrefabs[0] == prefab || pmPrefabs[1] == prefab)
-            return currentHeight / thresholdPmYoungHeight;
-        else if (pmPrefabs[2] == prefab)
-            return currentHeight / thresholdPmAdultHeight;
-        else
-            return currentHeight / thresholdPmSeniourHeight;
-    }
-
-    private float calculateEGFactor(float currentHeight, float currentAge, GameObject prefab)
-    {
-        if (egPrefabs[0] == prefab)
-            return currentHeight / thresholdEgYoungHeight;
-        else if (egPrefabs[1] == prefab)
-            return currentHeight / thresholdEgAdultHeight;
-        else
-            return currentHeight / thresholdEgSeniourHeight;
-    }
-
-    private float calculateCASFactor(float currentHeight, float currentAge, GameObject prefab)
-    {
-        if (casPrefabs[0] == prefab)
-            return currentHeight / thresholdCasYoungHeight;
-        else if (casPrefabs[1] == prefab)
-            return currentHeight / thresholdCasAdultHeight;
-        else
-            return currentHeight / thresholdCasSeniourHeight;
     }
 
     //creates empty objects that act as an hitbox for each tree so when clicking on a tree displays tree data
@@ -635,4 +527,123 @@ public class Visualizer : MonoBehaviour
             }
         }
     }
+    #endregion
+
+    #region tree prefab and factor selection
+    private void GetFactorAndPrefabSpecie(string specie, float height, float hbc, float age, out float factor, out GameObject prefab)
+    {
+        prefab = null;
+        factor = 0f;
+
+        if (specie.Equals(species[0]))
+        {
+            prefab = getPBPrefabForCurrentAge(age, height, hbc);
+            factor = calculatePBFactor(height, age, prefab);
+        }
+        else if (specie.Equals(species[1]))
+        {
+            prefab = getPMPrefabForCurrentHeight(age, height, hbc);
+            factor = calculatePMFactor(height, age, prefab);
+        }
+        else if (specie.Equals(species[2]))
+        {
+            prefab = getEGPrefabForCurrentHeight(age, height, hbc);
+            factor = calculateEGFactor(height, age, prefab);
+        }
+        else if (specie.Equals(species[3]))
+        {
+            prefab = getCASPrefabForCurrentHeight(age, height, hbc);
+            factor = calculateCASFactor(height, age, prefab);
+        }
+    }
+
+    //-----Prefab selection methods-----//
+    private GameObject getPBPrefabForCurrentAge(float currentAge, float h, float hbc)
+    {
+        if (currentAge < pbAdultStartingAge)
+            return pbPrefabs[hbc >= h / 2 ? 0 + offsetToPbCa : 0];
+        else if (currentAge >= pbAdultStartingAge && currentAge < pbYoungAdultAge)
+            return pbPrefabs[hbc >= h / 2 ? 1 + offsetToPbCa : 1];
+        else if (currentAge >= pbAdultStartingAge && currentAge < pbMidAdultAge)
+            return pbPrefabs[hbc >= h / 2 ? 2 + offsetToPbCa : 2];
+        else if (currentAge >= pbAdultStartingAge && currentAge < pbSeniourStartingAge)
+            return pbPrefabs[hbc >= h / 2 ? 3 + offsetToPbCa : 3];
+        else
+            return pbPrefabs[hbc >= h / 2 ? 4 + offsetToPbCa : 4];
+    }
+
+    private GameObject getPMPrefabForCurrentHeight(float currentAge, float h, float hbc)
+    {
+        if (currentAge < pmMidYougAge)
+            return pmPrefabs[hbc >= h / 2 ? 0 + offsetToPmCa : 0];
+        else if (currentAge >= pmMidYougAge && currentAge < pmAdultStartingAge)
+            return pmPrefabs[hbc >= h / 2 ? 1 + offsetToPmCa : 1];
+        else if (currentAge >= pmAdultStartingAge && currentAge < pmSeniourStartingAge)
+            return pmPrefabs[hbc >= h / 2 ? 2 + offsetToPmCa : 2];
+        else
+            return pmPrefabs[hbc >= h / 2 ? 3 + offsetToPmCa : 3];
+    }
+
+    private GameObject getEGPrefabForCurrentHeight(float currentAge, float h, float hbc)
+    {
+        if (currentAge < egAdultStartingAge)
+            return egPrefabs[hbc >= h / 2 ? 0 + offsetToEgCa : 0];
+        else if (currentAge >= egAdultStartingAge && currentAge < egSeniourStartingAge)
+            return egPrefabs[hbc >= h / 2 ? 1 + offsetToEgCa : 1];
+        else
+            return egPrefabs[hbc >= h / 2 ? 2 + offsetToEgCa : 2];
+    }
+
+    private GameObject getCASPrefabForCurrentHeight(float currentAge, float h, float hbc)
+    {
+        if (currentAge < casAdultStartingAge)
+            return casPrefabs[hbc >= h / 2 ? 0 + offsetToCasCa : 0];
+        else if (currentAge >= casAdultStartingAge && currentAge < casSeniourStartingAge)
+            return casPrefabs[hbc >= h / 2 ? 1 + offsetToCasCa : 1];
+        else
+            return casPrefabs[hbc >= h / 2 ? 2 + offsetToCasCa : 2];
+    }
+
+    //-----Scale factor calculation methods-----//
+    private float calculatePBFactor(float currentHeight, float currentAge, GameObject prefab)
+    {
+        if (pbPrefabs[0] == prefab)
+            return currentHeight / thresholdPbYoungHeight;
+        else if (pbPrefabs[1] == prefab || pbPrefabs[2] == prefab || pbPrefabs[3] == prefab)
+            return currentHeight / thresholdPbAdultHeight;
+        else
+            return currentHeight / thresholdPbSeniourHeight;
+    }
+
+    private float calculatePMFactor(float currentHeight, float currentAge, GameObject prefab)
+    {
+        if (pmPrefabs[0] == prefab || pmPrefabs[1] == prefab)
+            return currentHeight / thresholdPmYoungHeight;
+        else if (pmPrefabs[2] == prefab)
+            return currentHeight / thresholdPmAdultHeight;
+        else
+            return currentHeight / thresholdPmSeniourHeight;
+    }
+
+    private float calculateEGFactor(float currentHeight, float currentAge, GameObject prefab)
+    {
+        if (egPrefabs[0] == prefab)
+            return currentHeight / thresholdEgYoungHeight;
+        else if (egPrefabs[1] == prefab)
+            return currentHeight / thresholdEgAdultHeight;
+        else
+            return currentHeight / thresholdEgSeniourHeight;
+    }
+
+    private float calculateCASFactor(float currentHeight, float currentAge, GameObject prefab)
+    {
+        if (casPrefabs[0] == prefab)
+            return currentHeight / thresholdCasYoungHeight;
+        else if (casPrefabs[1] == prefab)
+            return currentHeight / thresholdCasAdultHeight;
+        else
+            return currentHeight / thresholdCasSeniourHeight;
+    }
+    #endregion
+
 }

@@ -5,17 +5,21 @@ using System.Linq;
 using UnityEngine;
 using XCharts.Runtime;
 
+//this class is responsible for generating and populating the graphs with and highlighting data points
 public class GraphGenerator : MonoBehaviour
 {
+    // Public fields
     public List<LineChart> lineCharts;
     public List<LineChart> MultiLineCharts;
     public List<BarChart> barCharts;
     public List<BarChart> ddBarCharts;
     public DropdownEx graphDropdown;
 
+    // Private fields
     int highlightedIndex1, highlightedIndex2;
     List<int> sortedYears;
 
+    // Constants
     readonly string[] graphDesc = {
         "Número de Árvores",
         "Número de Cepos",
@@ -40,7 +44,9 @@ public class GraphGenerator : MonoBehaviour
         "55", "60", "65", "70", "75", "80", "85", "90", "95", "100", ">102.5"
     };
 
-    public void receiveData(List<Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>>> tableData,
+    // Public methods
+    public void receiveData(
+        List<Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>>> tableData,
         List<Dictionary<string, SortedDictionary<string, List<DDEntry>>>> DDtableData,
         int current_year1, int current_year2, string selectedId_stand1,
         string selectedId_stand2, string selectedId_presc1, string selectedId_presc2,
@@ -49,7 +55,7 @@ public class GraphGenerator : MonoBehaviour
         List<int> allYears = new List<int>();
         foreach (var entry in tableData.First().Values.First()[selectedId_presc1])
             allYears.Add(entry.year);
-        
+
         if (tableData.Count > 1)
         {
             foreach (var entry in tableData.ElementAt(1).Values.First()[selectedId_presc2])
@@ -65,11 +71,11 @@ public class GraphGenerator : MonoBehaviour
 
         foreach (LineChart chart in lineCharts)
             prepareChart(chart);
-        
+
         string[] id_stands = { selectedId_stand1, selectedId_stand2 };
         string[] id_prescs = { selectedId_presc1, selectedId_presc2 };
-
         prepareDropdown(tableData, id_prescs, isComparingPresc);
+
         populateLineChart(lineCharts[0], tableData, e => e.N, id_stands, id_prescs, isComparingPresc);
         populateLineChart(lineCharts[1], tableData, e => e.Nst, id_stands, id_prescs, isComparingPresc);
         populateLineChart(lineCharts[2], tableData, e => e.Ndead, id_stands, id_prescs, isComparingPresc);
@@ -80,10 +86,7 @@ public class GraphGenerator : MonoBehaviour
         populateLineChart(lineCharts[7], tableData, e => e.Vu_st, id_stands, id_prescs, isComparingPresc);
 
         populateBarCharts(sortedYears, tableData, id_stands, id_prescs, isComparingPresc);
-
-        populateDDBarCharts(DDtableData, id_stands, id_prescs,
-            new int[] { current_year1, current_year2 }, isComparingPresc);
-
+        populateDDBarCharts(DDtableData, id_stands, id_prescs, new int[] { current_year1, current_year2 }, isComparingPresc);
         populateMultiLineChart(tableData, id_stands, id_prescs, isComparingPresc);
 
         int y1 = current_year1;
@@ -94,13 +97,80 @@ public class GraphGenerator : MonoBehaviour
 
         foreach (LineChart chart in MultiLineCharts)
             highlightPointMultiLine(chart, y1, y2);
-
     }
 
+    public void populateDDBarCharts(
+        List<Dictionary<string, SortedDictionary<string, List<DDEntry>>>> DDtableData,
+        string[] id_stands,
+        string[] id_prescs,
+        int[] currentYears,
+        bool isComparingPresc)
+    {
+        var chart = ddBarCharts[0];
+        var behaviour = chart.GetComponent<GraphBehaviour>();
+        prepareDDBarChart(chart);
+
+        chart.GetChartComponent<Title>().text = "Distribuição de diâmetros";
+
+        int seriesToPopulate = (DDtableData.Count > 1 || isComparingPresc) ? 2 : 1;
+        List<List<float>> allValues = new List<List<float>>();
+
+        for (int standIndex = 0; standIndex < seriesToPopulate; standIndex++)
+        {
+            var dataSource = DDtableData.Count > 1 ? DDtableData.ElementAt(standIndex) : DDtableData.First();
+            var plotData = dataSource.Values.First()[id_prescs[standIndex]];
+
+            if (plotData == null || plotData.Count == 0) continue;
+
+            int yearIndex = currentYears[standIndex];
+            if (yearIndex < 0 || yearIndex >= plotData.Count) continue;
+
+            var entry = plotData[yearIndex];
+            string standId = entry.id_stand;
+            string serieName = isComparingPresc ? $"{standId} - {id_prescs[standIndex]}" : standId;
+
+            var serie = chart.AddSerie<Bar>(serieName);
+            serie.animation.enable = false;
+            serie.stack = "";
+            Color serieColor = Color.HSVToRGB((standIndex * 0.3f) % 1f, 0.8f, 1f);
+            serie.itemStyle.color = serieColor;
+
+            List<float> values = new List<float>();
+            for (int c = 0; c < DDCategories.Length; c++)
+            {
+                float v = GetDDValueByIndex(entry, c);
+                values.Add(v);
+                chart.AddData(serie.index, v);
+            }
+            allValues.Add(values);
+        }
+
+        chart.RefreshChart();
+        behaviour.SaveDDOriginalValues(allValues);
+    }
+
+    public void changeHighlightedYearGraphs(int year1, int year2, bool isComparing)
+    {
+        foreach (var chart in lineCharts)
+            removeHighlight(chart);
+        foreach (var chart in MultiLineCharts)
+            removeHighlightMultiLine(chart);
+
+        int y1 = year1;
+        int y2 = isComparing ? year1 : year2;
+
+        foreach (var chart in lineCharts)
+            highlightPoint(chart, y1, y2);
+
+        foreach (var chart in MultiLineCharts)
+            highlightPointMultiLine(chart, y1, y2);
+    }
+
+    // Private methods
     private void prepareDropdown(
-    List<Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>>> tableData,
-    string[] id_prescs,
-    bool isComparingPresc)
+        List<Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>>> tableData,
+        string[] id_prescs,
+        bool isComparingPresc)
     {
         graphDropdown.ClearOptions();
         List<string> options = new List<string>();
@@ -114,33 +184,24 @@ public class GraphGenerator : MonoBehaviour
             if (plotData1 != null && plotData1.Count > 0)
             {
                 string standId = plotData1.First().id_stand;
-
                 if (!string.IsNullOrEmpty(id_prescs[0]))
-                {
                     foreach (var desc in addedGraphDesc)
                         options.Add($"{desc} ({standId} - {id_prescs[0]})");
-                }
-
                 if (!string.IsNullOrEmpty(id_prescs[1]))
-                {
                     foreach (var desc in addedGraphDesc)
                         options.Add($"{desc} ({standId} - {id_prescs[1]})");
-                }
             }
         }
         else
         {
             int chartsToPopulate = tableData.Count > 1 ? 2 : 1;
-
             for (int standIndex = 0; standIndex < chartsToPopulate; standIndex++)
             {
                 var dataSource = tableData.Count > 1 ? tableData.ElementAt(standIndex) : tableData.First();
                 var plotData = dataSource.Values.First()[id_prescs[standIndex]];
-
                 if (plotData != null && plotData.Count > 0)
                 {
                     string standId = plotData.First().id_stand;
-
                     foreach (var desc in addedGraphDesc)
                         options.Add($"{desc} ({standId})");
                 }
@@ -149,6 +210,61 @@ public class GraphGenerator : MonoBehaviour
 
         graphDropdown.AddOptions(options);
         graphDropdown.RefreshShownValue();
+    }
+
+    private void prepareChart(BaseChart chart)
+    {
+        chart.ClearData();
+        chart.RemoveAllSerie();
+        chart.RemoveData();
+        chart.RefreshChart();
+
+        var xAxis = chart.GetChartComponent<XAxis>();
+        xAxis.type = Axis.AxisType.Value;
+        xAxis.minMaxType = Axis.AxisMinMaxType.Custom;
+
+        if (sortedYears.Count > 0)
+        {
+            int minYear = sortedYears.Min();
+            int maxYear = sortedYears.Max();
+            xAxis.min = minYear;
+            xAxis.max = maxYear;
+        }
+    }
+
+    private void prepareDDBarChart(BaseChart chart)
+    {
+        chart.ClearData();
+        chart.RemoveAllSerie();
+        chart.RemoveData();
+        chart.RefreshChart();
+
+        var xAxis = chart.GetChartComponent<XAxis>();
+        xAxis.data.Clear();
+        xAxis.type = Axis.AxisType.Category;
+
+        foreach (var cat in DDCategories)
+            chart.AddXAxisData(cat);
+
+        chart.RefreshChart();
+    }
+
+    private void prepareBarChart(BaseChart chart, List<int> years)
+    {
+        chart.ClearData();
+        chart.RemoveAllSerie();
+        chart.RemoveData();
+        chart.RefreshChart();
+
+        var xAxis = chart.GetChartComponent<XAxis>();
+        xAxis.data.Clear();
+        xAxis.type = Axis.AxisType.Category;
+
+        foreach (var y in years)
+            chart.AddXAxisData(y.ToString());
+
+        chart.AnimationEnable(false);
+        chart.RefreshChart();
     }
 
     private void populateLineChart(
@@ -169,37 +285,27 @@ public class GraphGenerator : MonoBehaviour
             string serieName1 = isComparingPresc ? $"{standId1} - {id_prescs[0]}" : standId1;
             chart.AddSerie<Line>(serieName1);
             var serie1 = chart.GetSerie(0);
-
             Color lineColor1 = Color.HSVToRGB(0f, 1f, 1f);
             setupSerieStyle(serie1, lineColor1);
-
             foreach (var entry in entries1)
-            {
                 chart.AddData(0, entry.year, valueSelector(entry));
-            }
         }
         if (tableData.Count > 1)
         {
-            // Multi-simulation case
             var entries2 = tableData.ElementAt(1).Values.First()[id_prescs[1]];
             if (entries2 != null && entries2.Count > 0)
             {
                 string standId2 = entries2.First().id_stand;
                 chart.AddSerie<Line>(standId2);
                 var serie2 = chart.GetSerie(1);
-
                 Color lineColor2 = Color.HSVToRGB(0.15f, 1f, 1f);
                 setupSerieStyle(serie2, lineColor2);
-
                 foreach (var entry in entries2)
-                {
                     chart.AddData(1, entry.year, valueSelector(entry));
-                }
             }
         }
         else if (isComparingPresc && !string.IsNullOrEmpty(id_prescs[1]))
         {
-            // Comparing prescriptions within same simulation
             var entries2 = tableData.First().Values.First()[id_prescs[1]];
             if (entries2 != null && entries2.Count > 0)
             {
@@ -207,84 +313,17 @@ public class GraphGenerator : MonoBehaviour
                 string serieName2 = $"{standId2} - {id_prescs[1]}";
                 chart.AddSerie<Line>(serieName2);
                 var serie2 = chart.GetSerie(1);
-
                 Color lineColor2 = Color.HSVToRGB(0.15f, 1f, 1f);
                 setupSerieStyle(serie2, lineColor2);
-
                 foreach (var entry in entries2)
-                {
                     chart.AddData(1, entry.year, valueSelector(entry));
-                }
             }
         }
-
         chart.RefreshChart();
     }
 
-    private void prepareChart(BaseChart chart)
-    {
-        chart.ClearData();
-        chart.RemoveAllSerie();
-        chart.RemoveData();
-        chart.RefreshChart();
-
-        var xAxis = chart.GetChartComponent<XAxis>();
-        xAxis.type = Axis.AxisType.Value;
-        xAxis.minMaxType = Axis.AxisMinMaxType.Custom;
-
-        if (sortedYears.Count > 0)
-        {
-            int minYear = sortedYears.Min();
-            int maxYear = sortedYears.Max();
-
-            xAxis.min = minYear;
-            xAxis.max = maxYear;
-        }
-    }
-
-    private void prepareDDBarChart(BaseChart chart)
-    {
-        chart.ClearData();
-        chart.RemoveAllSerie();
-        chart.RemoveData();
-        chart.RefreshChart();
-
-        var xAxis = chart.GetChartComponent<XAxis>();
-        xAxis.data.Clear();
-        xAxis.type = Axis.AxisType.Category;
-
-        foreach (var cat in DDCategories)
-        {
-            chart.AddXAxisData(cat);
-        }
-
-        
-
-        chart.RefreshChart();
-    }
-
-    private void prepareBarChart(BaseChart chart, List<int> years)
-    {
-        chart.ClearData();
-        chart.RemoveAllSerie();
-        chart.RemoveData();
-        chart.RefreshChart();
-
-        var xAxis = chart.GetChartComponent<XAxis>();
-        xAxis.data.Clear();
-        xAxis.type = Axis.AxisType.Category;
-
-        foreach (var y in years)
-        {
-            chart.AddXAxisData(y.ToString());
-        }
-
-        chart.AnimationEnable(false);
-
-        chart.RefreshChart();
-    }
-
-    private void populateBarCharts(List<int> years, 
+    private void populateBarCharts(
+        List<int> years,
         List<Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>>> tableData,
         string[] id_stands,
         string[] id_prescs,
@@ -300,15 +339,12 @@ public class GraphGenerator : MonoBehaviour
         };
 
         int chartsToPopulate = tableData.Count > 1 ? 2 : (isComparingPresc ? 2 : 1);
-
         for (int standIndex = 0; standIndex < chartsToPopulate; standIndex++)
         {
             var chart = barCharts[standIndex];
             prepareBarChart(chart, years);
-
             var dataSource = tableData.Count > 1 ? tableData.ElementAt(standIndex) : tableData.First();
             var plotData = dataSource.Values.First()[id_prescs[standIndex]];
-            
             if (plotData == null || plotData.Count == 0) continue;
 
             string standId = plotData[0].id_stand;
@@ -333,7 +369,6 @@ public class GraphGenerator : MonoBehaviour
                 {
                     int yearIndex = years.IndexOf(entry.year);
                     if (yearIndex < 0) continue;
-
                     float v = comp switch
                     {
                         "Vu_as1" => entry.Vu_as1,
@@ -343,17 +378,14 @@ public class GraphGenerator : MonoBehaviour
                         "Vu_as5" => entry.Vu_as5,
                         _ => 0f
                     };
-
                     chart.UpdateData(serie.index, yearIndex, v);
                     serie.GetSerieData(yearIndex).ignore = false;
-
                 }
             }
-
             chart.RefreshChart();
         }
 
-        // Biomass charts
+        // Biomassa
         string[] BiomassComponents = { "Wr", "Ww", "Wb", "Wbr", "Wl" };
         Color[] biomassColors = {
             new Color(0.36f, 0.20f, 0.09f),
@@ -367,10 +399,8 @@ public class GraphGenerator : MonoBehaviour
         {
             var chart = barCharts[2 + standIndex];
             prepareBarChart(chart, years);
-
             var dataSource = tableData.Count > 1 ? tableData.ElementAt(standIndex) : tableData.First();
             var plotData = dataSource.Values.First()[id_prescs[standIndex]];
-            
             if (plotData == null || plotData.Count == 0) continue;
 
             string standId = plotData[0].id_stand;
@@ -394,7 +424,6 @@ public class GraphGenerator : MonoBehaviour
                 {
                     int yearIndex = years.IndexOf(entry.year);
                     if (yearIndex < 0) continue;
-
                     float v = comp switch
                     {
                         "Ww" => entry.Ww,
@@ -404,99 +433,11 @@ public class GraphGenerator : MonoBehaviour
                         "Wr" => entry.Wr,
                         _ => 0f
                     };
-
                     chart.UpdateData(serie.index, yearIndex, v);
                     serie.GetSerieData(yearIndex).ignore = false;
-
                 }
             }
-
             chart.RefreshChart();
-        }
-    }
-    public void populateDDBarCharts(
-        List<Dictionary<string, SortedDictionary<string, List<DDEntry>>>> DDtableData,
-        string[] id_stands,
-        string[] id_prescs,
-        int[] currentYears,
-        bool isComparingPresc)
-    {
-        var chart = ddBarCharts[0];
-        var behaviour = chart.GetComponent<GraphBehaviour>();
-        prepareDDBarChart(chart);
-
-        chart.GetChartComponent<Title>().text = "Distribuição de diâmetros";
-
-        int seriesToPopulate = (DDtableData.Count > 1 || isComparingPresc) ? 2 : 1;
-
-        List<List<float>> allValues = new List<List<float>>();
-
-        for (int standIndex = 0; standIndex < seriesToPopulate; standIndex++)
-        {
-            var dataSource = DDtableData.Count > 1 ? DDtableData.ElementAt(standIndex) : DDtableData.First();
-            var plotData = dataSource.Values.First()[id_prescs[standIndex]];
-
-            if (plotData == null || plotData.Count == 0) continue;
-
-            int yearIndex = currentYears[standIndex];
-
-            if (yearIndex < 0 || yearIndex >= plotData.Count) continue;
-
-            var entry = plotData[yearIndex];
-
-            string standId = entry.id_stand;
-            string serieName = isComparingPresc ? $"{standId} - {id_prescs[standIndex]}" : standId;
-
-            var serie = chart.AddSerie<Bar>(serieName);
-            serie.animation.enable = false;
-            serie.stack = "";
-
-            Color serieColor = Color.HSVToRGB((standIndex * 0.3f) % 1f, 0.8f, 1f);
-            serie.itemStyle.color = serieColor;
-
-            List<float> values = new List<float>();
-
-            for (int c = 0; c < DDCategories.Length; c++)
-            {
-                float v = GetDDValueByIndex(entry, c);
-                values.Add(v);
-                chart.AddData(serie.index, v);
-            }
-
-            allValues.Add(values);
-        }
-
-        chart.RefreshChart();
-        behaviour.SaveDDOriginalValues(allValues);
-    }
-
-    private float GetDDValueByIndex(DDEntry entry, int index)
-    {
-        switch (index)
-        {
-            case 0: return entry.dd0;
-            case 1: return entry.dd5;
-            case 2: return entry.dd10;
-            case 3: return entry.dd15;
-            case 4: return entry.dd20;
-            case 5: return entry.dd25;
-            case 6: return entry.dd30;
-            case 7: return entry.dd35;
-            case 8: return entry.dd40;
-            case 9: return entry.dd45;
-            case 10: return entry.dd50;
-            case 11: return entry.dd55;
-            case 12: return entry.dd60;
-            case 13: return entry.dd65;
-            case 14: return entry.dd70;
-            case 15: return entry.dd75;
-            case 16: return entry.dd80;
-            case 17: return entry.dd85;
-            case 18: return entry.dd90;
-            case 19: return entry.dd95;
-            case 20: return entry.dd100;
-            case 21: return entry.dd102;
-            default: return 0f;
         }
     }
 
@@ -512,19 +453,15 @@ public class GraphGenerator : MonoBehaviour
             if (chart == null) continue;
 
             prepareChart(chart);
-
             highlightedIndex1 = -1;
             highlightedIndex2 = -1;
 
             int datasetsToPlot = tableData.Count > 1 ? 2 : (isComparingPresc ? 2 : 1);
-
             for (int plotIndex = 0; plotIndex < datasetsToPlot; plotIndex++)
             {
                 var dataSource = tableData.Count > 1 ? tableData.ElementAt(plotIndex) : tableData.First();
                 var plotData = dataSource.Values.First()[id_prescs[plotIndex]];
-                
-                if (plotData == null || plotData.Count == 0)
-                    continue;
+                if (plotData == null || plotData.Count == 0) continue;
 
                 string id_stand = plotData.First().id_stand;
                 Color baseColor = Color.HSVToRGB((plotIndex * 0.2f) % 1f, 0.8f, 1f);
@@ -551,10 +488,8 @@ public class GraphGenerator : MonoBehaviour
 
                 chart.AddSerie<Line>(serieName1);
                 chart.AddSerie<Line>(serieName2);
-
                 var serie1 = chart.GetSerie(chart.series.Count - 2);
                 var serie2 = chart.GetSerie(chart.series.Count - 1);
-
                 setupSerieStyle(serie1, baseColor);
                 setupSerieStyle(serie2, secondaryColor);
 
@@ -564,9 +499,38 @@ public class GraphGenerator : MonoBehaviour
                     chart.AddData(serie2.index, entry.year, valueSelector2(entry));
                 }
             }
-
             chart.RefreshChart();
         }
+    }
+
+    private float GetDDValueByIndex(DDEntry entry, int index)
+    {
+        return index switch
+        {
+            0 => entry.dd0,
+            1 => entry.dd5,
+            2 => entry.dd10,
+            3 => entry.dd15,
+            4 => entry.dd20,
+            5 => entry.dd25,
+            6 => entry.dd30,
+            7 => entry.dd35,
+            8 => entry.dd40,
+            9 => entry.dd45,
+            10 => entry.dd50,
+            11 => entry.dd55,
+            12 => entry.dd60,
+            13 => entry.dd65,
+            14 => entry.dd70,
+            15 => entry.dd75,
+            16 => entry.dd80,
+            17 => entry.dd85,
+            18 => entry.dd90,
+            19 => entry.dd95,
+            20 => entry.dd100,
+            21 => entry.dd102,
+            _ => 0f
+        };
     }
 
     private void setupSerieStyle(Serie serie, Color color)
@@ -581,17 +545,12 @@ public class GraphGenerator : MonoBehaviour
     private void highlightPoint(LineChart chart, int year1, int year2)
     {
         foreach (Serie serie in chart.series)
-        {
             for (int i = 0; i < serie.dataCount; i++)
-            {
                 serie.GetSerieData(i).state = SerieState.Normal;
-            }
-        }
 
         if (chart.series.Count > 0)
         {
             var serie1 = chart.GetSerie(0);
-
             if (year1 >= 0 && year1 < serie1.dataCount)
             {
                 var data1 = serie1.GetSerieData(year1);
@@ -601,10 +560,7 @@ public class GraphGenerator : MonoBehaviour
                     highlightedIndex1 = year1;
                 }
             }
-            else
-            {
-                highlightedIndex1 = -1;
-            }
+            else highlightedIndex1 = -1;
         }
 
         if (chart.series.Count > 1)
@@ -619,22 +575,16 @@ public class GraphGenerator : MonoBehaviour
                     highlightedIndex2 = year2;
                 }
             }
-            else
-            {
-                highlightedIndex2 = -1;
-            }
+            else highlightedIndex2 = -1;
         }
-
         chart.RefreshChart();
     }
 
     private void highlightPointMultiLine(LineChart chart, int year1, int year2)
     {
         foreach (Serie serie in chart.series)
-        {
             for (int j = 0; j < serie.dataCount; j++)
                 serie.GetSerieData(j).state = SerieState.Normal;
-        }
 
         int[] years = { year1, year2 };
         int[] highlightedIndexes = { highlightedIndex1, highlightedIndex2 };
@@ -643,15 +593,10 @@ public class GraphGenerator : MonoBehaviour
         {
             int year = years[i / 2];
             ref int highlightedIndex = ref highlightedIndexes[i / 2];
-
             HighlightPair(chart.GetSerie(i), chart.GetSerie(i + 1), year, ref highlightedIndex);
-
-            if (i == 0)
-                highlightedIndex1 = highlightedIndex;
-            else if (i == 2)
-                highlightedIndex2 = highlightedIndex;
+            if (i == 0) highlightedIndex1 = highlightedIndex;
+            else if (i == 2) highlightedIndex2 = highlightedIndex;
         }
-
         chart.RefreshChart();
     }
 
@@ -671,35 +616,26 @@ public class GraphGenerator : MonoBehaviour
         {
             var dataA = serieA.GetSerieData(year);
             var dataB = serieB.GetSerieData(year);
-
             if (!dataA.ignore && !dataB.ignore)
             {
                 dataA.state = SerieState.Emphasis;
                 dataB.state = SerieState.Emphasis;
             }
-
             highlightedIndex = year;
         }
-        else
-        {
-            highlightedIndex = -1;
-        }
+        else highlightedIndex = -1;
     }
 
     private void removeHighlight(LineChart chart)
     {
         var serie1 = chart.GetSerie(0);
         if (highlightedIndex1 >= 0)
-        {
             serie1.GetSerieData(highlightedIndex1).state = SerieState.Normal;
-        }
         if (chart.series.Count > 1)
         {
             var serie2 = chart.GetSerie(1);
             if (highlightedIndex2 >= 0)
-            {
                 serie2.GetSerieData(highlightedIndex2).state = SerieState.Normal;
-            }
         }
         chart.RefreshChart();
     }
@@ -712,9 +648,7 @@ public class GraphGenerator : MonoBehaviour
             {
                 var serie1 = chart.GetSerie(i);
                 var serie2 = chart.GetSerie(i + 1);
-
                 int highlightIndex = (i == 0) ? highlightedIndex1 : highlightedIndex2;
-
                 if (highlightIndex >= 0 &&
                     highlightIndex < serie1.dataCount &&
                     highlightIndex < serie2.dataCount)
@@ -724,23 +658,5 @@ public class GraphGenerator : MonoBehaviour
                 }
             }
         }
-    }
-
-    public void changeHighlightedYearGraphs(int year1, int year2, bool isComparing)
-    {
-        foreach (var chart in lineCharts)
-            removeHighlight(chart);
-        foreach (var chart in MultiLineCharts)
-            removeHighlightMultiLine(chart);
-        
-        int y1 = year1;
-        int y2 = isComparing ? year1 : year2;
-
-        foreach (var chart in lineCharts)
-            highlightPoint(chart, y1, y2);
-
-        foreach (var chart in MultiLineCharts)
-            highlightPointMultiLine(chart, y1, y2);
-
     }
 }
