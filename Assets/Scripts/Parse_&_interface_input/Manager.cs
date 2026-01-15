@@ -161,6 +161,23 @@ public class Manager : MonoBehaviour
 
     void Update()
     {
+        if (outputSoloTreesData != null && canInteract)
+        {
+            if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                advancePlot1();
+                if (outputSoloTreesData.Count > 1)
+                    advancePlot2();
+                changeHightlight();
+            }
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                reversePlot1();
+                if (outputSoloTreesData.Count > 1)
+                    reversePlot2();
+                changeHightlight();
+            }
+        }
         if (!isExpanded)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -212,21 +229,6 @@ public class Manager : MonoBehaviour
 
             if (outputSoloTreesData != null && canInteract)
             {
-                if (Input.GetKeyDown(KeyCode.RightArrow))
-                {
-                    advancePlot1();
-                    if (outputSoloTreesData.Count > 1)
-                        advancePlot2();
-                    changeHightlight();
-                }
-                if (Input.GetKeyDown(KeyCode.LeftArrow))
-                {
-                    reversePlot1();
-                    if (outputSoloTreesData.Count > 1)
-                        reversePlot2();
-                    changeHightlight();
-                }
-
                 //change year for each plot individualy
                 if (Input.GetKeyDown(KeyCode.X))
                 {
@@ -323,7 +325,7 @@ public class Manager : MonoBehaviour
                 int yearValue = outputPlot1[newIndex].Values.First().Year;
                 if (yearValue != outputPlot1[current_year1].Values.First().Year)
                 {
-                    changePlot1(yearValue); 
+                    changePlot1(yearValue);
                     UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
                 }
             }
