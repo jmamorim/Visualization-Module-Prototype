@@ -258,6 +258,8 @@ public class GraphGenerator : MonoBehaviour
             chart.AddXAxisData(cat);
         }
 
+        
+
         chart.RefreshChart();
     }
 
@@ -276,6 +278,10 @@ public class GraphGenerator : MonoBehaviour
         {
             chart.AddXAxisData(y.ToString());
         }
+
+        chart.AnimationEnable(false);
+
+        chart.RefreshChart();
     }
 
     private void populateBarCharts(List<int> years, 
@@ -313,6 +319,7 @@ public class GraphGenerator : MonoBehaviour
             {
                 string comp = VolumeComponents[c];
                 var serie = chart.AddSerie<Bar>($"{standId} {comp}");
+                serie.animation.enable = false;
                 serie.stack = $"volume_{standId}_{standIndex}";
                 serie.itemStyle.color = volumeColors[c];
 
@@ -441,6 +448,7 @@ public class GraphGenerator : MonoBehaviour
             string serieName = isComparingPresc ? $"{standId} - {id_prescs[standIndex]}" : standId;
 
             var serie = chart.AddSerie<Bar>(serieName);
+            serie.animation.enable = false;
             serie.stack = "";
 
             Color serieColor = Color.HSVToRGB((standIndex * 0.3f) % 1f, 0.8f, 1f);

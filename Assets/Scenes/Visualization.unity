@@ -101295,7 +101295,345 @@ MonoBehaviour:
   m_Parallels: []
   m_ParallelAxes: []
   m_Comments: []
-  m_SerieBars: []
+  m_SerieBars:
+  - m_Index: 0
+    m_Show: 1
+    m_CoordSystem: GridCoord
+    m_SerieType: Bar
+    m_SerieName: serie0
+    m_State: 0
+    m_ColorBy: 0
+    m_Stack: 
+    m_XAxisIndex: 0
+    m_YAxisIndex: 0
+    m_RadarIndex: 0
+    m_VesselIndex: 0
+    m_PolarIndex: 0
+    m_SingleAxisIndex: 0
+    m_ParallelIndex: 0
+    m_GridIndex: -1
+    m_MinShow: 0
+    m_MaxShow: 0
+    m_MaxCache: 0
+    m_SampleDist: 0
+    m_SampleType: 1
+    m_SampleAverage: 0
+    m_LineType: 0
+    m_SmoothLimit: 0
+    m_BarType: 0
+    m_BarPercentStack: 0
+    m_BarWidth: 0
+    m_BarMaxWidth: 0
+    m_BarGap: 0.1
+    m_BarZebraWidth: 4
+    m_BarZebraGap: 2
+    m_Min: 0
+    m_Max: 0
+    m_MinSize: 0
+    m_MaxSize: 1
+    m_StartAngle: 0
+    m_EndAngle: 0
+    m_MinAngle: 0
+    m_Clockwise: 1
+    m_RoundCap: 0
+    m_SplitNumber: 0
+    m_ClickOffset: 1
+    m_RoseType: 0
+    m_Gap: 0
+    m_Center:
+    - 0.5
+    - 0.46
+    m_Radius:
+    - 0
+    - 0.28
+    m_MinRadius: 0
+    m_MinShowLabel: 0
+    m_MinShowLabelValue: 0
+    m_ShowDataDimension: 2
+    m_ShowDataName: 0
+    m_Clip: 0
+    m_Ignore: 0
+    m_IgnoreValue: 0
+    m_IgnoreLineBreak: 0
+    m_ShowAsPositiveNumber: 0
+    m_Large: 1
+    m_LargeThreshold: 200
+    m_AvoidLabelOverlap: 0
+    m_RadarType: 0
+    m_PlaceHolder: 0
+    m_DataSortType: 2
+    m_Orient: 1
+    m_Align: 0
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+    m_InsertDataToHead: 0
+    m_RealtimeSort: 0
+    m_LineStyle:
+      m_Show: 1
+      m_Type: 0
+      m_Color:
+        serializedVersion: 2
+        rgba: 0
+      m_ToColor:
+        serializedVersion: 2
+        rgba: 0
+      m_ToColor2:
+        serializedVersion: 2
+        rgba: 0
+      m_Width: 0
+      m_Length: 0
+      m_Opacity: 1
+      m_DashLength: 4
+      m_DotLength: 2
+      m_GapLength: 2
+    m_Symbol:
+      m_Show: 0
+      m_Type: 3
+      m_Size: 0
+      m_Gap: 0
+      m_Width: 0
+      m_Height: 0
+      m_Offset: {x: 0, y: 0}
+      m_Image: {fileID: 0}
+      m_ImageType: 0
+      m_Color:
+        serializedVersion: 2
+        rgba: 0
+      m_BorderWidth: 0
+      m_EmptyColor:
+        serializedVersion: 2
+        rgba: 0
+      m_Size2: 0
+      m_SizeType: 0
+      m_DataIndex: 1
+      m_DataScale: 1
+      m_StartIndex: 0
+      m_Interval: 0
+      m_ForceShowLast: 0
+      m_Repeat: 0
+      m_MinSize: 0
+      m_MaxSize: 0
+    m_Animation:
+      m_Enable: 1
+      m_Type: 0
+      m_Easting: 0
+      m_Threshold: 2000
+      m_UnscaledTime: 0
+      m_FadeIn:
+        m_Enable: 1
+        m_Reverse: 0
+        m_Delay: 0
+        m_Duration: 1000
+        m_Speed: 0
+      m_FadeOut:
+        m_Enable: 1
+        m_Reverse: 1
+        m_Delay: 0
+        m_Duration: 1000
+        m_Speed: 0
+      m_Change:
+        m_Enable: 1
+        m_Reverse: 0
+        m_Delay: 0
+        m_Duration: 500
+        m_Speed: 0
+      m_Addition:
+        m_Enable: 1
+        m_Reverse: 0
+        m_Delay: 0
+        m_Duration: 500
+        m_Speed: 0
+      m_Hiding:
+        m_Enable: 1
+        m_Reverse: 0
+        m_Delay: 0
+        m_Duration: 500
+        m_Speed: 0
+      m_Interaction:
+        m_Enable: 1
+        m_Reverse: 0
+        m_Delay: 0
+        m_Duration: 250
+        m_Speed: 0
+        m_Width:
+          m_Type: 0
+          m_Value: 1.1
+        m_Radius:
+          m_Type: 0
+          m_Value: 1.1
+        m_Offset:
+          m_Type: 1
+          m_Value: 5
+      m_Exchange:
+        m_Enable: 1
+        m_Reverse: 0
+        m_Delay: 0
+        m_Duration: 250
+        m_Speed: 0
+    m_ItemStyle:
+      m_Show: 1
+      m_Color:
+        serializedVersion: 2
+        rgba: 0
+      m_Color0:
+        serializedVersion: 2
+        rgba: 0
+      m_ToColor:
+        serializedVersion: 2
+        rgba: 0
+      m_ToColor2:
+        serializedVersion: 2
+        rgba: 0
+      m_MarkColor:
+        serializedVersion: 2
+        rgba: 0
+      m_BackgroundColor:
+        serializedVersion: 2
+        rgba: 0
+      m_BackgroundWidth: 0
+      m_BackgroundGap: 0
+      m_CenterColor:
+        serializedVersion: 2
+        rgba: 0
+      m_CenterGap: 0
+      m_BorderWidth: 0
+      m_BorderGap: 0
+      m_BorderColor:
+        serializedVersion: 2
+        rgba: 0
+      m_BorderColor0:
+        serializedVersion: 2
+        rgba: 0
+      m_BorderToColor:
+        serializedVersion: 2
+        rgba: 0
+      m_Opacity: 1
+      m_ItemMarker: 
+      m_ItemFormatter: 
+      m_NumericFormatter: 
+      m_CornerRadius:
+      - 0
+      - 0
+      - 0
+      - 0
+    m_Data:
+    - m_Index: 0
+      m_Name: 
+      m_Id: 
+      m_ParentId: 
+      m_Ignore: 0
+      m_Selected: 0
+      m_Radius: 0
+      m_State: 4
+      m_ItemStyles: []
+      m_Labels: []
+      m_LabelLines: []
+      m_Symbols: []
+      m_LineStyles: []
+      m_AreaStyles: []
+      m_TitleStyles: []
+      m_EmphasisStyles: []
+      m_BlurStyles: []
+      m_SelectStyles: []
+      m_Data:
+      - 0
+      - 39
+    - m_Index: 1
+      m_Name: 
+      m_Id: 
+      m_ParentId: 
+      m_Ignore: 0
+      m_Selected: 0
+      m_Radius: 0
+      m_State: 4
+      m_ItemStyles: []
+      m_Labels: []
+      m_LabelLines: []
+      m_Symbols: []
+      m_LineStyles: []
+      m_AreaStyles: []
+      m_TitleStyles: []
+      m_EmphasisStyles: []
+      m_BlurStyles: []
+      m_SelectStyles: []
+      m_Data:
+      - 1
+      - 76
+    - m_Index: 2
+      m_Name: 
+      m_Id: 
+      m_ParentId: 
+      m_Ignore: 0
+      m_Selected: 0
+      m_Radius: 0
+      m_State: 4
+      m_ItemStyles: []
+      m_Labels: []
+      m_LabelLines: []
+      m_Symbols: []
+      m_LineStyles: []
+      m_AreaStyles: []
+      m_TitleStyles: []
+      m_EmphasisStyles: []
+      m_BlurStyles: []
+      m_SelectStyles: []
+      m_Data:
+      - 2
+      - 23
+    - m_Index: 3
+      m_Name: 
+      m_Id: 
+      m_ParentId: 
+      m_Ignore: 0
+      m_Selected: 0
+      m_Radius: 0
+      m_State: 4
+      m_ItemStyles: []
+      m_Labels: []
+      m_LabelLines: []
+      m_Symbols: []
+      m_LineStyles: []
+      m_AreaStyles: []
+      m_TitleStyles: []
+      m_EmphasisStyles: []
+      m_BlurStyles: []
+      m_SelectStyles: []
+      m_Data:
+      - 3
+      - 76
+    - m_Index: 4
+      m_Name: 
+      m_Id: 
+      m_ParentId: 
+      m_Ignore: 0
+      m_Selected: 0
+      m_Radius: 0
+      m_State: 4
+      m_ItemStyles: []
+      m_Labels: []
+      m_LabelLines: []
+      m_Symbols: []
+      m_LineStyles: []
+      m_AreaStyles: []
+      m_TitleStyles: []
+      m_EmphasisStyles: []
+      m_BlurStyles: []
+      m_SelectStyles: []
+      m_Data:
+      - 4
+      - 39
+    m_Links: []
+    m_Labels: []
+    m_LabelLines: []
+    m_EndLabels: []
+    m_LineArrows: []
+    m_AreaStyles: []
+    m_TitleStyles: []
+    m_EmphasisStyles: []
+    m_BlurStyles: []
+    m_SelectStyles: []
   m_SerieCandlesticks: []
   m_SerieEffectScatters: []
   m_SerieHeatmaps: []
