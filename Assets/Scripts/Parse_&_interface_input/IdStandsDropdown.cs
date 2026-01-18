@@ -146,17 +146,25 @@ public class IdStandsDropdown : MonoBehaviour
             infoText += "ID Meteorologico: " + plotData.id_meteo + "\n\n";
 
             infoText += "<b>Localização:</b>\n";
-            infoText += "Coordenadas: (" + plotData.CoordX.ToString("F2") + ", " + plotData.CoordY.ToString("F2") + ")\n";
+
+            if (plotData.CoordX == 0 && plotData.CoordY == 0)
+            {
+                infoText += "Coordenadas: Desconhecido\n";
+            }
+            else
+            {
+                infoText += "Coordenadas: (" + plotData.CoordX.ToString("F2") + ", " + plotData.CoordY.ToString("F2") + ")\n";
+            }
+
             infoText += "Altitude: " + plotData.Altitude.ToString("F0") + " m\n\n";
 
             infoText += "<b>Composição:</b>\n";
             infoText += "Espécie Principal: " + GetSpeciesName(plotData.Sp1) + "\n";
             infoText += "Espécie Secundária: " + GetSpeciesName(plotData.Sp2) + "\n";
-            infoText += "Composição: " + plotData.composition + "\n";
-            infoText += "Estrutura: " + plotData.Structure + "\n\n";
+            infoText += "Composição: " + GetCompositionName(plotData.composition) + "\n";
+            infoText += "Estrutura: " + GetStructureName(plotData.Structure) + "\n\n";
 
             infoText += "<b>Características da Parcela:</b>\n";
-            infoText += "Tipo de Parcela: " + plotData.PlotType + "\n";
             infoText += "Forma da Parcela: " + GetPlotShapeName(plotData.plotShape) + "\n";
 
             if (plotData.plotShape == 0)
@@ -202,6 +210,39 @@ public class IdStandsDropdown : MonoBehaviour
                 return spCode;
         }
     }
+
+    private string GetCompositionName(string composition)
+    {
+        if (string.IsNullOrEmpty(composition))
+            return "Desconhecido";
+
+        switch (composition.ToLower())
+        {
+            case "pure":
+                return "Puro";
+            case "mixed":
+                return "Misto";
+            default:
+                return composition;
+        }
+    }
+
+    private string GetStructureName(string structure)
+    {
+        if (string.IsNullOrEmpty(structure))
+            return "Desconhecido";
+
+        switch (structure.ToUpper())
+        {
+            case "R":
+                return "Regular";
+            case "I":
+                return "Irregular";
+            default:
+                return structure;
+        }
+    }
+
 
     private string GetPlotShapeName(int shape)
     {

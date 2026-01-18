@@ -20491,8 +20491,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1387432533}
   manager: {fileID: 1344679403}
-  isMultiVisualization: 0
   paralelPos: {fileID: 1997323980}
+  isMultiVisualization: 0
   isFree: 0
   canUseCameraMovement: 1
   freeCameraMoveSpeed: 10
@@ -33470,6 +33470,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 530787398}
   m_CullTransparentMesh: 1
+--- !u!1 &531717538
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 531717540}
+  - component: {fileID: 531717539}
+  m_Layer: 0
+  m_Name: Windzone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!182 &531717539
+WindZone:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 531717538}
+  m_Enabled: 1
+  m_Mode: 0
+  m_Radius: 20
+  m_WindMain: 1
+  m_WindTurbulence: 1
+  m_WindPulseMagnitude: 0.5
+  m_WindPulseFrequency: 0.01
+--- !u!4 &531717540
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 531717538}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 674.40985, y: 0, z: -1456.0565}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &532255357
 GameObject:
   m_ObjectHideFlags: 0
@@ -72868,7 +72914,7 @@ MonoBehaviour:
   m_RadiusAxes: []
   m_Titles:
   - m_Show: 1
-    m_Text: "N\xFAmero de cepos"
+    m_Text: "N\xFAmero de tou\xE7as"
     m_SubText: 
     m_LabelStyle:
       m_Show: 1
@@ -73622,7 +73668,7 @@ MonoBehaviour:
           rgba: 0
     m_AxisName:
       m_Show: 1
-      m_Name: cepos/ha
+      m_Name: "tou\xE7as/ha"
       m_OnZero: 0
       m_LabelStyle:
         m_Show: 1
@@ -74107,15 +74153,16 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Estrutura do povoamento:\nNst \u2013 N\xFAmero de cepos\nQuantidade de
-    cepos presentes na \xE1rea em an\xE1lise, resultantes de cortes anteriores.\nN
-    \u2013 N\xFAmero de \xE1rvores vivas\nTotal de \xE1rvores vivas num determinado
-    momento ou ano de simula\xE7\xE3o.\nNdead \u2013 N\xFAmero de \xE1rvores mortas\nQuantidade
-    de \xE1rvores que morreram por causas naturais ou competi\xE7\xE3o.\n\nDimens\xF5es
-    e caracter\xEDsticas do povoamento:\nhdom \u2013 Altura dominante\nAltura m\xE9dia
-    das 100 \xE1rvores mais altas por hectare; indicador de produtividade do povoamento.\nG
-    \u2013 \xC1rea basal\nSoma das \xE1reas das sec\xE7\xF5es transversais dos troncos
-    (a 1,30 m), expressa em m\xB2/ha.\ndg \u2013 Di\xE2metro quadr\xE1tico m\xE9dio\nDi\xE2metro
+  m_text: "Estrutura do povoamento:\nNst \u2013 N\xFAmero de tou\xE7as (exceto no
+    eucalipto, \xE9 igual ao n\xFAmero de \xE1rvores, no eucalipto cada tou\xE7a
+    pode ter v\xE1rias varas/\xE1rvores)\r\nN \u2013 N\xFAmero de \xE1rvores vivas\nTotal
+    de \xE1rvores vivas num determinado momento ou ano de simula\xE7\xE3o.\nNdead
+    \u2013 N\xFAmero de \xE1rvores mortas\nQuantidade de \xE1rvores que morreram
+    por causas naturais ou competi\xE7\xE3o.\n\nDimens\xF5es e caracter\xEDsticas
+    do povoamento:\nhdom \u2013 Altura dominante\nAltura m\xE9dia das 100 \xE1rvores
+    mais altas por hectare; indicador de produtividade do povoamento.\nG \u2013 \xC1rea
+    basal\nSoma das \xE1reas das sec\xE7\xF5es transversais dos troncos (a 1,30 m),
+    expressa em m\xB2/ha.\ndg \u2013 Di\xE2metro quadr\xE1tico m\xE9dio\nDi\xE2metro
     correspondente \xE0 \xE1rvore m\xE9dia em termos de \xE1rea basal.\n\nVolume:\nVu_st
     \u2013 Volume do fuste sem cepo e sem casca\nVolume comercial do tronco, excluindo
     cepo e casca.\nVst \u2013 Volume do fuste sem cepo\nVolume do tronco excluindo
@@ -131751,8 +131798,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1216698046}
   manager: {fileID: 1344679403}
-  isMultiVisualization: 0
   paralelPos: {fileID: 2109280929}
+  isMultiVisualization: 0
   isFree: 0
   canUseCameraMovement: 1
   freeCameraMoveSpeed: 10
@@ -132872,3 +132919,4 @@ SceneRoots:
   - {fileID: 702936679}
   - {fileID: 1034151797}
   - {fileID: 1867972677}
+  - {fileID: 531717540}
