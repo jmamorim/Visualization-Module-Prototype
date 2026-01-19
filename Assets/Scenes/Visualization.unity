@@ -2084,8 +2084,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 150, y: 55}
-  m_SizeDelta: {x: 260, y: 40}
+  m_AnchoredPosition: {x: 160, y: 55}
+  m_SizeDelta: {x: 230, y: 35}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &37563869
 MonoBehaviour:
@@ -10353,15 +10353,14 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Navega\xE7\xE3o Geral por Anos\n\nSeta Esquerda \u2013 Retroceder um ano\nSeta
-    Direita \u2013 Avan\xE7ar um ano\n\nNavega\xE7\xE3o do Povoamento 1\nA \u2013
-    Retroceder um ano (apenas Gr\xE1fico 1)\nD \u2013 Avan\xE7ar um ano (apenas Gr\xE1fico
-    1)\n\nNavega\xE7\xE3o do Povoamento 2\n\nQ \u2013 Retroceder um ano (apenas Gr\xE1fico
-    2)\nE \u2013 Avan\xE7ar um ano (apenas Gr\xE1fico 2)\n\nC\xE2mara e Visualiza\xE7\xE3o\n\nR
-    \u2013 Repor a c\xE2mara\nP \u2013 Alternar vista topogr\xE1fica\nArrastar com
-    o rato na vista em perspetiva \u2013 Rodar a c\xE2mera\nArrastar com o rato na
-    vista topogr\xE1fica \u2013 Deslocar a c\xE2mera\n\nIntera\xE7\xE3o com \xC1rvores\n\nClique
-    direito numa \xE1rvore \u2013 Mostrar um marcador e a informa\xE7\xE3o da \xE1rvore\n"
+  m_text: "Navega\xE7\xE3o Geral por Anos\n\nSeta Esquerda \u2013 Retroceder um ano;\nSeta
+    Direita \u2013 Avan\xE7ar um ano;\n\nNavega\xE7\xE3o do Povoamento 1\n\nA \u2013
+    Retroceder um ano (apenas Gr\xE1fico 1);\nD \u2013 Avan\xE7ar um ano (apenas
+    Gr\xE1fico 1);\n\nNavega\xE7\xE3o do Povoamento 2\n\nQ \u2013 Retroceder um ano
+    (apenas Gr\xE1fico 2);\nE \u2013 Avan\xE7ar um ano (apenas Gr\xE1fico 2);\n\nC\xE2mara
+    e Visualiza\xE7\xE3o\n\nR \u2013 Repor a c\xE2mara;\nP \u2013 Alternar vista
+    topogr\xE1fica;\n\nVista em Perspetiva\n\nArrastar com o rato \u2013 Rodar a
+    c\xE2mara;\n\nVista Topogr\xE1fica\n\nArrastar com o rato \u2013 Deslocar a c\xE2mara;"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -10497,13 +10496,18 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Simula\xE7\xE3o de Sobrevoo LiDAR e Sobrevoo Orbital\n\nL \u2013 Sobrevoo
-    LiDAR (apenas Povoamento 1)\nO \u2013 Sobrevoo orbital (apenas Povoamento 1)\nK
-    \u2013 Sobrevoo LiDAR (apenas Povoamento 2)\nI \u2013 Sobrevoo orbital (apenas
-    Povoamento 2)\n\nNota\n\nPara interromper qualquer um dos sobrevoos, pode pressionar
-    \u201CL\u201D ou \u201CO\u201D na visualiza\xE7\xE3o simples, ou qualquer uma
-    das teclas acima indicadas na visualiza\xE7\xE3o m\xFAltipla que estejam associadas
-    \xE0 funcionalidade de simula\xE7\xE3o de sobrevoo."
+  m_text: "Modo de C\xE2mara Livre\n\nAtiva\xE7\xE3o: Quando o rato est\xE1 sobre
+    o espa\xE7o de um povoamento;\nBot\xE3o esquerdo do rato enquanto arrasta \u2013
+    Rodar a c\xE2mara;\nW / A / S / D \u2013 Mover a c\xE2mara (frente, esquerda,
+    tr\xE1s, direita);\n\nIntera\xE7\xE3o com \xC1rvores\n\nClique direito numa \xE1rvore
+    \u2013 Mostrar um marcador e a informa\xE7\xE3o da \xE1rvore;\n\nSimula\xE7\xE3o
+    de Sobrevoo LiDAR e Sobrevoo Orbital\n\nL \u2013 Sobrevoo LiDAR (apenas Povoamento
+    1);\nO \u2013 Sobrevoo orbital (apenas Povoamento 1);\nK \u2013 Sobrevoo LiDAR
+    (apenas Povoamento 2);\nI \u2013 Sobrevoo orbital (apenas Povoamento 2);\n\nNota:\nPara
+    interromper qualquer um dos sobrevoos, pode pressionar \u201CL\u201D ou \u201CO\u201D
+    na visualiza\xE7\xE3o simples, ou qualquer uma das teclas acima indicadas na
+    visualiza\xE7\xE3o m\xFAltipla que estejam associadas \xE0 funcionalidade de
+    simula\xE7\xE3o de sobrevoo."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -15966,12 +15970,12 @@ PrefabInstance:
     - target: {fileID: 7806073484746996409, guid: 701dc487a7a2934458a2abbfdf40073f,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 160
+      value: 140
       objectReference: {fileID: 0}
     - target: {fileID: 7806073484746996409, guid: 701dc487a7a2934458a2abbfdf40073f,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 30
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7806073484746996409, guid: 701dc487a7a2934458a2abbfdf40073f,
         type: 3}
@@ -24813,7 +24817,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -275}
+  m_AnchoredPosition: {x: 130, y: -50}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &375517090
@@ -28643,8 +28647,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 16
+  m_fontSizeBase: 16
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -32021,7 +32025,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 253048946}
   m_HandleRect: {fileID: 253048945}
   m_Direction: 3
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -46258,7 +46262,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000030517578, y: 275}
+  m_AnchoredPosition: {x: -120, y: 50}
   m_SizeDelta: {x: 550, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &759230009
@@ -71960,11 +71964,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1334169300}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 5, y: 250}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 5, y: -55}
   m_SizeDelta: {x: 40, y: 40}
-  m_Pivot: {x: 0, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &1183691524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72041,7 +72045,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b29cda88838707545bef88e037ec0016, type: 3}
+  m_Sprite: {fileID: 21300000, guid: adb74305519dc6942953afe3604e7e1f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -82623,9 +82627,9 @@ MonoBehaviour:
   PrescBox2: {fileID: 37563867}
   comparePrescsButton: {fileID: 934340616}
   changeLayoutButton: {fileID: 1183691522}
-  inactiveSpriteLayoutButton: {fileID: 21300000, guid: b29cda88838707545bef88e037ec0016,
+  inactiveSpriteLayoutButton: {fileID: 21300000, guid: adb74305519dc6942953afe3604e7e1f,
     type: 3}
-  activeSpriteLayoutButton: {fileID: 21300000, guid: 060a1327910f5bc48ae1316716f5bdb4,
+  activeSpriteLayoutButton: {fileID: 21300000, guid: b0defe46351194d46b85be8dd3c8b9e0,
     type: 3}
 --- !u!4 &1344679404
 Transform:
@@ -88494,8 +88498,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 16
+  m_fontSizeBase: 16
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -95647,8 +95651,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 55, y: -55}
-  m_SizeDelta: {x: 260, y: 40}
+  m_AnchoredPosition: {x: 50, y: -55}
+  m_SizeDelta: {x: 230, y: 35}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1576314134
 MonoBehaviour:
@@ -113512,12 +113516,12 @@ PrefabInstance:
     - target: {fileID: 7806073484746996409, guid: 701dc487a7a2934458a2abbfdf40073f,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 160
+      value: 140
       objectReference: {fileID: 0}
     - target: {fileID: 7806073484746996409, guid: 701dc487a7a2934458a2abbfdf40073f,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 30
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7806073484746996409, guid: 701dc487a7a2934458a2abbfdf40073f,
         type: 3}
@@ -113557,7 +113561,7 @@ PrefabInstance:
     - target: {fileID: 7806073484746996409, guid: 701dc487a7a2934458a2abbfdf40073f,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -6
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 7806073484746996409, guid: 701dc487a7a2934458a2abbfdf40073f,
         type: 3}

@@ -78,14 +78,17 @@ public class CameraBehaviour : MonoBehaviour
 
     private void HandleFreeCameraMovement()
     {
-        float mouseX = Input.GetAxis("Mouse X") * lookSensitivity;
-        float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity;
+        if (Input.GetMouseButton(1) && IsMouseOverViewport())
+        {
+            float mouseX = Input.GetAxis("Mouse X") * lookSensitivity;
+            float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity;
 
-        yaw += mouseX;
-        pitch -= mouseY;
-        pitch = Mathf.Clamp(pitch, -89f, 89f);
+            yaw += mouseX;
+            pitch -= mouseY;
+            pitch = Mathf.Clamp(pitch, -89f, 89f);
 
-        transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+            transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+        }
 
         Vector3 movement = Vector3.zero;
         if (Input.GetKey(KeyCode.W)) movement += transform.forward;

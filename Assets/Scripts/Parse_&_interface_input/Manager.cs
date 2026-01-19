@@ -351,14 +351,14 @@ public class Manager : MonoBehaviour
             graphsBox.transform.localPosition = showingTreeInfoGraphsBoxPos;
             graphsBox.GetComponent<RectTransform>().sizeDelta = new Vector2(showingTreeInfoGraphsBoxWidth, showingTreeInfoGraphsBoxHeight);
             treeInfoBox.SetActive(true);
-            treeInfoText.text = $"<b>Tree information:</b>\n" +
-                                $"Cicle: {t.ciclo}\n" +
-                                $"Year: {t.Year}\n" +
-                                $"Age: {t.t} anos\n" +
-                                $"Heigth: {t.h} m\n" +
-                                $"Diameter: {t.d} cm\n" +
-                                $"Heigth of crown base: {t.hbc} m\n" +
-                                $"Crown width: {t.cw} cm";
+            treeInfoText.text = $"<b>Informação da árvore:</b>\n" +
+                                $"Ciclo: {t.ciclo}\n" +
+                                $"Ano: {t.Year}\n" +
+                                $"Idade: {t.t} anos\n" +
+                                $"Altura: {t.h} m\n" +
+                                $"Diâmetro: {t.d} cm\n" +
+                                $"Altura da base da copa: {t.hbc} m\n" +
+                                $"Largura da copa: {t.cw} cm";
         }
     }
 
@@ -489,7 +489,7 @@ public class Manager : MonoBehaviour
 
     public void positionViewPorts(bool isMulti, Camera cam = null)
     {
-        if (isMulti)
+        if (isMulti || isComparingPresc)
         {
             Camera1.SetActive(true);
             Camera2.SetActive(true);
@@ -497,19 +497,11 @@ public class Manager : MonoBehaviour
             cameraBehaviour2.isMultiVisualization = true;
             if (!isVerticalLayout)
             {
-                yearSlider1.transform.localPosition = slider1OriginalPos;
-                yearSlider1.transform.localEulerAngles = slider1OriginalRot;
-                yearSlider2.transform.localPosition = slider2OriginalPos;
-                yearSlider2.transform.localEulerAngles = slider2OriginalRot;
                 Camera1.GetComponent<Camera>().rect = new Rect(0, 0.5f, 0.75f, 0.5f);
                 Camera2.GetComponent<Camera>().rect = new Rect(0, 0, 0.75f, 0.5f);
             }
             else
             {
-                yearSlider1.transform.localPosition = verticalLayoutSlider1.localPosition;
-                yearSlider1.transform.localEulerAngles = verticalLayoutSlider1.localEulerAngles;
-                yearSlider2.transform.localPosition = verticalLayoutSlider2.localPosition;
-                yearSlider2.transform.localEulerAngles = verticalLayoutSlider2.localEulerAngles;
                 Camera1.GetComponent<Camera>().rect = new Rect(0, 0, 0.38f, 1);
                 Camera2.GetComponent<Camera>().rect = new Rect(0.38f, 0, 0.38f, 1);
             }
@@ -527,23 +519,6 @@ public class Manager : MonoBehaviour
                 {
                     cam.GetComponent<Camera>().rect = new Rect(0, 0, 1, 1);
                 }
-            }
-        }
-        else if (isComparingPresc)
-        {
-            Camera1.SetActive(true);
-            Camera2.SetActive(true);
-            cameraBehaviour1.isMultiVisualization = true;
-            cameraBehaviour2.isMultiVisualization = true;
-            if (!isVerticalLayout)
-            {
-                Camera1.GetComponent<Camera>().rect = new Rect(0, 0.5f, 0.75f, 0.5f);
-                Camera2.GetComponent<Camera>().rect = new Rect(0, 0, 0.75f, 0.5f);
-            }
-            else
-            {
-                Camera1.GetComponent<Camera>().rect = new Rect(0, 0, 0.38f, 1);
-                Camera2.GetComponent<Camera>().rect = new Rect(0.38f, 0, 0.38f, 1);
             }
         }
         else
