@@ -236,7 +236,7 @@ public class IdStandsDropdown : MonoBehaviour
         {
             case "R":
                 return "Regular";
-            case "I":
+            case "J":
                 return "Irregular";
             default:
                 return structure;
