@@ -10361,9 +10361,10 @@ MonoBehaviour:
     Gr\xE1fico 2);\n\n<b>C\xE2mara e Visualiza\xE7\xE3o</b>\n\nR \u2013 Repor a c\xE2mara;\nP
     \u2013 Alternar vista topogr\xE1fica;\nF enquanto uma \xE1rvore est\xE1 selecionada
     - Modo de foco;\n\nNota:\nS\xF3 uma c\xE2mera pode estar em modo de foco, e neste
-    modo, s\xF3 \xE9 poss\xEDvel rodar \xE0 volta da \xE1rvore selecionada.\n\n<b>Vista
-    em Perspetiva</b>\n\nArrastar com o rato \u2013 Rodar a c\xE2mara;\n\n<b>Vista
-    Topogr\xE1fica</b>\n\nArrastar com o rato \u2013 Deslocar a c\xE2mara;\n\n"
+    modo, s\xF3 \xE9 poss\xEDvel rodar \xE0 volta da \xE1rvore selecionada. Para
+    sair deste modo basta clicar no F de novo.\n\n<b>Vista em Perspetiva</b>\n\nArrastar
+    com o rato \u2013 Rodar a c\xE2mara;\n\n<b>Vista Topogr\xE1fica</b>\n\nArrastar
+    com o rato \u2013 Deslocar a c\xE2mara;\n\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
