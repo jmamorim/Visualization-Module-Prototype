@@ -49,6 +49,13 @@ public class Manager : MonoBehaviour
     Vector3 slider1OriginalPos, slider2OriginalPos;
     Vector3 slider1OriginalRot, slider2OriginalRot;
     List<int> sortedYears;
+    bool isFocusMode1 = false;
+    bool isFocusMode2 = false;
+    int selectedTreeCameraId = -1;
+    Vector3 savedCameraPos1, savedCameraPos2;
+    Quaternion savedCameraRot1, savedCameraRot2;
+    Transform savedTarget1, savedTarget2;
+    float focusDistance = 10.0f;
 
     #region Unity Methods
 
@@ -188,6 +195,7 @@ public class Manager : MonoBehaviour
 
     private void HandleKeyboardInput()
     {
+        HandleFocusModeToggle();
         if (outputSoloTreesData != null && canInteract)
         {
             if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -297,8 +305,70 @@ public class Manager : MonoBehaviour
 
     #region Public Methods
 
+    public bool IsFocusMode() => isFocusMode1 || isFocusMode2;
+
+    public bool IsFocusMode1() => isFocusMode1;
+
+    public bool IsFocusMode2() => isFocusMode2;
+    public void ResetSelected()
+    {
+        if (isFocusMode1)
+        {
+            ExitFocusMode(1, cameraBehaviour1);
+            isFocusMode1 = false;
+        }
+        if (isFocusMode2)
+        {
+            ExitFocusMode(2, cameraBehaviour2);
+            isFocusMode2 = false;
+        }
+
+        selectedTreeCameraId = -1;
+
+        if (lastSelectedTree != null)
+        {
+            lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
+            lastSelectedTree = null;
+        }
+    }
+
+    public void DeselectTree()
+    {
+        if (isFocusMode1)
+        {
+            ExitFocusMode(1, cameraBehaviour1);
+            isFocusMode1 = false;
+        }
+        if (isFocusMode2)
+        {
+            ExitFocusMode(2, cameraBehaviour2);
+            isFocusMode2 = false;
+        }
+
+        selectedTreeCameraId = -1;
+        ResetSelected();
+        HideTreeInfo();
+    }
+
+    public void SelectTree(GameObject tree)
+    {
+        lastSelectedTree = tree;
+        selectedTreeCameraId = -1;
+
+        if (IsTreeVisibleToCamera(tree, cam1))
+        {
+            selectedTreeCameraId = 1;
+        }
+        else if (cam2 != null && cam2.gameObject.activeSelf && IsTreeVisibleToCamera(tree, cam2))
+        {
+            selectedTreeCameraId = 2;
+        }
+    }
     public void comparePresc()
     {
+        if(IsFocusMode())
+            ExitAnyFocusMode();
+
         isComparingPresc = !isComparingPresc;
         PrescBox2.SetActive(isComparingPresc);
         comparePrescsButton.GetComponent<Image>().color = isComparingPresc ? Color.green : Color.red;
@@ -325,25 +395,7 @@ public class Manager : MonoBehaviour
 
     public bool isMultiVisualizationActive() => outputSoloTreesData.Count() > 1;
 
-    public void SelectTree(GameObject tree) => lastSelectedTree = tree;
-
     public GameObject GetSelectedTree() => lastSelectedTree;
-
-    public void ResetSelected()
-    {
-        if (lastSelectedTree != null)
-        {
-            lastSelectedTree.transform.Find("OutlineMesh").gameObject.SetActive(false);
-            lastSelectedTree = null;
-        }
-    }
-
-    public void DeselectTree()
-    {
-        ResetSelected();
-        HideTreeInfo();
-    }
-
     public void ShowTreeInfo(Tree t)
     {
         if (treeInfoText != null)
@@ -604,7 +656,115 @@ public class Manager : MonoBehaviour
     #endregion
 
     #region Private Methods
+    private void HandleFocusModeToggle()
+    {
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            if (lastSelectedTree != null && selectedTreeCameraId != -1)
+            {
+                if (selectedTreeCameraId == 1)
+                {
+                    isFocusMode1 = !isFocusMode1;
 
+                    if (isFocusMode1)
+                    {
+                        EnterFocusMode(1, cameraBehaviour1);
+                    }
+                    else
+                    {
+                        ExitFocusMode(1, cameraBehaviour1);
+                    }
+                }
+                else if (selectedTreeCameraId == 2)
+                {
+                    isFocusMode2 = !isFocusMode2;
+
+                    if (isFocusMode2)
+                    {
+                        EnterFocusMode(2, cameraBehaviour2);
+                    }
+                    else
+                    {
+                        ExitFocusMode(2, cameraBehaviour2);
+                    }
+                }
+            }
+        }
+    }
+
+    private void EnterFocusMode(int cameraId, CameraBehaviour camBehaviour)
+    {
+        if (lastSelectedTree == null) return;
+
+        Transform treeTransform = lastSelectedTree.transform;
+
+        if (cameraId == 1)
+        {
+            savedCameraPos1 = Camera1.transform.position;
+            savedCameraRot1 = Camera1.transform.rotation;
+            savedTarget1 = camBehaviour.target;
+        }
+        else if (cameraId == 2)
+        {
+            savedCameraPos2 = Camera2.transform.position;
+            savedCameraRot2 = Camera2.transform.rotation;
+            savedTarget2 = camBehaviour.target;
+        }
+
+        Vector3 direction = (camBehaviour.transform.position - treeTransform.position).normalized;
+        if (direction.magnitude < 0.1f)
+        {
+            direction = Vector3.forward;
+        }
+
+        Vector3 focusPosition = treeTransform.position + direction * focusDistance;
+        var halfTreeHeight = lastSelectedTree.GetComponent<BoxCollider>().bounds.max.y;
+        focusPosition.y = treeTransform.position.y + halfTreeHeight;
+
+        camBehaviour.transform.position = focusPosition;
+
+        camBehaviour.ChangeLookAt(treeTransform);
+
+        camBehaviour.SetFocusMode(true);
+
+        canInteract = false;
+    }
+    private void ExitFocusMode(int cameraId, CameraBehaviour camBehaviour)
+    {
+        camBehaviour.SetFocusMode(false);
+
+        if (cameraId == 1)
+        {
+            Camera1.transform.position = savedCameraPos1;
+            Camera1.transform.rotation = savedCameraRot1;
+            camBehaviour.target = savedTarget1;
+            camBehaviour.ResetLookAt();
+        }
+        else if (cameraId == 2)
+        {
+            Camera2.transform.position = savedCameraPos2;
+            Camera2.transform.rotation = savedCameraRot2;
+            camBehaviour.target = savedTarget2;
+            camBehaviour.ResetLookAt();
+        }
+
+        canInteract = true;
+    }
+
+    private bool IsTreeVisibleToCamera(GameObject tree, Camera cam)
+    {
+        if ((cam.cullingMask & (1 << tree.layer)) == 0)
+            return false;
+        Vector3 viewportPoint = cam.WorldToViewportPoint(tree.transform.position);
+        if (viewportPoint.z > 0 &&
+            viewportPoint.x >= 0 && viewportPoint.x <= 1 &&
+            viewportPoint.y >= 0 && viewportPoint.y <= 1)
+        {
+            return true;
+        }
+
+        return false;
+    }
     private void OnYearSlider2Changed(float value)
     {
         int newYear = Mathf.RoundToInt(value);
@@ -836,6 +996,9 @@ public class Manager : MonoBehaviour
 
     private void changePlot1(int year)
     {
+        if(IsFocusMode())
+            ExitAnyFocusMode();
+
         var outputPlot1 = outputSoloTreesData.First().Values.First()[selectedId_presc1];
 
         if (isComparingPresc)
@@ -912,6 +1075,9 @@ public class Manager : MonoBehaviour
 
     private void changePlot2(int year)
     {
+        if (IsFocusMode())
+            ExitAnyFocusMode();
+        
         var outputPlot2 = outputSoloTreesData.ElementAt(1).Values.First()[selectedId_presc2];
 
         current_year2 = year;
@@ -937,6 +1103,23 @@ public class Manager : MonoBehaviour
             }
             changeHightlight();
         }
+    }
+
+    private void ExitAnyFocusMode()
+    {
+        if (isFocusMode1)
+        {
+            ExitFocusMode(1, cameraBehaviour1);
+            isFocusMode1 = false;
+        }
+
+        if (isFocusMode2)
+        {
+            ExitFocusMode(2, cameraBehaviour2);
+            isFocusMode2 = false;
+        }
+
+        selectedTreeCameraId = -1;
     }
 
     #endregion

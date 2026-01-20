@@ -37,8 +37,8 @@ public class CameraBehaviour : MonoBehaviour
     private float pitch = 0f;
     private float yaw = 0f;
     private float currentVerticalAngle = 0f;
-
     private Camera cam;
+    private bool isFocusMode = false;
 
     #region Unity Methods
 
@@ -65,7 +65,7 @@ public class CameraBehaviour : MonoBehaviour
 
         if (canUseCameraMovement && !isOverUI && ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
         {
-            if (isFree && !isTopographic)
+            if (isFree && !isTopographic && !isFocusMode)
                 HandleFreeCameraMovement();
             else
                 HandleOrbitOrPan();
@@ -78,7 +78,7 @@ public class CameraBehaviour : MonoBehaviour
 
     private void HandleFreeCameraMovement()
     {
-        if (Input.GetMouseButton(1) && IsMouseOverViewport())
+        if (Input.GetMouseButton(0) && IsMouseOverViewport())
         {
             float mouseX = Input.GetAxis("Mouse X") * lookSensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity;
@@ -124,7 +124,7 @@ public class CameraBehaviour : MonoBehaviour
 
                 currentVerticalAngle = newVerticalAngle;
             }
-            else
+            else if (!isFocusMode)
             {
                 Vector3 move = (transform.right * -delta.x + transform.up * -delta.y) * panSpeed;
                 move.y = 0;
@@ -140,6 +140,10 @@ public class CameraBehaviour : MonoBehaviour
 
     #region Camera State Methods
 
+    public void SetFocusMode(bool focus)
+    {
+        isFocusMode = focus;
+    }
     public void InitializeCamera(Vector3 initPos, Quaternion initRot, Transform lookAt, Vector3 paralelPos, Quaternion paralelRot)
     {
         initialPosition = initPos;
@@ -153,9 +157,11 @@ public class CameraBehaviour : MonoBehaviour
 
     public void ResetCamera()
     {
+        isFocusMode = false;
         transform.position = initialPosition;
         transform.rotation = initialRotation;
-        target.position = initialLookAt.position;
+        if(initialLookAt != null)
+            target.position = initialLookAt.position;
         currentVerticalAngle = 0f;
         manager.ResetSelected();
     }
