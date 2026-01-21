@@ -57252,7 +57252,7 @@ MonoBehaviour:
       m_AutoRotate: 0
       m_Distance: 8
       m_Formatter: 
-      m_NumericFormatter: F2
+      m_NumericFormatter: F0
       m_Width: 0
       m_Height: 0
       m_FixedX: 0
@@ -73790,7 +73790,7 @@ MonoBehaviour:
       m_AutoRotate: 0
       m_Distance: 8
       m_Formatter: 
-      m_NumericFormatter: F2
+      m_NumericFormatter: F0
       m_Width: 0
       m_Height: 0
       m_FixedX: 0
@@ -103396,7 +103396,7 @@ MonoBehaviour:
       m_AutoRotate: 0
       m_Distance: 8
       m_Formatter: 
-      m_NumericFormatter: F2
+      m_NumericFormatter: F0
       m_Width: 0
       m_Height: 0
       m_FixedX: 0
