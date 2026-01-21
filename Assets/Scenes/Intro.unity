@@ -700,6 +700,7 @@ GameObject:
   - component: {fileID: 66650020}
   - component: {fileID: 66650019}
   - component: {fileID: 66650018}
+  - component: {fileID: 66650022}
   m_Layer: 5
   m_Name: Image (2)
   m_TagString: Untagged
@@ -809,6 +810,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 66650016}
   m_CullTransparentMesh: 1
+--- !u!114 &66650022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66650016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29556529f9308a64ea1610172193abc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScrollBarOnEnableFix
+  scrollbar: {fileID: 763141624}
 --- !u!1 &71032951
 GameObject:
   m_ObjectHideFlags: 0
@@ -1136,6 +1150,7 @@ GameObject:
   - component: {fileID: 142505468}
   - component: {fileID: 142505467}
   - component: {fileID: 142505466}
+  - component: {fileID: 142505470}
   m_Layer: 5
   m_Name: Image (5)
   m_TagString: Untagged
@@ -1245,6 +1260,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 142505464}
   m_CullTransparentMesh: 1
+--- !u!114 &142505470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142505464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29556529f9308a64ea1610172193abc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScrollBarOnEnableFix
+  scrollbar: {fileID: 145187695}
 --- !u!1 &145187693
 GameObject:
   m_ObjectHideFlags: 0
@@ -4598,6 +4626,7 @@ GameObject:
   - component: {fileID: 558787839}
   - component: {fileID: 558787841}
   - component: {fileID: 558787842}
+  - component: {fileID: 558787843}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -4707,6 +4736,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Mask
   m_ShowMaskGraphic: 1
+--- !u!114 &558787843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 558787837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29556529f9308a64ea1610172193abc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScrollBarOnEnableFix
+  scrollbar: {fileID: 214250003}
 --- !u!1 &632799219
 GameObject:
   m_ObjectHideFlags: 0
@@ -8158,6 +8200,7 @@ GameObject:
   - component: {fileID: 950864822}
   - component: {fileID: 950864821}
   - component: {fileID: 950864820}
+  - component: {fileID: 950864824}
   m_Layer: 5
   m_Name: Image (3)
   m_TagString: Untagged
@@ -8267,6 +8310,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 950864818}
   m_CullTransparentMesh: 1
+--- !u!114 &950864824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950864818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29556529f9308a64ea1610172193abc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScrollBarOnEnableFix
+  scrollbar: {fileID: 1187892185}
 --- !u!1 &971671705
 GameObject:
   m_ObjectHideFlags: 0
@@ -10125,6 +10181,7 @@ GameObject:
   - component: {fileID: 1138147869}
   - component: {fileID: 1138147868}
   - component: {fileID: 1138147867}
+  - component: {fileID: 1138147871}
   m_Layer: 5
   m_Name: Image (4)
   m_TagString: Untagged
@@ -10234,6 +10291,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1138147865}
   m_CullTransparentMesh: 1
+--- !u!114 &1138147871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138147865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29556529f9308a64ea1610172193abc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScrollBarOnEnableFix
+  scrollbar: {fileID: 1229228582}
 --- !u!1 &1143293489
 GameObject:
   m_ObjectHideFlags: 0
@@ -11553,6 +11623,7 @@ GameObject:
   - component: {fileID: 1277020804}
   - component: {fileID: 1277020803}
   - component: {fileID: 1277020802}
+  - component: {fileID: 1277020806}
   m_Layer: 5
   m_Name: Image (1)
   m_TagString: Untagged
@@ -11662,6 +11733,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1277020800}
   m_CullTransparentMesh: 1
+--- !u!114 &1277020806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277020800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29556529f9308a64ea1610172193abc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScrollBarOnEnableFix
+  scrollbar: {fileID: 676786568}
 --- !u!1 &1282438621
 GameObject:
   m_ObjectHideFlags: 0
@@ -13149,6 +13233,7 @@ GameObject:
   - component: {fileID: 1466325727}
   - component: {fileID: 1466325726}
   - component: {fileID: 1466325725}
+  - component: {fileID: 1466325729}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -13258,6 +13343,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1466325723}
   m_CullTransparentMesh: 1
+--- !u!114 &1466325729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1466325723}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29556529f9308a64ea1610172193abc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScrollBarOnEnableFix
+  scrollbar: {fileID: 340021951}
 --- !u!1 &1469965979
 GameObject:
   m_ObjectHideFlags: 0
@@ -14451,6 +14549,7 @@ GameObject:
   - component: {fileID: 1592788728}
   - component: {fileID: 1592788727}
   - component: {fileID: 1592788726}
+  - component: {fileID: 1592788730}
   m_Layer: 5
   m_Name: Image (1)
   m_TagString: Untagged
@@ -14560,6 +14659,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1592788724}
   m_CullTransparentMesh: 1
+--- !u!114 &1592788730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1592788724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29556529f9308a64ea1610172193abc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScrollBarOnEnableFix
+  scrollbar: {fileID: 1846149609}
 --- !u!1 &1599648070
 GameObject:
   m_ObjectHideFlags: 0
@@ -18652,6 +18764,7 @@ GameObject:
   - component: {fileID: 2093886337}
   - component: {fileID: 2093886336}
   - component: {fileID: 2093886335}
+  - component: {fileID: 2093886339}
   m_Layer: 5
   m_Name: Image (2)
   m_TagString: Untagged
@@ -18761,6 +18874,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2093886333}
   m_CullTransparentMesh: 1
+--- !u!114 &2093886339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093886333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29556529f9308a64ea1610172193abc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  scrollbar: {fileID: 233324674}
 --- !u!1 &2105372936
 GameObject:
   m_ObjectHideFlags: 0
