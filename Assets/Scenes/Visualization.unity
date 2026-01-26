@@ -33503,52 +33503,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 530787398}
   m_CullTransparentMesh: 1
---- !u!1 &531717538
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 531717540}
-  - component: {fileID: 531717539}
-  m_Layer: 0
-  m_Name: Windzone
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!182 &531717539
-WindZone:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 531717538}
-  m_Enabled: 1
-  m_Mode: 0
-  m_Radius: 20
-  m_WindMain: 1
-  m_WindTurbulence: 1
-  m_WindPulseMagnitude: 0.5
-  m_WindPulseFrequency: 0.01
---- !u!4 &531717540
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 531717538}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 674.40985, y: 0, z: -1456.0565}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &532255357
 GameObject:
   m_ObjectHideFlags: 0
@@ -41698,6 +41652,8 @@ MonoBehaviour:
   - {fileID: 919132149155446097, guid: 10d08aa9e64f57f4497817797d468c06, type: 3}
   - {fileID: 919132149155446097, guid: d02f0de2013faf2408d268e4e74785cc, type: 3}
   - {fileID: 919132149155446097, guid: 15367d980d088db4bb2307eebca1a891, type: 3}
+  cepoPrefab: {fileID: 919132149155446097, guid: c9aeb674c243c0a48a5c39862b4ca255,
+    type: 3}
   inputAndParsedData: {fileID: 11400000, guid: 24849724a7db169408041f84a6ecdaae, type: 2}
   cam1: {fileID: 330585545}
   cam2: {fileID: 2125857184}
@@ -132997,4 +132953,3 @@ SceneRoots:
   - {fileID: 702936679}
   - {fileID: 1034151797}
   - {fileID: 1867972677}
-  - {fileID: 531717540}

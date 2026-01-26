@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 
@@ -15,6 +16,7 @@ public class Visualizer : MonoBehaviour
     public List<GameObject> egPrefabs;
     [Header("Castanheiro Prefabs")]
     public List<GameObject> casPrefabs;
+    public GameObject cepoPrefab;
     public InputAndParsedData inputAndParsedData;
 
     [Header("Scene References")]
@@ -336,61 +338,67 @@ public class Visualizer : MonoBehaviour
     public void displayTrees(List<TreeData> trees, Terrain terrain, bool isCircular)
     {
         if (trees == null || trees.Count == 0) return;
-
         terrain.terrainData.treeInstances = new TreeInstance[0];
-        TreePrototype[] prototypes = new TreePrototype[pbPrefabs.Count + pmPrefabs.Count + egPrefabs.Count + casPrefabs.Count];
-        for (int i = 0; i < pbPrefabs.Count; i++)
+
+        // Build list of valid prototypes
+        List<TreePrototype> prototypeList = new List<TreePrototype>();
+
+        foreach (var prefab in pbPrefabs)
         {
-            prototypes[i] = new TreePrototype { prefab = pbPrefabs[i] };
+            if (prefab != null)
+                prototypeList.Add(new TreePrototype { prefab = prefab });
         }
-        for (int i = 0; i < pmPrefabs.Count; i++)
+        foreach (var prefab in pmPrefabs)
         {
-            prototypes[pbPrefabs.Count + i] = new TreePrototype { prefab = pmPrefabs[i] };
+            if (prefab != null)
+                prototypeList.Add(new TreePrototype { prefab = prefab });
         }
-        for (int i = 0; i < egPrefabs.Count; i++)
+        foreach (var prefab in egPrefabs)
         {
-            prototypes[pbPrefabs.Count + pmPrefabs.Count + i] = new TreePrototype { prefab = egPrefabs[i] };
+            if (prefab != null)
+                prototypeList.Add(new TreePrototype { prefab = prefab });
         }
-        for (int i = 0; i < casPrefabs.Count; i++)
+        foreach (var prefab in casPrefabs)
         {
-            prototypes[pbPrefabs.Count + pmPrefabs.Count + egPrefabs.Count + i] = new TreePrototype { prefab = casPrefabs[i] };
+            if (prefab != null)
+                prototypeList.Add(new TreePrototype { prefab = prefab });
         }
+        if (cepoPrefab != null)
+            prototypeList.Add(new TreePrototype { prefab = cepoPrefab });
+
+        TreePrototype[] prototypes = prototypeList.ToArray();
         terrain.terrainData.treePrototypes = prototypes;
 
         List<TreeInstance> treeInstancesTerrain = new List<TreeInstance>();
-
         Vector3 terrainCenter = terrain.transform.position + terrain.terrainData.size / 2f;
-
         foreach (TreeData tree in trees)
         {
+            float worldX = tree.Xarv;
+            float worldZ = tree.Yarv;
+            float normX, normZ;
+            if (isCircular)
+            {
+                // Origin is the center of the terrain
+                normX = (worldX + terrain.terrainData.size.x / 2f) / terrain.terrainData.size.x;
+                normZ = (worldZ + terrain.terrainData.size.z / 2f) / terrain.terrainData.size.z;
+            }
+            else
+            {
+                // Origin is the bottom right corner of the terrain
+                normX = (worldX - terrain.transform.position.x) / terrain.terrainData.size.x;
+                normZ = (worldZ - terrain.transform.position.z) / terrain.terrainData.size.z;
+            }
             if (tree.estado == 0)
             {
-                float worldX = tree.Xarv;
-                float worldZ = tree.Yarv;
-
-                float normX, normZ;
-
-                if (isCircular)
-                {
-                    // Origin is the center of the terrain
-                    normX = (worldX + terrain.terrainData.size.x / 2f) / terrain.terrainData.size.x;
-                    normZ = (worldZ + terrain.terrainData.size.z / 2f) / terrain.terrainData.size.z;
-                }
-                else
-                {
-                    // Origin is the bottom rigth corner of the terrain
-                    normX = (worldX - terrain.transform.position.x) / terrain.terrainData.size.x;
-                    normZ = (worldZ - terrain.transform.position.z) / terrain.terrainData.size.z;
-                }
-
                 GameObject prefab = null;
                 float factor = 0;
                 GetFactorAndPrefabSpecie(tree.specie, tree.h, tree.hbc, tree.t, out factor, out prefab);
 
+                if (prefab == null) continue;
+
                 int protoIndex = System.Array.FindIndex(prototypes, p => p.prefab == prefab);
                 if (protoIndex < 0) continue;
                 float terrainHeight = terrain.terrainData.GetInterpolatedHeight(normX, normZ) / terrain.terrainData.size.y;
-
                 TreeInstance ti = new TreeInstance
                 {
                     position = new Vector3(normX, terrainHeight, normZ),
@@ -403,8 +411,24 @@ public class Visualizer : MonoBehaviour
                 };
                 treeInstancesTerrain.Add(ti);
             }
+            else if (tree.wasAlive)
+            {
+                int protoIndex = System.Array.FindIndex(prototypes, p => p.prefab == cepoPrefab);
+                if (protoIndex < 0) continue;
+                float terrainHeight = terrain.terrainData.GetInterpolatedHeight(normX, normZ) / terrain.terrainData.size.y;
+                TreeInstance ti = new TreeInstance
+                {
+                    position = new Vector3(normX, terrainHeight, normZ),
+                    prototypeIndex = protoIndex,
+                    widthScale = 1f,
+                    heightScale = 1f,
+                    color = Color.white,
+                    lightmapColor = Color.white,
+                    rotation = tree.rotation
+                };
+                treeInstancesTerrain.Add(ti);
+            }
         }
-
         terrain.terrainData.treeInstances = treeInstancesTerrain.ToArray();
     }
 
