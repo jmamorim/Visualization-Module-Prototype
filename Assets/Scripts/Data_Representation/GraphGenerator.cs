@@ -149,21 +149,16 @@ public class GraphGenerator : MonoBehaviour
         behaviour.SaveDDOriginalValues(allValues);
     }
 
-    public void changeHighlightedYearGraphs(int year1, int year2, bool isComparing)
+    public void changeHighlightedYearGraphs(int year1, int year2)
     {
         foreach (var chart in lineCharts)
             removeHighlight(chart);
         foreach (var chart in MultiLineCharts)
             removeHighlightMultiLine(chart);
-
-        int y1 = year1;
-        int y2 = isComparing ? year1 : year2;
-
         foreach (var chart in lineCharts)
-            highlightPoint(chart, y1, y2);
-
+            highlightPoint(chart, year1, year2);
         foreach (var chart in MultiLineCharts)
-            highlightPointMultiLine(chart, y1, y2);
+            highlightPointMultiLine(chart, year1, year2);
     }
 
     // Private methods

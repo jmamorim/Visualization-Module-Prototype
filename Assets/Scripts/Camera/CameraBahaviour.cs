@@ -16,8 +16,8 @@ public class CameraBehaviour : MonoBehaviour
     [SerializeField] private bool canUseCameraMovement = true;
     [SerializeField] private float freeCameraMoveSpeed = 10.0f;
     [SerializeField] private float lookSensitivity = 2.0f;
-    [SerializeField] private float minVerticalAngle = -45f;
-    [SerializeField] private float maxVerticalAngle = 45f;
+    [SerializeField] private float minVerticalAngle = 0f;
+    [SerializeField] private float maxVerticalAngle = 90f;
 
     //Private fields
     private float zoomSpeed = 5.0f;

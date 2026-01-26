@@ -366,7 +366,7 @@ public class Manager : MonoBehaviour
     }
     public void comparePresc()
     {
-        if(IsFocusMode())
+        if (IsFocusMode())
             ExitAnyFocusMode();
 
         isComparingPresc = !isComparingPresc;
@@ -806,11 +806,11 @@ public class Manager : MonoBehaviour
     {
         if (isComparingPresc)
         {
-            graphGenerator.changeHighlightedYearGraphs(current_year1, current_year1, isComparingPresc);
+            graphGenerator.changeHighlightedYearGraphs(current_year1, current_year2);
         }
         else
         {
-            graphGenerator.changeHighlightedYearGraphs(current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1, isComparingPresc);
+            graphGenerator.changeHighlightedYearGraphs(current_year1, outputSoloTreesData.Count() > 1 ? current_year2 : -1);
         }
     }
 
@@ -869,35 +869,38 @@ public class Manager : MonoBehaviour
     private void advancePlot1()
     {
         var outputPlot1 = outputSoloTreesData.First().Values.First()[selectedId_presc1];
-
         if (current_year1 < outputPlot1.Count - 1)
         {
-            current_year1++;
             HideTreeInfo();
-
             if (isComparingPresc)
             {
-                int yearValue = outputPlot1[current_year1].Values.First().Year;
                 var outputPlot2 = outputSoloTreesData.First().Values.First()[selectedId_presc2];
-                int actualIndex1 = GetLastIndexForYear(outputPlot1, yearValue);
-                int actualIndex2 = GetLastIndexForYear(outputPlot2, yearValue);
 
-                if (actualIndex1 >= 0)
+                bool hasNextYear = outputPlot1[current_year1 + 1] != null && outputPlot2[current_year2 + 1] != null;
+                bool plot1RepeatsYear = hasNextYear && outputPlot1[current_year1].Values.First().Year == outputPlot1[current_year1 + 1].Values.First().Year;
+                bool plot2RepeatsYear = hasNextYear && outputPlot2[current_year2].Values.First().Year == outputPlot2[current_year2 + 1].Values.First().Year;
+
+                if (plot1RepeatsYear)
+                    current_year1++;
+                if (plot2RepeatsYear)
+                    current_year2++;
+
+                if (!plot1RepeatsYear && !plot2RepeatsYear)
                 {
-                    current_year1 = actualIndex1;
-                    visualizer.receiveTreeDataPlot1(outputPlot1[actualIndex1], outputPlot1[actualIndex1].Values.First().Year);
+                    current_year1++;
+                    current_year2++;
                 }
-                if (actualIndex2 >= 0)
-                {
-                    current_year2 = actualIndex2;
-                    visualizer.receiveTreeDataPlot2(outputPlot2[actualIndex2], outputPlot2[actualIndex2].Values.First().Year, false);
-                }
+
+                Debug.Log($"Advancing Plot1 to index {current_year1} (Year: {outputPlot1[current_year1].Values.First().Year}), Plot2 to index {current_year2} (Year: {outputPlot2[current_year2].Values.First().Year})");
+
+                visualizer.receiveTreeDataPlot1(outputPlot1[current_year1], outputPlot1[current_year1].Values.First().Year);
+                visualizer.receiveTreeDataPlot2(outputPlot2[current_year2], outputPlot2[current_year2].Values.First().Year, false);
             }
             else
             {
+                current_year1++;
                 visualizer.receiveTreeDataPlot1(outputPlot1[current_year1], outputPlot1[current_year1].Values.First().Year);
             }
-
             graphGenerator.populateDDBarCharts(
                 DDTableData,
                 new string[] { selectedId_stand1, selectedId_stand2 },
@@ -905,7 +908,6 @@ public class Manager : MonoBehaviour
                 new int[] { current_year1, current_year2 },
                 isComparingPresc
             );
-
             if (yearSlider1 != null)
             {
                 yearSlider1.SetValueWithoutNotify(current_year1);
@@ -917,33 +919,38 @@ public class Manager : MonoBehaviour
     {
         if (current_year1 > 0)
         {
-            current_year1--;
             var outputPlot1 = outputSoloTreesData.First().Values.First()[selectedId_presc1];
             HideTreeInfo();
-
             if (isComparingPresc)
             {
-                int yearValue = outputPlot1[current_year1].Values.First().Year;
                 var outputPlot2 = outputSoloTreesData.First().Values.First()[selectedId_presc2];
-                int actualIndex1 = GetFirstIndexForYear(outputPlot1, yearValue);
-                int actualIndex2 = GetFirstIndexForYear(outputPlot2, yearValue);
 
-                if (actualIndex1 >= 0)
+                bool hasNextYear = current_year1 > 0 && current_year2 > 0 &&
+                                  outputPlot1[current_year1 - 1] != null && outputPlot2[current_year2 - 1] != null;
+                bool plot1RepeatsYear = hasNextYear && outputPlot1[current_year1].Values.First().Year == outputPlot1[current_year1 - 1].Values.First().Year;
+                bool plot2RepeatsYear = hasNextYear && outputPlot2[current_year2].Values.First().Year == outputPlot2[current_year2 - 1].Values.First().Year;
+
+                if (plot1RepeatsYear)
+                    current_year1--;
+                if (plot2RepeatsYear)
+                    current_year2--;
+
+                if (!plot1RepeatsYear && !plot2RepeatsYear)
                 {
-                    current_year1 = actualIndex1;
-                    visualizer.receiveTreeDataPlot1(outputPlot1[actualIndex1], outputPlot1[actualIndex1].Values.First().Year);
+                    current_year1--;
+                    current_year2--;
                 }
-                if (actualIndex2 >= 0)
-                {
-                    current_year2 = actualIndex2;
-                    visualizer.receiveTreeDataPlot2(outputPlot2[actualIndex2], outputPlot2[actualIndex2].Values.First().Year, false);
-                }
+
+                Debug.Log($"Reversing Plot1 to index {current_year1} (Year: {outputPlot1[current_year1].Values.First().Year}), Plot2 to index {current_year2} (Year: {outputPlot2[current_year2].Values.First().Year})");
+
+                visualizer.receiveTreeDataPlot1(outputPlot1[current_year1], outputPlot1[current_year1].Values.First().Year);
+                visualizer.receiveTreeDataPlot2(outputPlot2[current_year2], outputPlot2[current_year2].Values.First().Year, false);
             }
             else
             {
+                current_year1--;
                 visualizer.receiveTreeDataPlot1(outputPlot1[current_year1], outputPlot1[current_year1].Values.First().Year);
             }
-
             graphGenerator.populateDDBarCharts(
                 DDTableData,
                 new string[] { selectedId_stand1, selectedId_stand2 },
@@ -951,7 +958,6 @@ public class Manager : MonoBehaviour
                 new int[] { current_year1, current_year2 },
                 isComparingPresc
             );
-
             if (yearSlider1 != null)
             {
                 yearSlider1.SetValueWithoutNotify(current_year1);
@@ -959,8 +965,72 @@ public class Manager : MonoBehaviour
         }
     }
 
-    // Need this when comparing so we can have the two visualizations synced because different prescriptions
-    // can have more actions, this means we can't use the same indexes to access the needed data
+    private void changePlot1(int year)
+    {
+        if (IsFocusMode())
+            ExitAnyFocusMode();
+        var outputPlot1 = outputSoloTreesData.First().Values.First()[selectedId_presc1];
+        if (isComparingPresc)
+        {
+            int actualIndex1 = GetLastIndexForYear(outputPlot1, year);
+            if (actualIndex1 >= 0)
+            {
+                current_year1 = actualIndex1;
+                HideTreeInfo();
+                visualizer.receiveTreeDataPlot1(
+                    outputPlot1[actualIndex1],
+                    outputPlot1[actualIndex1].Values.First().Year
+                );
+                var outputPlot2 = outputSoloTreesData.First().Values.First()[selectedId_presc2];
+                int actualIndex2 = GetLastIndexForYear(outputPlot2, year);
+                if (actualIndex2 >= 0)
+                {
+                    current_year2 = actualIndex2;
+                    visualizer.receiveTreeDataPlot2(
+                        outputPlot2[actualIndex2],
+                        outputPlot2[actualIndex2].Values.First().Year,
+                        false
+                    );
+                }
+                graphGenerator.populateDDBarCharts(
+                    DDTableData,
+                    new string[] { selectedId_stand1, selectedId_stand2 },
+                    new string[] { selectedId_presc1YT, selectedId_presc2YT },
+                    new int[] { current_year1, current_year2 },
+                    isComparingPresc
+                );
+                if (yearSlider1 != null)
+                {
+                    yearSlider1.SetValueWithoutNotify(current_year1);
+                }
+                changeHightlight();
+            }
+        }
+        else
+        {
+            current_year1 = year;
+            if (current_year1 >= 0 && current_year1 < outputPlot1.Count)
+            {
+                HideTreeInfo();
+                visualizer.receiveTreeDataPlot1(
+                    outputPlot1[current_year1],
+                    outputPlot1[current_year1].Values.First().Year
+                );
+                graphGenerator.populateDDBarCharts(
+                    DDTableData,
+                    new string[] { selectedId_stand1, selectedId_stand2 },
+                    new string[] { selectedId_presc1YT, selectedId_presc2YT },
+                    new int[] { current_year1, current_year2 },
+                    isComparingPresc
+                );
+                if (yearSlider1 != null)
+                {
+                    yearSlider1.SetValueWithoutNotify(current_year1);
+                }
+                changeHightlight();
+            }
+        }
+    }
     private int GetLastIndexForYear(List<SortedDictionary<int, TreeData>> prescData, int targetYear)
     {
         int lastIndex = -1;
@@ -979,105 +1049,11 @@ public class Manager : MonoBehaviour
         return lastIndex;
     }
 
-    private int GetFirstIndexForYear(List<SortedDictionary<int, TreeData>> prescData, int targetYear)
-    {
-        int lastIndex = -1;
-        for (int i = 0; i < prescData.Count; i++)
-        {
-            int year = prescData[i].Values.First().Year;
-            if (year == targetYear)
-            {
-                lastIndex = i;
-                break;
-            }
-        }
-        return lastIndex;
-    }
-
-    private void changePlot1(int year)
-    {
-        if(IsFocusMode())
-            ExitAnyFocusMode();
-
-        var outputPlot1 = outputSoloTreesData.First().Values.First()[selectedId_presc1];
-
-        if (isComparingPresc)
-        {
-            int actualIndex1 = GetLastIndexForYear(outputPlot1, year);
-
-            if (actualIndex1 >= 0)
-            {
-                current_year1 = actualIndex1;
-                HideTreeInfo();
-                visualizer.receiveTreeDataPlot1(
-                    outputPlot1[actualIndex1],
-                    outputPlot1[actualIndex1].Values.First().Year
-                );
-
-                var outputPlot2 = outputSoloTreesData.First().Values.First()[selectedId_presc2];
-                int actualIndex2 = GetLastIndexForYear(outputPlot2, year);
-
-                if (actualIndex2 >= 0)
-                {
-                    current_year2 = actualIndex2;
-                    visualizer.receiveTreeDataPlot2(
-                        outputPlot2[actualIndex2],
-                        outputPlot2[actualIndex2].Values.First().Year,
-                        false
-                    );
-                }
-
-                graphGenerator.populateDDBarCharts(
-                    DDTableData,
-                    new string[] { selectedId_stand1, selectedId_stand2 },
-                    new string[] { selectedId_presc1YT, selectedId_presc2YT },
-                    new int[] { current_year1, current_year2 },
-                    isComparingPresc
-                );
-
-                if (yearSlider1 != null)
-                {
-                    yearSlider1.SetValueWithoutNotify(current_year1);
-                }
-
-                changeHightlight();
-            }
-        }
-        else
-        {
-            current_year1 = year;
-
-            if (current_year1 >= 0 && current_year1 < outputPlot1.Count)
-            {
-                HideTreeInfo();
-                visualizer.receiveTreeDataPlot1(
-                    outputPlot1[current_year1],
-                    outputPlot1[current_year1].Values.First().Year
-                );
-
-                graphGenerator.populateDDBarCharts(
-                    DDTableData,
-                    new string[] { selectedId_stand1, selectedId_stand2 },
-                    new string[] { selectedId_presc1YT, selectedId_presc2YT },
-                    new int[] { current_year1, current_year2 },
-                    isComparingPresc
-                );
-
-                if (yearSlider1 != null)
-                {
-                    yearSlider1.SetValueWithoutNotify(current_year1);
-                }
-
-                changeHightlight();
-            }
-        }
-    }
-
     private void changePlot2(int year)
     {
         if (IsFocusMode())
             ExitAnyFocusMode();
-        
+
         var outputPlot2 = outputSoloTreesData.ElementAt(1).Values.First()[selectedId_presc2];
 
         current_year2 = year;
