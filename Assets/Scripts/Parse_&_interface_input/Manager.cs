@@ -404,6 +404,7 @@ public class Manager : MonoBehaviour
             graphsBox.GetComponent<RectTransform>().sizeDelta = new Vector2(showingTreeInfoGraphsBoxWidth, showingTreeInfoGraphsBoxHeight);
             treeInfoBox.SetActive(true);
             treeInfoText.text = $"<b>Informação da árvore:</b>\n" +
+                                $"Espécie: {GetSpeciesName(t.specie)}\n" +
                                 $"Ciclo: {t.ciclo}\n" +
                                 $"Ano: {t.Year}\n" +
                                 $"Idade: {t.t} anos\n" +
@@ -656,6 +657,22 @@ public class Manager : MonoBehaviour
     #endregion
 
     #region Private Methods
+    private string GetSpeciesName(string spCode)
+    {
+        switch (spCode)
+        {
+            case "Pb":
+                return "Pinheiro bravo (Pb)";
+            case "Pm":
+                return "Pinheiro manso (Pm)";
+            case "Ec":
+                return "Eucalipto (Ec)";
+            case "Ct":
+                return "Sobreiro (Ct)";
+            default:
+                return spCode;
+        }
+    }
     private void HandleFocusModeToggle()
     {
         if (Input.GetKeyDown(KeyCode.F))
