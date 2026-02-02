@@ -39,6 +39,7 @@ public class CameraBehaviour : MonoBehaviour
     private float currentVerticalAngle = 0f;
     private Camera cam;
     private bool isFocusMode = false;
+    private bool isSynchronizedMode = false;
 
     #region Unity Methods
 
@@ -51,11 +52,12 @@ public class CameraBehaviour : MonoBehaviour
     {
         bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
         float scroll = Input.GetAxis("Mouse ScrollWheel");
+        isSynchronizedMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         if (Input.GetKeyDown(KeyCode.R))
             ResetCamera();
 
-        if (scroll != 0 && IsMouseOverViewport() && !isOverUI)
+        if (scroll != 0 && (IsMouseOverViewport() || isSynchronizedMode) && !isOverUI)
         {
             if (!isTopographic)
                 cam.fieldOfView = Mathf.Clamp(cam.fieldOfView - scroll * zoomSpeed, minZoomFOV, maxZoomFOV);
@@ -63,7 +65,7 @@ public class CameraBehaviour : MonoBehaviour
                 cam.orthographicSize = Mathf.Clamp(cam.orthographicSize - scroll * zoomSpeed, minZoomOrtho, maxZoomOrtho);
         }
 
-        if (canUseCameraMovement && !isOverUI && ((IsMouseOverViewport() && isMultiVisualization) || !isMultiVisualization))
+        if (canUseCameraMovement && !isOverUI && (((IsMouseOverViewport() || isSynchronizedMode) && isMultiVisualization) || !isMultiVisualization))
         {
             if (isFree && !isTopographic && !isFocusMode)
                 HandleFreeCameraMovement();
@@ -78,7 +80,7 @@ public class CameraBehaviour : MonoBehaviour
 
     private void HandleFreeCameraMovement()
     {
-        if (Input.GetMouseButton(0) && IsMouseOverViewport())
+        if (Input.GetMouseButton(0))
         {
             float mouseX = Input.GetAxis("Mouse X") * lookSensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity;
@@ -104,10 +106,10 @@ public class CameraBehaviour : MonoBehaviour
 
     private void HandleOrbitOrPan()
     {
-        if (Input.GetMouseButtonDown(0) && IsMouseOverViewport())
+        if (Input.GetMouseButtonDown(0))
             lastMousePosition = Input.mousePosition;
 
-        if (Input.GetMouseButton(0) && IsMouseOverViewport())
+        if (Input.GetMouseButton(0))
         {
             Vector3 delta = Input.mousePosition - lastMousePosition;
 

@@ -10363,7 +10363,8 @@ MonoBehaviour:
     - Modo de foco;\n\nNota:\nS\xF3 uma c\xE2mera pode estar em modo de foco, e neste
     modo, s\xF3 \xE9 poss\xEDvel rodar \xE0 volta da \xE1rvore selecionada. Para
     sair deste modo basta clicar no F de novo.\n\n<b>Vista em Perspetiva</b>\n\nArrastar
-    com o rato \u2013 Rodar a c\xE2mara;\n\n<b>Vista Topogr\xE1fica</b>\n\nArrastar
+    com o rato \u2013 Rodar a c\xE2mara;\nSegurar no shift \u2013 sincroniza as a\xE7\xF5es
+    nas c\xE2meras (se houver mais do que uma)\n\n<b>Vista Topogr\xE1fica</b>\n\nArrastar
     com o rato \u2013 Deslocar a c\xE2mara;\n\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

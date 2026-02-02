@@ -205,7 +205,7 @@ public class Parser : MonoBehaviour
             outputDDTableDataList.Add(ddTableData);
         }
 
-        so.simIds = new List<string> { selectedSim1.options[selectedSim1.value].text, selectedSim2 != null ? selectedSim2.options[selectedSim2.value].text : ""};
+        so.simIds = new List<string> { selectedSim1.options[selectedSim1.value].text, selectedSim2 != null ? selectedSim2.options[selectedSim2.value].text : "" };
         so.outputSoloTreesData = outputSoloTreesDataList;
         so.outputYieldTable = outputYieldTableDataList;
         so.outputDDTable = outputDDTableDataList;
@@ -335,26 +335,29 @@ public class Parser : MonoBehaviour
                 bool wasAlive = treeWasAlive.ContainsKey(id_arv) ? treeWasAlive[id_arv] : true;
 
                 int estado = int.Parse(treeInfo[estadoIndex].Trim());
-                treeWasAlive[id_arv] = (estado == 0);
+                //presist alive status
+                var previousYearInfo = currentYearIndex - 1 > 0 ? treesInfoPerYear[currentYearIndex - 1] : null;
+                var previousYearWasAlive = previousYearInfo != null && (previousYearInfo[id_arv] != null ? previousYearInfo[id_arv].wasAlive : false);
+                treeWasAlive[id_arv] = (estado == 0) || previousYearWasAlive;
 
                 TreeData tree = new TreeData(
-                    treeInfo[idStand].Trim(),
-                    treeInfo[idPresc].Trim(),
-                    int.Parse(treeInfo[cicloIndex].Trim()),
-                    int.Parse(treeInfo[yearIndex].Trim()),
-                    float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture),
-                    id_arv,
-                    float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),
-                    treeInfo[speciesIndex].Trim(),
-                    float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture),
-                    float.Parse(treeInfo[hbcIndex].Trim(), CultureInfo.InvariantCulture),
-                    estado,
-                    rotation,
-                    wasAlive
-                );
+                        treeInfo[idStand].Trim(),
+                        treeInfo[idPresc].Trim(),
+                        int.Parse(treeInfo[cicloIndex].Trim()),
+                        int.Parse(treeInfo[yearIndex].Trim()),
+                        float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture),
+                        id_arv,
+                        float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),
+                        treeInfo[speciesIndex].Trim(),
+                        float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture),
+                        float.Parse(treeInfo[hbcIndex].Trim(), CultureInfo.InvariantCulture),
+                        estado,
+                        rotation,
+                        wasAlive
+                    );
 
                 currentYearTrees[id_arv] = tree;
             }
