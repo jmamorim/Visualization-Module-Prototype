@@ -9,7 +9,6 @@ using UnityEngine.SceneManagement;
 
 public class Parser : MonoBehaviour
 {
-    public FeedbackController FeedbackController;
     public TMP_Dropdown selectedSim1, selectedSim2;
     public TMP_InputField intervalInputField;
     public SimMetadata simMetadata;
@@ -55,7 +54,6 @@ public class Parser : MonoBehaviour
         {
             if (!int.TryParse(intervalInputField.text, out interval) || interval < 0)
             {
-                FeedbackController.ShowMessage("Interval is not valid\n", dpsolo != null);
                 return;
             }
         }
@@ -70,7 +68,6 @@ public class Parser : MonoBehaviour
             var dropdownSolo = idStandsDropdownSolo.GetComponent<TMP_Dropdown>();
             if (dropdownSolo.options.Count() == 0)
             {
-                FeedbackController.ShowMessage("Please pick a simulation for Solo Trees Plot\n", dpsolo != null);
                 return;
             }
             string selectedIdStandSolo = dropdownSolo.options[dropdownSolo.value].text;
@@ -112,12 +109,10 @@ public class Parser : MonoBehaviour
             var dropdown2 = idStandsDropdown2.GetComponent<TMP_Dropdown>();
             if (dropdown1.options.Count() == 0)
             {
-                FeedbackController.ShowMessage("Please pick a simulation for Plot 1\n", dpsolo != null);
                 return;
             }
             if (dropdown2.options.Count() == 0)
             {
-                FeedbackController.ShowMessage("Please pick a simulation for Plot 2\n", dpsolo != null);
                 return;
             }
 
@@ -217,7 +212,6 @@ public class Parser : MonoBehaviour
     {
         if (string.IsNullOrEmpty(soloTreePath))
         {
-            FeedbackController.ShowMessage("No solo trees file selected\n", dpsolo != null);
             throw new ArgumentException("No solo trees file selected");
         }
 
@@ -225,7 +219,6 @@ public class Parser : MonoBehaviour
 
         if (lines.Length == 0)
         {
-            FeedbackController.ShowMessage($"File is empty on {soloTreePath}\n", dpsolo != null);
             throw new ArgumentException("File is empty");
         }
 
@@ -233,7 +226,6 @@ public class Parser : MonoBehaviour
 
         if (!VerifyHeaders(headers, expectedSoloTreesHeaders))
         {
-            FeedbackController.ShowMessage($"Incorect headers on {soloTreePath}\n", dpsolo != null);
             throw new ArgumentException("Incorrect headers");
         }
 
@@ -242,7 +234,6 @@ public class Parser : MonoBehaviour
 
         if (interval > (ending_year - starting_year))
         {
-            FeedbackController.ShowMessage("Interval is greater than the planing horizon\n", dpsolo != null);
             throw new ArgumentException("Interval is greater than the planing horizon");
         }
 
@@ -443,11 +434,41 @@ public class Parser : MonoBehaviour
         return treesInfoPerYear;
     }
 
+    private SortedSet<int> BuildTargetYears(int starting_year, int ending_year)
+    {
+        if (interval <= 0) return null;
+
+        var targetYears = new SortedSet<int>();
+        int year = starting_year;
+        while (year <= ending_year)
+        {
+            targetYears.Add(year);
+            year += interval;
+        }
+        if (!targetYears.Contains(ending_year))
+        {
+            targetYears.Add(ending_year);
+        }
+        return targetYears;
+    }
+
+    private int GetTargetYear(int entryYear, int starting_year, SortedSet<int> targetYears)
+    {
+        int targetYear = starting_year;
+        foreach (int y in targetYears)
+        {
+            if (y <= entryYear)
+                targetYear = y;
+            else
+                break;
+        }
+        return targetYear;
+    }
+
     private void parseYieldTable(Dictionary<string, SortedDictionary<string, List<YieldTableEntry>>> output, string yieldTablePath, string selectedIdStand)
     {
         if (string.IsNullOrEmpty(yieldTablePath))
         {
-            FeedbackController.ShowMessage($"No yield table file selected\n", dpsolo != null);
             throw new ArgumentException("No yield table file selected");
         }
 
@@ -455,7 +476,6 @@ public class Parser : MonoBehaviour
 
         if (lines.Length == 0)
         {
-            FeedbackController.ShowMessage($"File is empty on {yieldTablePath}\n", dpsolo != null);
             throw new ArgumentException("File is empty");
         }
 
@@ -463,7 +483,6 @@ public class Parser : MonoBehaviour
 
         if (!VerifyHeaders(headers, expectedYieldTableHeaders))
         {
-            FeedbackController.ShowMessage($"Incorrect headers on {yieldTablePath}\n", dpsolo != null);
             throw new ArgumentException("Incorrect headers");
         }
 
@@ -483,22 +502,16 @@ public class Parser : MonoBehaviour
             }
         }
 
+        if (interval > (ending_year - starting_year))
+        {
+            throw new ArgumentException("Interval is greater than the planing horizon");
+        }
+
+        SortedSet<int> targetYears = BuildTargetYears(starting_year, ending_year);
+
         var standPrescGroups = new Dictionary<string, Dictionary<string, List<YieldTableEntry>>>();
 
-        SortedSet<int> targetYears = new SortedSet<int>();
-        if (interval > 0)
-        {
-            int year = starting_year;
-            while (year <= ending_year)
-            {
-                targetYears.Add(year);
-                year += interval;
-            }
-            if (!targetYears.Contains(ending_year))
-            {
-                targetYears.Add(ending_year);
-            }
-        }
+        var intervalBuckets = new Dictionary<string, Dictionary<string, SortedDictionary<int, YieldTableEntry>>>();
 
         for (int i = 1; i < lines.Length; i++)
         {
@@ -526,20 +539,6 @@ public class Parser : MonoBehaviour
                 if (id_stand == selectedIdStand)
                 {
                     int entryYear = int.Parse(entryInfo[tableYearIndex].Trim());
-
-                    int targetYear = starting_year;
-                    foreach (int y in targetYears)
-                    {
-                        if (y <= entryYear)
-                        {
-                            targetYear = y;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
 
                     YieldTableEntry entry = new YieldTableEntry(
                         id_stand,
@@ -571,16 +570,26 @@ public class Parser : MonoBehaviour
                         float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)
                     );
 
-                    if (!standPrescGroups.ContainsKey(id_stand))
+                    if (targetYears == null)
                     {
-                        standPrescGroups[id_stand] = new Dictionary<string, List<YieldTableEntry>>();
-                    }
-                    if (!standPrescGroups[id_stand].ContainsKey(id_presc))
-                    {
-                        standPrescGroups[id_stand][id_presc] = new List<YieldTableEntry>();
-                    }
+                        if (!standPrescGroups.ContainsKey(id_stand))
+                            standPrescGroups[id_stand] = new Dictionary<string, List<YieldTableEntry>>();
+                        if (!standPrescGroups[id_stand].ContainsKey(id_presc))
+                            standPrescGroups[id_stand][id_presc] = new List<YieldTableEntry>();
 
-                    standPrescGroups[id_stand][id_presc].Add(entry);
+                        standPrescGroups[id_stand][id_presc].Add(entry);
+                    }
+                    else
+                    {
+                        int targetYear = GetTargetYear(entryYear, starting_year, targetYears);
+
+                        if (!intervalBuckets.ContainsKey(id_stand))
+                            intervalBuckets[id_stand] = new Dictionary<string, SortedDictionary<int, YieldTableEntry>>();
+                        if (!intervalBuckets[id_stand].ContainsKey(id_presc))
+                            intervalBuckets[id_stand][id_presc] = new SortedDictionary<int, YieldTableEntry>();
+
+                        intervalBuckets[id_stand][id_presc][targetYear] = entry;
+                    }
                 }
             }
             catch (FormatException fe)
@@ -594,6 +603,20 @@ public class Parser : MonoBehaviour
             catch (Exception ex)
             {
                 Debug.LogError($"Unexpected error parsing line {i}: {ex.Message}");
+            }
+        }
+
+        if (targetYears != null)
+        {
+            foreach (var standKvp in intervalBuckets)
+            {
+                if (!standPrescGroups.ContainsKey(standKvp.Key))
+                    standPrescGroups[standKvp.Key] = new Dictionary<string, List<YieldTableEntry>>();
+
+                foreach (var prescKvp in standKvp.Value)
+                {
+                    standPrescGroups[standKvp.Key][prescKvp.Key] = prescKvp.Value.Values.ToList();
+                }
             }
         }
 
@@ -618,7 +641,6 @@ public class Parser : MonoBehaviour
     {
         if (string.IsNullOrEmpty(DDTablePath))
         {
-            FeedbackController.ShowMessage($"No diamater distribution table file selected\n", dpsolo != null);
             throw new ArgumentException("No DD table file selected");
         }
 
@@ -626,7 +648,6 @@ public class Parser : MonoBehaviour
 
         if (lines.Length == 0)
         {
-            FeedbackController.ShowMessage($"File is empty on {DDTablePath}\n", dpsolo != null);
             throw new ArgumentException("File is empty");
         }
 
@@ -636,7 +657,6 @@ public class Parser : MonoBehaviour
 
         if (!VerifyHeaders(headers, expectedDDTableHeaders))
         {
-            FeedbackController.ShowMessage($"Incorrect headers on {DDTablePath}\n", dpsolo != null);
             throw new ArgumentException("Incorrect headers");
         }
 
@@ -656,28 +676,21 @@ public class Parser : MonoBehaviour
             }
         }
 
+        if (interval > (ending_year - starting_year))
+        {
+            throw new ArgumentException("Interval is greater than the planing horizon");
+        }
+
+        SortedSet<int> targetYears = BuildTargetYears(starting_year, ending_year);
+
         var standPrescGroups = new Dictionary<string, Dictionary<string, List<DDEntry>>>();
 
-        SortedSet<int> targetYears = new SortedSet<int>();
-        if (interval > 0)
-        {
-            int year = starting_year;
-            while (year <= ending_year)
-            {
-                targetYears.Add(year);
-                year += interval;
-            }
-            if (!targetYears.Contains(ending_year))
-            {
-                targetYears.Add(ending_year);
-            }
-        }
+        var intervalBuckets = new Dictionary<string, Dictionary<string, SortedDictionary<int, DDEntry>>>();
 
         for (int i = 1; i < lines.Length; i++)
         {
             string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
 
-            // Fixes weird inaccuracies in the csv file like ending with a dot or empty fields
             for (int j = 0; j < entryInfo.Length; j++)
             {
                 string s = entryInfo[j];
@@ -699,20 +712,6 @@ public class Parser : MonoBehaviour
                 if (id_stand == selectedIdStand)
                 {
                     int entryYear = int.Parse(entryInfo[ddYearIndex].Trim());
-
-                    int targetYear = starting_year;
-                    foreach (int y in targetYears)
-                    {
-                        if (y <= entryYear)
-                        {
-                            targetYear = y;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
 
                     DDEntry entry = new DDEntry(
                         id_stand,
@@ -741,16 +740,26 @@ public class Parser : MonoBehaviour
                         float.Parse(entryInfo[dd102Index].Trim(), CultureInfo.InvariantCulture)
                     );
 
-                    if (!standPrescGroups.ContainsKey(id_stand))
+                    if (targetYears == null)
                     {
-                        standPrescGroups[id_stand] = new Dictionary<string, List<DDEntry>>();
-                    }
-                    if (!standPrescGroups[id_stand].ContainsKey(id_presc))
-                    {
-                        standPrescGroups[id_stand][id_presc] = new List<DDEntry>();
-                    }
+                        if (!standPrescGroups.ContainsKey(id_stand))
+                            standPrescGroups[id_stand] = new Dictionary<string, List<DDEntry>>();
+                        if (!standPrescGroups[id_stand].ContainsKey(id_presc))
+                            standPrescGroups[id_stand][id_presc] = new List<DDEntry>();
 
-                    standPrescGroups[id_stand][id_presc].Add(entry);
+                        standPrescGroups[id_stand][id_presc].Add(entry);
+                    }
+                    else
+                    {
+                        int targetYear = GetTargetYear(entryYear, starting_year, targetYears);
+
+                        if (!intervalBuckets.ContainsKey(id_stand))
+                            intervalBuckets[id_stand] = new Dictionary<string, SortedDictionary<int, DDEntry>>();
+                        if (!intervalBuckets[id_stand].ContainsKey(id_presc))
+                            intervalBuckets[id_stand][id_presc] = new SortedDictionary<int, DDEntry>();
+
+                        intervalBuckets[id_stand][id_presc][targetYear] = entry;
+                    }
                 }
             }
             catch (FormatException fe)
@@ -764,6 +773,20 @@ public class Parser : MonoBehaviour
             catch (Exception ex)
             {
                 Debug.LogError($"Unexpected error parsing line {i}: {ex.Message}");
+            }
+        }
+
+        if (targetYears != null)
+        {
+            foreach (var standKvp in intervalBuckets)
+            {
+                if (!standPrescGroups.ContainsKey(standKvp.Key))
+                    standPrescGroups[standKvp.Key] = new Dictionary<string, List<DDEntry>>();
+
+                foreach (var prescKvp in standKvp.Value)
+                {
+                    standPrescGroups[standKvp.Key][prescKvp.Key] = prescKvp.Value.Values.ToList();
+                }
             }
         }
 
@@ -847,6 +870,5 @@ public class Parser : MonoBehaviour
     {
         list[index] = path;
         string text = isYieldTable ? "Yield table" : "Solo trees";
-        FeedbackController.ShowMessage($"{text} file selected: {Path.GetFileName(path)}\n", dpsolo != null);
     }
 }
