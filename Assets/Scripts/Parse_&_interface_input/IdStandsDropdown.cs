@@ -120,6 +120,8 @@ public class IdStandsDropdown : MonoBehaviour
         {
             string prescText = "<b>Prescrições do Povoamento:</b>\n\n";
 
+            prescText += "Horizonte de planeamento: " + simInfo.planingHorizon + " anos\n\n";
+
             if (plotData.prescriptions.Count > 0)
             {
                 prescText += "Prescrições:\n";
@@ -134,6 +136,7 @@ public class IdStandsDropdown : MonoBehaviour
             }
 
             prescInfoText.text = prescText;
+            
         }
 
         if (simInfoText != null)

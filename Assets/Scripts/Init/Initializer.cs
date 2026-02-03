@@ -402,6 +402,12 @@ public class Initializer : MonoBehaviour
 
         string[] headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
 
+        //get planing horizon from yield table
+        int yearIndex = System.Array.IndexOf(headers, "year");
+        int startingYear = int.Parse(lines[1].Split(',')[yearIndex].Trim());
+        int endingYear = int.Parse(lines[lines.Length - 1].Split(',')[yearIndex].Trim());
+        simInfo.planingHorizon = endingYear - startingYear;
+
         int idStandIndex = System.Array.IndexOf(headers, "id_stand");
         int idPrescIndex = System.Array.IndexOf(headers, "id_presc");
 
@@ -492,6 +498,7 @@ public class SimulationInfo
 {
     public string folderPath, inputPath, soloTreesPath, yieldTablePath, ddTablePath;
     public string readmeContent;
+    public float planingHorizon;
     public Dictionary<string, PlotData> plotDataByIdPar = new Dictionary<string, PlotData>();
 }
 
