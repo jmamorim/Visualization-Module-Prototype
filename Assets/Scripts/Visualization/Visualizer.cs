@@ -43,7 +43,6 @@ public class Visualizer : MonoBehaviour
     [Header("Pinheiro-manso Parameters"), Tooltip("Ages at which Pinheiro-manso transitions between stages")]
     [SerializeField] float pmMidYougAge;
     [SerializeField] float pmAdultStartingAge;
-    [SerializeField] float pmYoungAdultAge;
     [SerializeField] float pmSeniourStartingAge;
 
     [Space(5)]

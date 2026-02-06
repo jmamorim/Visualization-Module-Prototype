@@ -11,8 +11,7 @@ public class Manager : MonoBehaviour
     // Public fields
     public TMP_Text treeInfoText;
     public GameObject treeInfoBox, graphsBox;
-    public Vector3 showingTreeInfoGraphsBoxPos;
-    public float showingTreeInfoGraphsBoxWidth, showingTreeInfoGraphsBoxHeight;
+    public float showingTreeInfoGraphsBoxHeight;
     public Visualizer visualizer;
     public Canvas visulaizationCanvas;
     public GameObject Camera1, Camera2;
@@ -26,7 +25,6 @@ public class Manager : MonoBehaviour
     public Slider yearSlider1, yearSlider2;
     public Transform multiVisSliderPos;
     public bool isExpanded = false;
-    public Transform verticalLayoutSlider1, verticalLayoutSlider2;
     public GameObject PrescBox1, PrescBox2, comparePrescsButton, changeLayoutButton;
 
     [SerializeField] Sprite inactiveSpriteLayoutButton;
@@ -46,8 +44,6 @@ public class Manager : MonoBehaviour
     float originalGraphsBoxWidth, originalGraphBoxHeight;
     bool isVerticalLayout = false;
     bool isComparingPresc = false;
-    Vector3 slider1OriginalPos, slider2OriginalPos;
-    Vector3 slider1OriginalRot, slider2OriginalRot;
     List<int> sortedYears;
     bool isFocusMode1 = false;
     bool isFocusMode2 = false;
@@ -120,11 +116,6 @@ public class Manager : MonoBehaviour
         SetupYearSlider1();
         SetupYearSlider2();
 
-        slider1OriginalPos = yearSlider1.transform.localPosition;
-        slider1OriginalRot = yearSlider1.transform.localEulerAngles;
-        slider2OriginalPos = yearSlider2.transform.localPosition;
-        slider2OriginalRot = yearSlider2.transform.localEulerAngles;
-
         receiveSoloTreesData(outputSoloTreesData);
         receiveYieldTableData(YieldTableData, DDTableData);
     }
@@ -167,6 +158,7 @@ public class Manager : MonoBehaviour
     {
         if (yearSlider2 != null && outputSoloTreesData.Count > 1)
         {
+            yearSlider1.transform.SetParent(multiVisSliderPos.parent);
             yearSlider1.transform.localPosition = multiVisSliderPos.localPosition;
             int maxYear2 = outputSoloTreesData.ElementAt(1).First().Value[selectedId_presc2].Count - 1;
             yearSlider2.minValue = 0;
@@ -400,8 +392,7 @@ public class Manager : MonoBehaviour
     {
         if (treeInfoText != null)
         {
-            graphsBox.transform.localPosition = showingTreeInfoGraphsBoxPos;
-            graphsBox.GetComponent<RectTransform>().sizeDelta = new Vector2(showingTreeInfoGraphsBoxWidth, showingTreeInfoGraphsBoxHeight);
+            graphsBox.GetComponent<RectTransform>().sizeDelta = new Vector2(graphsBox.GetComponent<RectTransform>().sizeDelta.x, showingTreeInfoGraphsBoxHeight);
             treeInfoBox.SetActive(true);
             treeInfoText.text = $"<b>Informação da árvore:</b>\n" +
                                 $"Espécie: {GetSpeciesName(t.specie)}\n" +
