@@ -80,8 +80,8 @@ public class Visualizer : MonoBehaviour
     //used when plotshape is 0 (area specific)
     float terrainOffset = 10f;
 
-    [SerializeField] float distanceScalingFactor = 0.6f;
-    const float perspectiveAngleFactor = 0.7f;
+    [SerializeField] float distanceScalingFactor = .5f;
+    const float perspectiveAngleFactor = .5f;
     CameraBehaviour behaviour1, behaviour2;
 
     #region unity methods
