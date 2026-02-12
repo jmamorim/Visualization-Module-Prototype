@@ -283,11 +283,8 @@ public class Manager : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.P))
                 {
-                    if (cameraBehaviour1.IsMouseOverViewport())
-                        cameraBehaviour1.SetToTopographic();
-
-                    if (outputSoloTreesData.Count > 1 && cameraBehaviour2.IsMouseOverViewport())
-                        cameraBehaviour2.SetToTopographic();
+                    cameraBehaviour1.SetToTopographic();
+                    cameraBehaviour2.SetToTopographic();
                 }
             }
         }

@@ -179,7 +179,7 @@ public class Visualizer : MonoBehaviour
         }
         else
         {
-            ConfigureTerrainOrigin(terrain2, shapeType1, dims1, out isCircularPlot2, plotReference2, cam2);
+            ConfigureTerrainOrigin(terrain2, shapeType1, dims1, out isCircularPlot1, plotReference1, cam2);
         }
             GenerateNoise();
     }
