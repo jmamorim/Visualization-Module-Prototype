@@ -13850,6 +13850,10 @@ MonoBehaviour:
   - {fileID: 1143293489}
   - {fileID: 1428863980}
   - {fileID: 1980265650}
+  informationsText:
+  - {fileID: 377930224}
+  - {fileID: 1571568662}
+  - {fileID: 366522312}
   idstandDropdown:
   - {fileID: 1761627822}
   - {fileID: 1785414282}

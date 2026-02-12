@@ -10,7 +10,7 @@ public class Initializer : MonoBehaviour
 {
     public SimMetadata simMetadata;
     public TMP_Dropdown[] simulationDropdowns;
-    public GameObject[] standsText;
+    public GameObject[] standsText, informationsText;
     public TMP_Dropdown[] idstandDropdown;
     public GameObject[] simReadme;
     public GameObject[] simPrescs;
@@ -290,6 +290,7 @@ public class Initializer : MonoBehaviour
                 else
                 {
                     standsText[index].SetActive(false);
+                    informationsText[index].SetActive(false);
                     idstandDropdown[index].ClearOptions();
                     idstandDropdown[index].gameObject.SetActive(false);
                     simReadme[index].SetActive(false);
