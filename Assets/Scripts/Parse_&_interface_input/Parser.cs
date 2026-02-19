@@ -29,19 +29,21 @@ public class Parser : MonoBehaviour
     List<string> DDTablePaths = new List<string>();
     int interval = 0;
     const int idStand = 0, idPresc = 1, cicloIndex = 2, yearIndex = 3, tIndex = 4, XarvIndex = 7, YarvIndex = 8, speciesIndex = 9, dIndex = 10, hIndex = 11, cwIndex = 12, hbcIndex = 13,
-        estadoIndex = 15, tableId_stand = 0, tableSIndex = 1, tableId_presc = 3, tableYearIndex = 6, tablenstIndex = 14, tablenIndex = 15, tablendeadIndex = 16, tablehdomIndex = 13,
+        estadoIndex = 15, tableId_stand = 0, tableId_presc = 3, tableYearIndex = 6, tablenstIndex = 14, tablenIndex = 15, tablendeadIndex = 16, tablehdomIndex = 13,
         tablegIndex = 19, tabledgIndex = 20, tablevu_stIndex = 21, tablevIndex = 24, tablevu_as1Index = 30, tablevu_as2Index = 31, tablevu_as3Index = 32, tablevu_as4Index = 33,
         tablevu_as5Index = 34, tablemaiVIndex = 38, tableiVIndex = 39, tablewwIndex = 40, tablewbIndex = 41, tablewbrIndex = 42, tablewlIndex = 43, tablewaIndex = 44,
         tablewrIndex = 45, tablenpvsumIndex = 66, tableeeaIndex = 67, ddId_standIndex = 0, ddId_prescIndex = 1, ddYearIndex = 2, dd0Index = 6, dd5Index = 7, dd10Index = 8,
         dd15index = 9, dd20Index = 10, dd25Index = 11, dd30Index = 12, dd35Index = 13, dd40Index = 14, dd45Index = 15, dd50Index = 16, dd55Index = 17, dd60Index = 18, dd65Index = 19,
         dd70Index = 20, dd75Index = 21, dd80Index = 22, dd85Index = 23, dd90Index = 24, dd95Index = 25, dd100Index = 26, dd102Index = 27;
     List<string> selectedIdStands = new List<string>();
+    bool isSoloVis = false;
 
     private void Start()
     {
-        if (dpsolo != null)
+        isSoloVis = dpsolo != null;
+        if (isSoloVis)
             idStandsDropdownSolo = dpsolo.GetComponent<IdStandsDropdown>();
-        if (dp1 != null && dp2 != null)
+        else
         {
             idStandsDropdown1 = dp1.GetComponent<IdStandsDropdown>();
             idStandsDropdown2 = dp2.GetComponent<IdStandsDropdown>();
@@ -63,7 +65,7 @@ public class Parser : MonoBehaviour
         List<Dictionary<string, SortedDictionary<string, List<DDEntry>>>> outputDDTableDataList = new List<Dictionary<string, SortedDictionary<string, List<DDEntry>>>>();
         List<(int, List<float>)> shapeData = new List<(int, List<float>)>();
 
-        if (dpsolo != null)
+        if (isSoloVis)
         {
             var dropdownSolo = idStandsDropdownSolo.GetComponent<TMP_Dropdown>();
             if (dropdownSolo.options.Count() == 0)
@@ -231,6 +233,7 @@ public class Parser : MonoBehaviour
 
         int starting_year = int.Parse(lines[1].Trim().Split(',')[3].Trim());
         int ending_year = int.Parse(lines[lines.Length - 1].Trim().Split(',')[3].Trim());
+        Debug.Log($"parseSoloTrees: selectedIdStand={selectedIdStand}, starting_year={starting_year}, ending_year={ending_year}");
 
         if (interval > (ending_year - starting_year))
         {
@@ -283,6 +286,7 @@ public class Parser : MonoBehaviour
 
     private List<SortedDictionary<int, TreeData>> ProcessTreeLines(List<string[]> treeLines, int starting_year, int ending_year)
     {
+        Debug.Log($"ProcessTreeLines: starting_year={starting_year}, ending_year={ending_year}, interval={interval}");
         List<SortedDictionary<int, TreeData>> treesInfoPerYear = new List<SortedDictionary<int, TreeData>>();
 
         if (interval == 0)
@@ -297,12 +301,14 @@ public class Parser : MonoBehaviour
             {
                 int id_arv = int.Parse(treeInfo[6].Trim());
 
+                //for year repetition
                 if (id_arv <= lastTreeId)
                 {
                     currentYearIndex++;
                     currentYearTrees = new SortedDictionary<int, TreeData>();
                     treesInfoPerYear.Add(currentYearTrees);
                 }
+                //initialization
                 else if (currentYearIndex == -1)
                 {
                     currentYearIndex = 0;
@@ -323,7 +329,7 @@ public class Parser : MonoBehaviour
                     treeRotations[id_arv] = rotation;
                 }
 
-                bool wasAlive = treeWasAlive.ContainsKey(id_arv) ? treeWasAlive[id_arv] : true;
+                bool wasAlive = treeWasAlive.ContainsKey(id_arv) ? treeWasAlive[id_arv] : false;
 
                 int estado = int.Parse(treeInfo[estadoIndex].Trim());
                 //presist alive status
@@ -362,6 +368,7 @@ public class Parser : MonoBehaviour
             while (year <= ending_year)
             {
                 yearGroups[year] = new SortedDictionary<int, TreeData>();
+                Debug.Log($"yearGroups key added: {year}");
                 year += interval;
             }
             if (!yearGroups.ContainsKey(ending_year))
@@ -402,26 +409,31 @@ public class Parser : MonoBehaviour
                         treeRotations[id_arv] = rotation;
                     }
 
-                    TreeData tree = new TreeData(
-                        treeInfo[idStand].Trim(),
-                        treeInfo[idPresc].Trim(),
-                        int.Parse(treeInfo[cicloIndex].Trim()),
-                        int.Parse(treeInfo[yearIndex].Trim()),
-                        float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture),
-                        id_arv,
-                        float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),
-                        treeInfo[speciesIndex].Trim(),
-                        float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(treeInfo[hbcIndex].Trim(), CultureInfo.InvariantCulture),
-                        int.Parse(treeInfo[estadoIndex].Trim()),
-                        rotation,
-                        false
-                    );
+                    int treeCurYear = int.Parse(treeInfo[yearIndex].Trim());
 
-                    yearGroups[targetYear][id_arv] = tree;
+                    if (treeCurYear == targetYear)
+                    {
+                        TreeData tree = new TreeData(
+                            treeInfo[idStand].Trim(),
+                            treeInfo[idPresc].Trim(),
+                            int.Parse(treeInfo[cicloIndex].Trim()),
+                            int.Parse(treeInfo[yearIndex].Trim()),
+                            float.Parse(treeInfo[tIndex].Trim(), CultureInfo.InvariantCulture),
+                            id_arv,
+                            float.Parse(treeInfo[XarvIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(treeInfo[YarvIndex].Trim(), CultureInfo.InvariantCulture),
+                            treeInfo[speciesIndex].Trim(),
+                            float.Parse(treeInfo[dIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(treeInfo[hIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(treeInfo[cwIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(treeInfo[hbcIndex].Trim(), CultureInfo.InvariantCulture),
+                            int.Parse(treeInfo[estadoIndex].Trim()),
+                            rotation,
+                            false
+                        );
+
+                        yearGroups[targetYear][id_arv] = tree;
+                    }
                 }
             }
 
@@ -486,21 +498,8 @@ public class Parser : MonoBehaviour
             throw new ArgumentException("Incorrect headers");
         }
 
-        int starting_year = int.MaxValue;
-        int ending_year = int.MinValue;
-
-        for (int i = 1; i < lines.Length; i++)
-        {
-            string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
-            string id_stand = entryInfo[tableId_stand].Trim();
-
-            if (id_stand == selectedIdStand)
-            {
-                int year = int.Parse(entryInfo[tableYearIndex].Trim());
-                if (year < starting_year) starting_year = year;
-                if (year > ending_year) ending_year = year;
-            }
-        }
+        int starting_year = int.Parse(lines[1].Trim().Split(',')[tableYearIndex].Trim());
+        int ending_year = int.Parse(lines[lines.Length - 1].Trim().Split(',')[tableYearIndex].Trim());
 
         if (interval > (ending_year - starting_year))
         {
@@ -540,55 +539,57 @@ public class Parser : MonoBehaviour
                 {
                     int entryYear = int.Parse(entryInfo[tableYearIndex].Trim());
 
-                    YieldTableEntry entry = new YieldTableEntry(
-                        id_stand,
-                        id_presc,
-                        entryYear,
-                        Mathf.RoundToInt(float.Parse(entryInfo[tablenstIndex].Trim(), CultureInfo.InvariantCulture)),
-                        Mathf.RoundToInt(float.Parse(entryInfo[tablenIndex].Trim(), CultureInfo.InvariantCulture)),
-                        Mathf.RoundToInt(float.Parse(entryInfo[tablendeadIndex].Trim(), CultureInfo.InvariantCulture)),
-                        Mathf.RoundToInt(float.Parse(entryInfo[tableSIndex].Trim(), CultureInfo.InvariantCulture)),
-                        float.Parse(entryInfo[tablehdomIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablegIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tabledgIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablevu_stIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablevIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablevu_as1Index].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablevu_as2Index].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablevu_as3Index].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablevu_as4Index].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablevu_as5Index].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablemaiVIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tableiVIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablewwIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablewbIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablewbrIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablewlIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablewaIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablewrIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tablenpvsumIndex].Trim(), CultureInfo.InvariantCulture),
-                        float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)
-                    );
-
-                    if (targetYears == null)
+                    if ((interval != 0 && targetYears.Contains(entryYear)) || interval == 0)
                     {
-                        if (!standPrescGroups.ContainsKey(id_stand))
-                            standPrescGroups[id_stand] = new Dictionary<string, List<YieldTableEntry>>();
-                        if (!standPrescGroups[id_stand].ContainsKey(id_presc))
-                            standPrescGroups[id_stand][id_presc] = new List<YieldTableEntry>();
+                        YieldTableEntry entry = new YieldTableEntry(
+                            id_stand,
+                            id_presc,
+                            entryYear,
+                            Mathf.RoundToInt(float.Parse(entryInfo[tablenstIndex].Trim(), CultureInfo.InvariantCulture)),
+                            Mathf.RoundToInt(float.Parse(entryInfo[tablenIndex].Trim(), CultureInfo.InvariantCulture)),
+                            Mathf.RoundToInt(float.Parse(entryInfo[tablendeadIndex].Trim(), CultureInfo.InvariantCulture)),
+                            float.Parse(entryInfo[tablehdomIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablegIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tabledgIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablevu_stIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablevIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablevu_as1Index].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablevu_as2Index].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablevu_as3Index].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablevu_as4Index].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablevu_as5Index].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablemaiVIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tableiVIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablewwIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablewbIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablewbrIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablewlIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablewaIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablewrIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tablenpvsumIndex].Trim(), CultureInfo.InvariantCulture),
+                            float.Parse(entryInfo[tableeeaIndex].Trim(), CultureInfo.InvariantCulture)
+                        );
 
-                        standPrescGroups[id_stand][id_presc].Add(entry);
-                    }
-                    else
-                    {
-                        int targetYear = GetTargetYear(entryYear, starting_year, targetYears);
+                        if (targetYears == null)
+                        {
+                            if (!standPrescGroups.ContainsKey(id_stand))
+                                standPrescGroups[id_stand] = new Dictionary<string, List<YieldTableEntry>>();
+                            if (!standPrescGroups[id_stand].ContainsKey(id_presc))
+                                standPrescGroups[id_stand][id_presc] = new List<YieldTableEntry>();
 
-                        if (!intervalBuckets.ContainsKey(id_stand))
-                            intervalBuckets[id_stand] = new Dictionary<string, SortedDictionary<int, YieldTableEntry>>();
-                        if (!intervalBuckets[id_stand].ContainsKey(id_presc))
-                            intervalBuckets[id_stand][id_presc] = new SortedDictionary<int, YieldTableEntry>();
+                            standPrescGroups[id_stand][id_presc].Add(entry);
+                        }
+                        else
+                        {
+                            int targetYear = GetTargetYear(entryYear, starting_year, targetYears);
 
-                        intervalBuckets[id_stand][id_presc][targetYear] = entry;
+                            if (!intervalBuckets.ContainsKey(id_stand))
+                                intervalBuckets[id_stand] = new Dictionary<string, SortedDictionary<int, YieldTableEntry>>();
+                            if (!intervalBuckets[id_stand].ContainsKey(id_presc))
+                                intervalBuckets[id_stand][id_presc] = new SortedDictionary<int, YieldTableEntry>();
+
+                            intervalBuckets[id_stand][id_presc][targetYear] = entry;
+                        }
                     }
                 }
             }
@@ -660,21 +661,8 @@ public class Parser : MonoBehaviour
             throw new ArgumentException("Incorrect headers");
         }
 
-        int starting_year = int.MaxValue;
-        int ending_year = int.MinValue;
-
-        for (int i = 1; i < lines.Length; i++)
-        {
-            string[] entryInfo = lines[i].Split(',').Select(s => s.Trim()).ToArray();
-            string id_stand = entryInfo[ddId_standIndex].Trim();
-
-            if (id_stand == selectedIdStand)
-            {
-                int year = int.Parse(entryInfo[ddYearIndex].Trim());
-                if (year < starting_year) starting_year = year;
-                if (year > ending_year) ending_year = year;
-            }
-        }
+        int starting_year = int.Parse(lines[1].Trim().Split(',')[ddYearIndex].Trim());
+        int ending_year = int.Parse(lines[lines.Length - 1].Trim().Split(',')[ddYearIndex].Trim());
 
         if (interval > (ending_year - starting_year))
         {
@@ -712,8 +700,9 @@ public class Parser : MonoBehaviour
                 if (id_stand == selectedIdStand)
                 {
                     int entryYear = int.Parse(entryInfo[ddYearIndex].Trim());
-
-                    DDEntry entry = new DDEntry(
+                    if ((interval != 0 && targetYears.Contains(entryYear)) || interval == 0)
+                    {
+                        DDEntry entry = new DDEntry(
                         id_stand,
                         id_presc,
                         float.Parse(entryInfo[dd0Index].Trim(), CultureInfo.InvariantCulture),
@@ -740,25 +729,26 @@ public class Parser : MonoBehaviour
                         float.Parse(entryInfo[dd102Index].Trim(), CultureInfo.InvariantCulture)
                     );
 
-                    if (targetYears == null)
-                    {
-                        if (!standPrescGroups.ContainsKey(id_stand))
-                            standPrescGroups[id_stand] = new Dictionary<string, List<DDEntry>>();
-                        if (!standPrescGroups[id_stand].ContainsKey(id_presc))
-                            standPrescGroups[id_stand][id_presc] = new List<DDEntry>();
+                        if (targetYears == null)
+                        {
+                            if (!standPrescGroups.ContainsKey(id_stand))
+                                standPrescGroups[id_stand] = new Dictionary<string, List<DDEntry>>();
+                            if (!standPrescGroups[id_stand].ContainsKey(id_presc))
+                                standPrescGroups[id_stand][id_presc] = new List<DDEntry>();
 
-                        standPrescGroups[id_stand][id_presc].Add(entry);
-                    }
-                    else
-                    {
-                        int targetYear = GetTargetYear(entryYear, starting_year, targetYears);
+                            standPrescGroups[id_stand][id_presc].Add(entry);
+                        }
+                        else
+                        {
+                            int targetYear = GetTargetYear(entryYear, starting_year, targetYears);
 
-                        if (!intervalBuckets.ContainsKey(id_stand))
-                            intervalBuckets[id_stand] = new Dictionary<string, SortedDictionary<int, DDEntry>>();
-                        if (!intervalBuckets[id_stand].ContainsKey(id_presc))
-                            intervalBuckets[id_stand][id_presc] = new SortedDictionary<int, DDEntry>();
+                            if (!intervalBuckets.ContainsKey(id_stand))
+                                intervalBuckets[id_stand] = new Dictionary<string, SortedDictionary<int, DDEntry>>();
+                            if (!intervalBuckets[id_stand].ContainsKey(id_presc))
+                                intervalBuckets[id_stand][id_presc] = new SortedDictionary<int, DDEntry>();
 
-                        intervalBuckets[id_stand][id_presc][targetYear] = entry;
+                            intervalBuckets[id_stand][id_presc][targetYear] = entry;
+                        }
                     }
                 }
             }

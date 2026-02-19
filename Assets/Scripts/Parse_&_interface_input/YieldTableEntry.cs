@@ -1,7 +1,7 @@
 public class YieldTableEntry
 {
     public string id_stand, id_presc;
-    public int year, Nst, N, Ndead, S;
+    public int year, Nst, N, Ndead;
     public float hdom, G, dg, Vu_st, V, Vu_as1, Vu_as2, Vu_as3, Vu_as4, Vu_as5, maiV, iV, Ww, Wb, Wbr, Wl, Wa, Wr, NPVsum, EEA;
 
     public YieldTableEntry(
@@ -10,7 +10,6 @@ public class YieldTableEntry
         int year,
         int Nst,
         int N,
-        int S,
         int Ndead,
         float hdom,
         float G,
@@ -38,7 +37,6 @@ public class YieldTableEntry
         this.year = year;
         this.Nst = Nst;
         this.N = N;
-        this.S = S;
         this.Ndead = Ndead;
         this.hdom = hdom;
         this.G = G;

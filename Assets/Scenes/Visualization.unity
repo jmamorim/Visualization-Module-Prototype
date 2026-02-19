@@ -120100,7 +120100,7 @@ MonoBehaviour:
   m_RadiusAxes: []
   m_Titles:
   - m_Show: 1
-    m_Text: Economic values
+    m_Text: "Valores econ\xF3micos"
     m_SubText: 
     m_LabelStyle:
       m_Show: 1
