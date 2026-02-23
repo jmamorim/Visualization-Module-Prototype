@@ -20627,7 +20627,6 @@ MonoBehaviour:
   lookSensitivity: 2
   minVerticalAngle: -45
   maxVerticalAngle: 45
-  cam: {fileID: 330585545}
 --- !u!114 &330585549
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83726,8 +83725,6 @@ MonoBehaviour:
     type: 3}
   activeSpriteLayoutButton: {fileID: 21300000, guid: b0defe46351194d46b85be8dd3c8b9e0,
     type: 3}
-  cameraBehaviour1: {fileID: 330585548}
-  cameraBehaviour2: {fileID: 2125857182}
 --- !u!4 &1344679404
 Transform:
   m_ObjectHideFlags: 0
@@ -133651,7 +133648,6 @@ MonoBehaviour:
   lookSensitivity: 2
   minVerticalAngle: -45
   maxVerticalAngle: 45
-  cam: {fileID: 2125857184}
 --- !u!20 &2125857184
 Camera:
   m_ObjectHideFlags: 0

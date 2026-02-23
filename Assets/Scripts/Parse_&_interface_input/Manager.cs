@@ -29,9 +29,9 @@ public class Manager : MonoBehaviour
 
     [SerializeField] Sprite inactiveSpriteLayoutButton;
     [SerializeField] Sprite activeSpriteLayoutButton;
+    [SerializeField] CameraBehaviour cameraBehaviour1, cameraBehaviour2;
 
     // Private fields
-    CameraBehaviour cameraBehaviour1, cameraBehaviour2;
     PrescsDropdown pDropdown1, pDropdown2;
     Camera cam1, cam2;
     List<Dictionary<string, SortedDictionary<string, List<SortedDictionary<int, TreeData>>>>> outputSoloTreesData;
@@ -58,8 +58,6 @@ public class Manager : MonoBehaviour
     private void Start()
     {
         // Camera and dropdown setup
-        cameraBehaviour1 = Camera1.GetComponent<CameraBehaviour>();
-        cameraBehaviour2 = Camera2.GetComponent<CameraBehaviour>();
         cam1 = Camera1.GetComponent<Camera>();
         cam2 = Camera2.GetComponent<Camera>();
         pDropdown1 = prescDropdown1.GetComponent<PrescsDropdown>();

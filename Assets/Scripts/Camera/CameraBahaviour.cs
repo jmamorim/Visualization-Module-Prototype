@@ -19,6 +19,8 @@ public class CameraBehaviour : MonoBehaviour
     [SerializeField] private float minVerticalAngle = 0f;
     [SerializeField] private float maxVerticalAngle = 90f;
 
+    [SerializeField] private Camera cam;
+    
     //Private fields
     private float zoomSpeed = 5.0f;
     private float rotationSpeed = 30.0f;
@@ -37,17 +39,10 @@ public class CameraBehaviour : MonoBehaviour
     private float pitch = 0f;
     private float yaw = 0f;
     private float currentVerticalAngle = 0f;
-    private Camera cam;
     private bool isFocusMode = false;
     private bool isSynchronizedMode = false;
 
     #region Unity Methods
-
-    private void Start()
-    {
-        cam = GetComponent<Camera>();
-    }
-
     private void Update()
     {
         bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();

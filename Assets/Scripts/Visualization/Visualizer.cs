@@ -71,6 +71,8 @@ public class Visualizer : MonoBehaviour
     [SerializeField] float thresholdCasAdultHeight;
     [SerializeField] float thresholdCasSeniourHeight;
 
+    [SerializeField] float distanceScalingFactor = .5f;
+    
     int currentYear;
     List<(int, List<float>)> plotShapeAndDimensions;
     readonly List<string> species = new List<string> { "Pb", "Pm", "Ec", "Ct" };
@@ -78,9 +80,9 @@ public class Visualizer : MonoBehaviour
     bool isCircularPlot1 = false;
     bool isCircularPlot2 = false;
     //used when plotshape is 0 (area specific)
-    float terrainOffset = 10f;
+    const float terrainOffset = 10f;
+    const float aspectRatio = 1.8f;
 
-    [SerializeField] float distanceScalingFactor = .5f;
     const float perspectiveAngleFactor = .5f;
     CameraBehaviour behaviour1, behaviour2;
 
@@ -181,7 +183,7 @@ public class Visualizer : MonoBehaviour
         {
             ConfigureTerrainOrigin(terrain2, shapeType1, dims1, out isCircularPlot1, plotReference1, cam2);
         }
-            GenerateNoise();
+        GenerateNoise();
     }
     private void GenerateNoise()
     {
@@ -294,7 +296,7 @@ public class Visualizer : MonoBehaviour
         orthographicRot = Quaternion.Euler(90f, 0f, 0f);
 
         float maxDimension = Mathf.Max(terrainSize.x, terrainSize.z);
-        behaviour.SetOrthographicSize(maxDimension / cam.aspect);
+        behaviour.SetOrthographicSize(maxDimension / aspectRatio);
 
         cam.transform.position = perspectivePos;
         cam.transform.rotation = perspectiveRot;
