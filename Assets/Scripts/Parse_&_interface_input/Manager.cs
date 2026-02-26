@@ -186,23 +186,6 @@ public class Manager : MonoBehaviour
     private void HandleKeyboardInput()
     {
         HandleFocusModeToggle();
-        if (outputSoloTreesData != null && canInteract)
-        {
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                advancePlot1();
-                if (outputSoloTreesData.Count > 1)
-                    advancePlot2();
-                changeHightlight();
-            }
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                reversePlot1();
-                if (outputSoloTreesData.Count > 1)
-                    reversePlot2();
-                changeHightlight();
-            }
-        }
         if (!isExpanded)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -254,6 +237,20 @@ public class Manager : MonoBehaviour
 
             if (outputSoloTreesData != null && canInteract)
             {
+                if (Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    advancePlot1();
+                    if (outputSoloTreesData.Count > 1)
+                        advancePlot2();
+                    changeHightlight();
+                }
+                if (Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    reversePlot1();
+                    if (outputSoloTreesData.Count > 1)
+                        reversePlot2();
+                    changeHightlight();
+                }
                 if (Input.GetKeyDown(KeyCode.X))
                 {
                     advancePlot1();

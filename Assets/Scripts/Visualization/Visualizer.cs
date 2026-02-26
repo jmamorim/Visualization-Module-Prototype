@@ -84,14 +84,10 @@ public class Visualizer : MonoBehaviour
     const float aspectRatio = 1.8f;
 
     const float perspectiveAngleFactor = .5f;
-    CameraBehaviour behaviour1, behaviour2;
 
     #region unity methods
     private void Start()
     {
-        behaviour1 = cam1.GetComponent<CameraBehaviour>();
-        behaviour2 = cam2.GetComponent<CameraBehaviour>();
-
         plotShapeAndDimensions = inputAndParsedData.plotShapeAndDimensions;
 
         // Reset terrains to avoid modifying original terrain data so unity doesnt serialize changes

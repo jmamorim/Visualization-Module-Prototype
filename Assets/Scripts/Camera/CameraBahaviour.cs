@@ -1,8 +1,12 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using TMPro;
+using System.Collections;
 
 public class CameraBehaviour : MonoBehaviour
 {
+    public TMP_Text text;
+
     [Header("References")]
     public Transform target;
     public Manager manager;
@@ -232,6 +236,20 @@ public class CameraBehaviour : MonoBehaviour
         {
             ResetCamera();
         }
+
+        if(text != null)
+        {
+            StopCoroutine("ShowFreeCameraText");
+            StartCoroutine("ShowFreeCameraText", free);
+        }
+    }
+
+    private IEnumerator ShowFreeCameraText(bool isActive)
+    {
+        text.text = isActive ? "Câmera Livre: Ativa" : "Câmera Livre: Desativada";
+        text.enabled = true;
+        yield return new WaitForSeconds(1.5f);
+        text.enabled = false;
     }
 
     public bool IsFreeCamera() => isFree;
