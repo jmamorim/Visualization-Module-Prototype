@@ -22,7 +22,7 @@ public class GraphGenerator : MonoBehaviour
     // Constants
     readonly string[] graphDesc = {
         "Número de Árvores",
-        "Número de Touças",
+        "Número de Cepos",
         "Número de Árvores Mortas",
         "Altura Dominante",
         "Diâmetro Médio Quadrático",

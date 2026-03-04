@@ -754,7 +754,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -245.47998, y: 0.000061035156}
+  m_AnchoredPosition: {x: -245.47998, y: 0}
   m_SizeDelta: {x: -469.04004, y: 0.00024414062}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &14483882
@@ -6854,7 +6854,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -30, y: 33.31}
+  m_AnchoredPosition: {x: -30, y: 33.31006}
   m_SizeDelta: {x: -894.55444, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &105476835
@@ -10399,16 +10399,16 @@ MonoBehaviour:
       m_Calls: []
   m_text: "<b>Navega\xE7\xE3o Geral por Anos</b>\n\nSeta Esquerda \u2013 Retroceder
     um ano;\nSeta Direita \u2013 Avan\xE7ar um ano;\n\n<b>Navega\xE7\xE3o do Povoamento
-    1</b>\n\nA \u2013 Retroceder um ano (apenas povoamento 1);\nD \u2013 Avan\xE7ar
-    um ano (apenas povoamento 1);\n\n<b>Navega\xE7\xE3o do Povoamento 2</b>\n\nQ
-    \u2013 Retroceder um ano (apenas povoamento 2);\nE \u2013 Avan\xE7ar um ano (apenas
-    povoamento 2);\n\n<b>C\xE2mara e Visualiza\xE7\xE3o</b>\n\nR \u2013 Repor a c\xE2mara;\nP
-    \u2013 Alternar vista topogr\xE1fica;\nF enquanto uma \xE1rvore est\xE1 selecionada
-    - Modo de foco;\n\nNota:\nS\xF3 uma c\xE2mera pode estar em modo de foco, e neste
-    modo, s\xF3 \xE9 poss\xEDvel rodar \xE0 volta da \xE1rvore selecionada. Para
-    sair deste modo basta clicar no F de novo.\n\n<b>Vista em Perspetiva</b>\n\nArrastar
-    com o rato \u2013 Rodar a c\xE2mara;\nSegurar no shift \u2013 sincroniza as a\xE7\xF5es
-    nas c\xE2meras (se houver mais do que uma)\n\n<b>Vista Topogr\xE1fica</b>\n\nArrastar
+    1</b>\n\nX \u2013 Retroceder um ano (apenas povoamento 1);\nZ \u2013 Avan\xE7ar
+    um ano (apenas povoamento 1);\n\n<b>Navega\xE7\xE3o do Povoamento 2</b>\n\nC
+    \u2013 Retroceder um ano (apenas povoamento 2);\nV \u2013 Avan\xE7ar um ano (apenas
+    povoamento 2);\n\n<b>C\xE2mara e Visualiza\xE7\xE3o</b>\n\nR \u2013 Repor a c\xE2mara;\nF
+    enquanto uma \xE1rvore est\xE1 selecionada - Modo de foco;\n\nNota:\nS\xF3 uma
+    c\xE2mera pode estar em modo de foco, e neste modo, s\xF3 \xE9 poss\xEDvel rodar
+    \xE0 volta da \xE1rvore selecionada. Para sair deste modo basta clicar no F de
+    novo.\n\n<b>Vista em Perspetiva</b>\n\nArrastar com o rato \u2013 Rodar a c\xE2mara;\nSegurar
+    no shift \u2013 sincroniza as a\xE7\xF5es nas c\xE2meras (se houver mais do que
+    uma)\n\n<b>Vista Topogr\xE1fica</b>\n\nP \u2013 Ativar e desativar vista topogr\xE1fica;\nArrastar
     com o rato \u2013 Deslocar a c\xE2mara;\n\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -10546,7 +10546,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "<b>Modo de C\xE2mara Livre</b>\n\nAtiva\xE7\xE3o: Quando o rato est\xE1
-    sobre o espa\xE7o de um povoamento clique no tecla espa\xE7o para ativar e desativar;\nBot\xE3o
+    sobre o espa\xE7o de um povoamento clique na tecla espa\xE7o para ativar e desativar;\nBot\xE3o
     esquerdo do rato enquanto arrasta \u2013 Rodar a c\xE2mara;\nW / A / S / D \u2013
     Mover a c\xE2mara (frente, esquerda, tr\xE1s, direita);\n\n<b>Intera\xE7\xE3o
     com \xC1rvores</b>\n\nClique direito numa \xE1rvore \u2013 Mostrar um marcador
@@ -30487,7 +30487,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Reniciar
+  m_text: Menu principal
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -73021,7 +73021,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 10.910034, y: -65.2}
+  m_AnchoredPosition: {x: 10.909912, y: -65.19995}
   m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1183691524
@@ -89120,7 +89120,7 @@ MonoBehaviour:
     ao tecido lenhoso do tronco.\nWb \u2013 Biomassa da casca\nMassa seca da casca
     do fuste.\nWbr \u2013 Biomassa de ramos\nMassa seca dos ramos lenhosos.\nWl \u2013
     Biomassa de folhas\nMassa seca da folhagem.\nWr \u2013 Biomassa das ra\xEDzes\nMassa
-    seca do sistema radicular.\n\n<b>Economia florestal:</b>\nNPVsum \u2013 Valor
+    seca do sistema radicular.\n\n<b>Economia florestal:</b>\nsumNPV \u2013 Valor
     acumulado dos valores atuais l\xEDquidos ao longo de um ciclo\nSoma dos valores
     atualizados dos proveitos menos custos durante todo o ciclo de gest\xE3o.\nEEA
     \u2013 Anuidade anual equivalente\nValor anual constante que equivale economicamente
