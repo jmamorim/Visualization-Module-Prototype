@@ -4069,6 +4069,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 1
   isMultiLine: 0
   isBar: 1
   isDD: 0
@@ -8498,6 +8499,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 1
   isDD: 0
@@ -22574,6 +22576,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 0
   isDD: 0
@@ -33752,6 +33755,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 1
   isDD: 0
@@ -58388,6 +58392,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 0
   isDD: 0
@@ -61768,6 +61773,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 1
   isBar: 0
   isDD: 0
@@ -65425,6 +65431,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 0
   isDD: 0
@@ -73779,6 +73786,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 0
   isDD: 0
@@ -82393,6 +82401,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 0
   isDD: 0
@@ -85818,6 +85827,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 1
   isMultiLine: 0
   isBar: 1
   isDD: 0
@@ -101447,6 +101457,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 1
   isDD: 1
@@ -104906,6 +104917,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 0
   isDD: 0
@@ -110384,6 +110396,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 0
   isDD: 0
@@ -114122,6 +114135,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 0
   isBar: 0
   isDD: 0
@@ -121298,6 +121312,7 @@ MonoBehaviour:
   cam1: {fileID: 330585548}
   cam2: {fileID: 2125857182}
   manager: {fileID: 1344679403}
+  standIndex: 0
   isMultiLine: 1
   isBar: 0
   isDD: 0

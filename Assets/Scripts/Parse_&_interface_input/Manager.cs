@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -584,16 +585,7 @@ public class Manager : MonoBehaviour
                 {
                     int yearValue = sortedYears[valueFromGraph];
                     var outputPlot1 = outputSoloTreesData.First().Values.First()[selectedId_presc1];
-
-                    int indexInData = -1;
-                    for (int i = 0; i < outputPlot1.Count; i++)
-                    {
-                        if (outputPlot1[i].Values.First().Year == yearValue)
-                        {
-                            indexInData = i;
-                            break;
-                        }
-                    }
+                    int indexInData = GetLastIndexForYear(outputPlot1, yearValue);
 
                     if (indexInData >= 0)
                     {
@@ -603,9 +595,23 @@ public class Manager : MonoBehaviour
             }
             else
             {
-                changePlot1(valueFromGraph);
-                if (YieldTableData.Count() > 1)
-                    changePlot2(valueFromGraph);
+                if (valueFromGraph >= 0 && valueFromGraph < sortedYears.Count)
+                {
+                    int yearValue = sortedYears[valueFromGraph];
+
+                    var outputPlot1 = outputSoloTreesData.First().Values.First()[selectedId_presc1];
+                    int indexInData1 = GetLastIndexForYear(outputPlot1, yearValue);
+                    if (indexInData1 >= 0 && serieId == 0)
+                        changePlot1(indexInData1);
+
+                    if (YieldTableData.Count() > 1)
+                    {
+                        var outputPlot2 = outputSoloTreesData.ElementAt(1).Values.First()[selectedId_presc2];
+                        int indexInData2 = GetLastIndexForYear(outputPlot2, yearValue);
+                        if (indexInData2 >= 0 && serieId == 1)
+                            changePlot2(indexInData2);
+                    }
+                }
             }
             return;
         }
@@ -623,17 +629,22 @@ public class Manager : MonoBehaviour
 
         if (!isMultiLine)
         {
-            changePlot1(valueFromGraph);
+            if(serieId == 0)
+                changePlot1(valueFromGraph);
+            else if(serieId == 1)
+                changePlot2(valueFromGraph);
             return;
         }
-
-        if (serieId == 0 || serieId == 1)
+        else
         {
-            changePlot1(valueFromGraph);
-        }
-        else if (serieId == 2 || serieId == 3)
-        {
-            changePlot2(valueFromGraph);
+            if (serieId == 0 || serieId == 1)
+            {
+                changePlot1(valueFromGraph);
+            }
+            else if (serieId == 2 || serieId == 3)
+            {
+                changePlot2(valueFromGraph);
+            }
         }
     }
 

@@ -9,6 +9,7 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
 {
     public CameraBehaviour cam1, cam2;
     public Manager manager;
+    public int standIndex;
 
     [SerializeField] bool isMultiLine = false;
     [SerializeField] bool isBar = false;
@@ -185,7 +186,7 @@ public class GraphBehaviour : MonoBehaviour, IPointerClickHandler
 
         Debug.Log($"Clicked on serie {clickedSerieIndex}, data index {clickedDataIndex}");
         int realYear = GetYearFromChartIndex(clickedDataIndex);
-        manager.changeSimYearOnGraphClick(clickedSerieIndex, clickedDataIndex, isMultiLine, isBar);
+        manager.changeSimYearOnGraphClick(isBar ? standIndex : clickedSerieIndex, clickedDataIndex, isMultiLine, isBar);
     }
 
     int GetYearFromChartIndex(int index)
