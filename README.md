@@ -5,7 +5,7 @@ Visualization Module for stadndsSIM forest simulator. This works was created for
 
 This repository is dedicated to Unity project of the visualization module if you wish to try hands on the module itself follow the following link that contains the app, a manual and a video demo: https://drive.google.com/file/d/1esd6RvyJGqu6PZTz_Y8l8z8EEp64WfJL/view?usp=drive_link
 
-Link for the thesis: soon...
+Link to the thesis: soon...
 
 ## 📬 Contact
 
