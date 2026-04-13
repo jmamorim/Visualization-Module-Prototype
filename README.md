@@ -1,5 +1,5 @@
 # Visualization Module for standsSIM forest simulator
-![Visualization Module](VisualizationPrototype.png)
+![Visualization Module](Image.png)
 
 Visualization Module for stadndsSIM forest simulator. This works was created for the thesis "DESENVOLVIMENTO DE UM MÓDULO DE VISUALIZAÇÃO PARA SIMULADOR DA FLORESTA" at FCT NOVA 
 
